@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DES MP — Statewide TNA Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--surface:#f7f8fa;--surface2:#eef0f4;--border:#d6d9e0;--border-light:#e8eaef;
+  --text:#1a1f2e;--text-mid:#4a5268;--text-dim:#8892a4;
+  --accent-blue:#1a56a0;--accent-blue-light:#dbe9f8;
+  --accent-green:#1a7a4a;--accent-green-light:#d4f0e2;
+  --accent-amber:#b45309;--accent-amber-light:#fef3c7;
+  --accent-red:#b91c1c;--accent-red-light:#fee2e2;
+  --accent-purple:#6d28d9;--accent-purple-light:#ede9fe;
+  --saffron:#e07b30;--india-navy:#1a356e;
+}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6}
+.gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
+.gov-strip-text{color:rgba(255,255,255,.7);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.gov-strip-sep{color:rgba(255,255,255,.25)}
+header{background:#fff;border-bottom:3px solid var(--saffron);padding:18px 40px 16px}
+.header-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.header-title h1{font-family:"EB Garamond",serif;font-size:20px;font-weight:700;color:var(--india-navy);line-height:1.2}
+.header-title h1 .hindi{display:block;font-size:14px;font-weight:400;font-style:italic;color:var(--text-mid);margin-top:2px}
+.header-title p{font-size:11.5px;color:var(--text-mid);margin-top:4px;letter-spacing:.02em}
+.header-meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.header-badge{background:var(--accent-blue-light);border:1px solid var(--accent-blue);color:var(--accent-blue);font-size:11px;font-weight:600;padding:4px 12px;border-radius:4px;letter-spacing:.04em}
+.header-date{font-size:11px;color:var(--text-dim)}
+.live-dot{display:inline-block;width:7px;height:7px;background:#22c55e;border-radius:50%;margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 40px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+select.filter-select{font-family:"Inter",sans-serif;font-size:12px;color:var(--text);background:#fff;border:1px solid var(--border);padding:5px 10px;border-radius:3px;cursor:pointer;outline:none}
+select.filter-select:focus{border-color:var(--accent-blue)}
+.filter-sep{color:var(--border);font-size:18px}
+.refresh-btn{background:var(--india-navy);color:#fff;border:none;padding:5px 12px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer}
+.refresh-btn:hover{background:#243f85}
+.tab-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:90;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tab-btn{font-family:"Inter",sans-serif;font-size:12px;font-weight:500;color:var(--text-mid);background:none;border:none;border-bottom:2px solid transparent;padding:12px 18px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab-btn:hover{color:var(--india-navy)}
+.tab-btn.active{color:var(--india-navy);border-bottom-color:var(--saffron);font-weight:600}
+.main{padding:28px 40px 60px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--india-navy);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text-mid)}
+/* Flags */
+.flag-bar{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.flag{padding:8px 14px;border-radius:4px;font-size:11.5px;display:flex;align-items:flex-start;gap:8px}
+.flag-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.flag.warn{background:var(--accent-amber-light);border:1px solid #fcd34d;color:var(--accent-amber)}
+.flag.info{background:var(--accent-blue-light);border:1px solid #93c5fd;color:var(--accent-blue)}
+.flag.small-n{background:var(--accent-red-light);border:1px solid #fca5a5;color:var(--accent-red)}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px}
+.kpi-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.blue::before{background:var(--accent-blue)}
+.kpi-card.green::before{background:var(--accent-green)}
+.kpi-card.amber::before{background:var(--saffron)}
+.kpi-card.red::before{background:var(--accent-red)}
+.kpi-card.purple::before{background:var(--accent-purple)}
+.kpi-label{font-size:10.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.kpi-value{font-family:"EB Garamond",serif;font-size:32px;font-weight:700;color:var(--india-navy);line-height:1}
+.kpi-sub{font-size:11px;color:var(--text-dim);margin-top:4px}
+.section-title{font-family:"EB Garamond",serif;font-size:16px;font-weight:700;color:var(--india-navy);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--border-light)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px}
+.card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:18px 20px}
+/* Progress bars */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.prog-label{font-size:12px;color:var(--text-mid);min-width:140px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-track{flex:1;background:var(--surface2);border-radius:3px;height:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.prog-val{font-size:11.5px;font-weight:600;color:var(--text);min-width:36px;text-align:right}
+/* Competency */
+.comp-row{margin-bottom:12px}
+.comp-name{font-size:11.5px;color:var(--text);margin-bottom:3px;font-weight:500}
+.comp-bar-wrap{display:flex;align-items:center;gap:8px}
+.comp-track{flex:1;background:var(--surface2);border-radius:3px;height:13px;overflow:hidden;position:relative}
+.comp-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.comp-fill::after{content:attr(data-label);position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:rgba(255,255,255,.9)}
+.comp-score{font-size:12px;font-weight:700;min-width:28px;text-align:right}
+.comp-gap{font-size:10px;color:var(--accent-red);margin-left:3px}
+.score-scale{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-dim);margin-top:4px}
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--india-navy);color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;white-space:nowrap}
+td{padding:7px 12px;border-bottom:1px solid var(--border-light);color:var(--text-mid)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)}
+.cov-bar{display:flex;align-items:center;gap:6px}
+.cov-track{flex:1;background:var(--surface2);border-radius:2px;height:8px;overflow:hidden;min-width:50px}
+.cov-fill{height:100%;border-radius:2px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.badge.high{background:#d4f0e2;color:#1a7a4a}
+.badge.mid{background:#fef3c7;color:#b45309}
+.badge.low{background:#fee2e2;color:#b91c1c}
+.badge.small{background:var(--accent-purple-light);color:var(--accent-purple)}
+.hq-tag{display:inline-block;background:#dbe9f8;border:1px solid var(--accent-blue);color:var(--accent-blue);font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:middle}
+.div-tag{display:inline-block;background:var(--accent-purple-light);border:1px solid #a78bfa;color:var(--accent-purple);font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:middle}
+/* Theme matrix */
+.theme-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 14px;border-radius:5px;border:1px solid var(--border-light);cursor:default;transition:border-color .15s}
+.theme-row:hover{border-color:var(--accent-blue)}
+.theme-name{font-size:12px;font-weight:600;color:var(--text);width:220px;flex-shrink:0}
+.theme-signal-block{flex:1;display:flex;flex-direction:column;gap:4px}
+.theme-sig-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-dim)}
+.theme-sig-label{width:75px;flex-shrink:0}
+.theme-sig-track{flex:1;background:var(--surface2);border-radius:2px;height:7px;overflow:hidden}
+.theme-sig-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.theme-sig-val{width:30px;text-align:right;flex-shrink:0}
+.theme-score{font-family:"EB Garamond",serif;font-size:24px;font-weight:700;width:40px;text-align:right;flex-shrink:0}
+.theme-class{font-size:10px;font-weight:700;padding:3px 8px;border-radius:3px;white-space:nowrap;width:120px;text-align:center;flex-shrink:0}
+.cls-immediate{background:#1a356e;color:#fff}
+.cls-phase1b{background:var(--accent-blue-light);color:var(--accent-blue)}
+.cls-later{background:var(--surface2);color:var(--text-dim)}
+/* Software level bars */
+.sw-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.sw-name{font-size:12px;font-weight:500;color:var(--text);width:110px;flex-shrink:0}
+.sw-stack-wrap{flex:1;display:flex;flex-direction:column;gap:2px}
+.sw-bar-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-dim)}
+.sw-bar-label{width:72px;flex-shrink:0}
+.sw-bar-track{flex:1;background:var(--surface2);border-radius:2px;height:8px;overflow:hidden}
+.sw-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.sw-bar-val{width:28px;text-align:right;flex-shrink:0;font-weight:600}
+.sw-total-badge{background:var(--surface2);border-radius:3px;padding:2px 7px;font-size:11px;font-weight:600;color:var(--text-mid);white-space:nowrap}
+/* Tooltip */
+#tooltip{position:fixed;background:var(--india-navy);color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:4px;max-width:260px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:9999;white-space:pre-wrap}
+#tooltip.show{opacity:1}
+.no-data{text-align:center;padding:36px;color:var(--text-dim);font-size:13px}
+.no-data-icon{font-size:28px;margin-bottom:8px}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+footer p{font-size:10.5px;color:var(--text-dim)}
+@media(max-width:768px){
+  .gov-strip,.header-inner,.filter-bar,.main,footer{padding-left:16px;padding-right:16px}
+  .tab-bar{padding:0 16px}
+  .two-col,.three-col{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .theme-name{width:140px}
+  .theme-class{width:90px;font-size:9px}
+}
+</style>
+</head>
+<body>
+<div id="loading-overlay" class="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading live data from Google Sheets…</div>
+</div>
+<div id="tooltip"></div>
+
+<div class="gov-strip">
+  <span class="gov-strip-text">Government of Madhya Pradesh</span>
+  <span class="gov-strip-sep">|</span>
+  <span class="gov-strip-text">Directorate of Economics &amp; Statistics</span>
+  <span class="gov-strip-sep">|</span>
+  <span class="gov-strip-text">GIZ India · DES–PIF MoU</span>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <h1>Statewide Training Needs Assessment Dashboard
+        <span class="hindi">राज्यव्यापी प्रशिक्षण आवश्यकता आकलन डैशबोर्ड</span>
+      </h1>
+      <p>Madhya Pradesh · All 7 Divisions · 52 Districts + Divisional Offices + HQ · STAT Framework (UNSD/GIST) · GIZ India Initiative</p>
+    </div>
+    <div class="header-meta">
+      <span class="header-badge"><span class="live-dot"></span>LIVE — Auto Refresh</span>
+      <span class="header-date" id="header-date">—</span>
+      <span class="header-date">Last refreshed: <span id="refresh-time">—</span></span>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Division</span>
+    <select class="filter-select" id="filter-division" onchange="applyFilters()">
+      <option value="all">All Divisions</option>
+      <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
+      <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+    </select>
+  </div>
+  <span class="filter-sep">|</span>
+  <div class="filter-group">
+    <span class="filter-label">District / Office</span>
+    <select class="filter-select" id="filter-district" onchange="applyFilters()">
+      <option value="all">All Locations</option>
+    </select>
+  </div>
+  <span class="filter-sep">|</span>
+  <div class="filter-group">
+    <span class="filter-label">Post</span>
+    <select class="filter-select" id="filter-post" onchange="applyFilters()">
+      <option value="all">All Posts</option>
+      <option value="BLI">BLI / Investigator</option>
+      <option value="ASO">ASO</option>
+      <option value="DSO">DSO</option>
+      <option value="AD">Assistant Director</option>
+      <option value="DD">Deputy Director / DPO</option>
+      <option value="JD">Joint Director</option>
+    </select>
+  </div>
+  <button class="refresh-btn" style="margin-left:auto" onclick="loadData()">↻ Refresh</button>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('coverage',this)">Response Coverage</button>
+  <button class="tab-btn" onclick="switchTab('profile',this)">Respondent Profile</button>
+  <button class="tab-btn" onclick="switchTab('competency',this)">Competency Assessment</button>
+  <button class="tab-btn" onclick="switchTab('priorities',this)">Training Priorities</button>
+  <button class="tab-btn" onclick="switchTab('software',this)">Software Demand</button>
+</div>
+
+<div class="main">
+  <div id="global-flags" class="flag-bar"></div>
+
+  <!-- TAB 1: OVERVIEW -->
+  <div id="tab-overview" class="tab-panel active">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Total Responses</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Submissions received</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Expected Responses</div><div class="kpi-value" id="kpi-expected">—</div><div class="kpi-sub">Based on filled posts</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Completion Rate</div><div class="kpi-value" id="kpi-completion">—</div><div class="kpi-sub">State-wide coverage</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Divisions Covered</div><div class="kpi-value" id="kpi-divisions">—</div><div class="kpi-sub">of 7 divisions</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Locations Covered</div><div class="kpi-value" id="kpi-districts">—</div><div class="kpi-sub">Districts + Offices + HQ</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">Avg Competency Score</div><div class="kpi-value" id="kpi-avg-comp">—</div><div class="kpi-sub">Weighted 0–4 scale</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="section-title">Division-wise Response Coverage</div><div id="div-coverage-chart"></div></div>
+      <div class="card"><div class="section-title">Top 8 Training Priority Areas</div><div id="overview-priorities-chart"></div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="section-title">Post-wise Participation</div><div id="overview-post-chart"></div></div>
+      <div class="card"><div class="section-title">Software Training Demand (Total Count)</div><div id="overview-sw-chart"></div></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: COVERAGE -->
+  <div id="tab-coverage" class="tab-panel">
+    <div class="kpi-grid">
+      <div class="kpi-card green"><div class="kpi-label">Received</div><div class="kpi-value" id="cov-received">—</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Pending</div><div class="kpi-value" id="cov-pending">—</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Completion</div><div class="kpi-value" id="cov-pct">—</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Zero-Response Locations</div><div class="kpi-value" id="cov-zero">—</div></div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title">Location-wise Coverage</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px">
+        <span class="hq-tag">HQ</span> DES Headquarters, Bhopal &nbsp;·&nbsp;
+        <span class="div-tag">DIV</span> Divisional Office &nbsp;·&nbsp;
+        <span class="badge small">n&lt;5</span> Indicative only — small sample
+      </p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Location</th><th>Division</th><th>Type</th><th>Expected</th><th>Received</th><th>Pending</th><th>Coverage</th><th>Status</th></tr></thead>
+          <tbody id="coverage-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Division-wise Summary</div>
+      <div id="div-summary-chart"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: PROFILE -->
+  <div id="tab-profile" class="tab-panel">
+    <div class="three-col">
+      <div class="card"><div class="section-title">Years of Service</div><div id="profile-service-chart"></div></div>
+      <div class="card"><div class="section-title">Highest Qualification</div><div id="profile-edu-chart"></div></div>
+      <div class="card"><div class="section-title">Prior Training Exposure</div><div id="profile-training-chart"></div></div>
+    </div>
+    <div class="three-col">
+      <div class="card"><div class="section-title">Device Access</div><div id="profile-device-chart"></div></div>
+      <div class="card"><div class="section-title">Internet Quality</div><div id="profile-internet-chart"></div></div>
+      <div class="card"><div class="section-title">Weekly Learning Time</div><div id="profile-time-chart"></div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="section-title">Preferred Training Mode</div><div id="profile-mode-chart"></div></div>
+      <div class="card"><div class="section-title">Main Training Constraints</div><div id="profile-constraints-chart"></div></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: COMPETENCY -->
+  <div id="tab-competency" class="tab-panel">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Overall Avg Score</div><div class="kpi-value" id="comp-avg-all">—</div><div class="kpi-sub">Role-weighted</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Avg Gap (from 4)</div><div class="kpi-value" id="comp-avg-gap">—</div><div class="kpi-sub">Intervention headroom</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Weakest Area</div><div class="kpi-value" style="font-size:13px;line-height:1.3" id="comp-weakest">—</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Strongest Area</div><div class="kpi-value" style="font-size:13px;line-height:1.3" id="comp-strongest">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">BLI — Functional Competencies (Section 2)</div>
+        <div id="comp-bli-func"></div>
+        <div class="score-scale" style="margin-top:8px;font-size:9.5px">
+          <span>0—Not Aware</span><span>1—Basic</span><span>2—Working</span><span>3—Proficient</span><span>4—Expert</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">BLI — Domain Competencies (Section 2)</div>
+        <div id="comp-bli-dom"></div>
+        <div class="score-scale" style="margin-top:8px;font-size:9.5px">
+          <span>0—Not Aware</span><span>1—Basic</span><span>2—Working</span><span>3—Proficient</span><span>4—Expert</span>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">ASO — Competencies (Section 3)</div>
+        <div id="comp-aso"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">DSO / Assistant Director — Competencies (Section 4)</div>
+        <div id="comp-dso-ad"></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Deputy Director / DPO — Competencies (Section 5)</div>
+        <div id="comp-dd-dpo"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Joint Director — Competencies (Section 6)</div>
+        <div id="comp-jd"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Integrated Prioritisation Matrix — Combined Score (Demand × Gap)</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">
+        Combined Score = (Priority Signal % + Need Signal %) ÷ 2 &nbsp;·&nbsp;
+        Methodology: Indore Pilot TNA Report, April 2026 (STAT Framework, UNSD/GIST) &nbsp;·&nbsp;
+        Scores ≥50 = Immediate; 35–49 = Phase 1B; &lt;35 = Reinforcement
+      </p>
+      <div id="comp-integrated"></div>
+    </div>
+  </div>
+
+  <!-- TAB 5: PRIORITIES -->
+  <div id="tab-priorities" class="tab-panel">
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title">Most Requested Priority Areas — All Posts</div>
+      <div id="priorities-all"></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="section-title">BLI Priority Areas</div><div id="priorities-bli"></div></div>
+      <div class="card"><div class="section-title">ASO / DSO / Senior Officer Priority Areas</div><div id="priorities-sup"></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Division-wise Top Priority Theme</div>
+      <div id="priorities-div"></div>
+    </div>
+  </div>
+
+  <!-- TAB 6: SOFTWARE -->
+  <div id="tab-software" class="tab-panel">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Top Demand</div><div class="kpi-value" style="font-size:16px;line-height:1.4" id="sw-top">—</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">AI Tools Demand</div><div class="kpi-value" id="sw-ai-pct">—</div></div>
+      <div class="kpi-card green"><div class="kpi-label">R/Python Demand</div><div class="kpi-value" id="sw-rpy-pct">—</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">STATA/EViews Demand</div><div class="kpi-value" id="sw-stata-pct">—</div></div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title">Software Demand by Training Level — Beginner / Intermediate / Advanced</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px">
+        Each bar shows the breakdown of respondents by desired entry level.
+        High beginner demand for STATA/EViews, R/Python, and AI Tools signals the need for foundational digital training before advanced modules — consistent with Indore Division pilot (April 2026).
+      </p>
+      <div style="display:flex;gap:16px;margin-bottom:12px;font-size:10.5px;color:var(--text-mid)">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Beginner (प्रारंभिक)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#1a56a0;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Intermediate (मध्यवर्ती)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#15803d;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Advanced (उन्नत)</span>
+      </div>
+      <div id="sw-level-chart"></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="section-title">Software Demand by Post</div><div id="sw-post-chart"></div></div>
+      <div class="card"><div class="section-title">Division-wise Top Software Needs</div><div id="sw-div-chart"></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>DES–PIF MoU</strong> signed 21 May 2025 · GIZ India GSDP/GDDP Framework Project · Indore Division Pilot: April 2026 · STAT Framework (UNSD/GIST)</p>
+  <p>Developed by <strong>Samuel D. David</strong> · <strong>Pahlé India Foundation (PIF), New Delhi</strong> · Data: Google Forms → Sheets (Live · Auto-refreshes every 3 min)</p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1fu274JL-ybQJUc0Xgyeu4L0FgNm0SG2dowlOk5U_nbY/export?format=csv&gid=86946345";
+const REFRESH_MS = 3 * 60 * 1000;
+
+// ═══════════════════════════════════════════════════
+// STAFF REGISTRY — filled posts, Jan 2026
+// is_hq = DES Headquarters; is_div_office = Divisional Office
+// ═══════════════════════════════════════════════════
+const REG = {
+  "Bhopal":{"div":"Bhopal","DSO":0,"ASO":5,"BLI":3},
+  "Raisen":{"div":"Bhopal","DSO":1,"ASO":2,"BLI":1},
+  "Sehore":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2},
+  "Rajgarh":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":2},
+  "Betul":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":4},
+  "Vidisha":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2},
+  "Hoshangabad":{"div":"Bhopal","DSO":1,"ASO":1,"BLI":4},
+  "Harda":{"div":"Bhopal","DSO":0,"ASO":2,"BLI":1},
+  "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3},
+  "DES Headquarters":{"div":"Bhopal","is_hq":true,"Senior":9,"ASO":50,"BLI":21},
+  "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7},
+  "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1},
+  "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4},
+  "Shivpuri":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2},
+  "Bhind":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":3},
+  "Morena":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":5},
+  "Sheopur":{"div":"Gwalior","DSO":0,"ASO":0,"BLI":2},
+  "Ashoknagar":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2},
+  "Divisional Office Gwalior":{"div":"Gwalior","is_div_office":true,"DSO":0,"ASO":3,"BLI":7},
+  "Indore":{"div":"Indore","DSO":1,"ASO":3,"BLI":8},
+  "Dhar":{"div":"Indore","DSO":0,"ASO":2,"BLI":5},
+  "Jhabua":{"div":"Indore","DSO":1,"ASO":2,"BLI":2},
+  "Alirajpur":{"div":"Indore","DSO":1,"ASO":2,"BLI":3},
+  "Khandwa":{"div":"Indore","DSO":0,"ASO":2,"BLI":3},
+  "Khargone":{"div":"Indore","DSO":1,"ASO":0,"BLI":3},
+  "Barwani":{"div":"Indore","DSO":1,"ASO":0,"BLI":5},
+  "Burhanpur":{"div":"Indore","DSO":0,"ASO":1,"BLI":1},
+  "Divisional Office Indore":{"div":"Indore","is_div_office":true,"DSO":1,"ASO":3,"BLI":8},
+  "Jabalpur":{"div":"Jabalpur","DSO":1,"ASO":9,"BLI":11},
+  "Balaghat":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":5},
+  "Chhindwara":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":7},
+  "Mandla":{"div":"Jabalpur","DSO":1,"ASO":2,"BLI":4},
+  "Narsinghpur":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":4},
+  "Seoni":{"div":"Jabalpur","DSO":1,"ASO":3,"BLI":3},
+  "Katni":{"div":"Jabalpur","DSO":0,"ASO":0,"BLI":2},
+  "Dindori":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":2},
+  "Divisional Office Jabalpur":{"div":"Jabalpur","is_div_office":true,"DSO":1,"ASO":2,"BLI":5},
+  "Rewa":{"div":"Rewa","DSO":0,"ASO":1,"BLI":6},
+  "Satna":{"div":"Rewa","DSO":0,"ASO":0,"BLI":6},
+  "Shahdol":{"div":"Rewa","DSO":1,"ASO":0,"BLI":3},
+  "Sidhi":{"div":"Rewa","DSO":0,"ASO":0,"BLI":2},
+  "Singrauli":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
+  "Umaria":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
+  "Anuppur":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
+  "Divisional Office Rewa":{"div":"Rewa","is_div_office":true,"DSO":0,"ASO":0,"BLI":6},
+  "Sagar":{"div":"Sagar","DSO":0,"ASO":1,"BLI":6},
+  "Chhatarpur":{"div":"Sagar","DSO":0,"ASO":0,"BLI":6},
+  "Damoh":{"div":"Sagar","DSO":1,"ASO":2,"BLI":2},
+  "Panna":{"div":"Sagar","DSO":0,"ASO":1,"BLI":2},
+  "Tikamgarh":{"div":"Sagar","DSO":1,"ASO":1,"BLI":2},
+  "Niwari":{"div":"Sagar","DSO":0,"ASO":1,"BLI":1},
+  "Divisional Office Sagar":{"div":"Sagar","is_div_office":true,"DSO":0,"ASO":2,"BLI":2},
+  "Ujjain":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":6},
+  "Dewas":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":1},
+  "Mandsaur":{"div":"Ujjain","DSO":1,"ASO":2,"BLI":3},
+  "Ratlam":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":4},
+  "Shajapur":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":1},
+  "Neemuch":{"div":"Ujjain","DSO":0,"ASO":2,"BLI":2},
+  "Agar Malwa":{"div":"Ujjain","DSO":0,"ASO":0,"BLI":2},
+  "Divisional Office Ujjain":{"div":"Ujjain","is_div_office":true,"DSO":1,"ASO":2,"BLI":3},
+};
+
+function getExpected(info){
+  if(info.is_hq) return (info.Senior||0)+(info.ASO||0)+(info.BLI||0);
+  return (info.DSO||0)+(info.ASO||0)+(info.BLI||0);
+}
+
+// ═══════════════════════════════════════════════════
+// COLUMN MAP
+// ═══════════════════════════════════════════════════
+const COL = {};
+function buildColMap(headers){
+  const find = kws => headers.find(h=>kws.some(k=>h.includes(k)))||null;
+  COL.division   = find(["संभागीय","Division"]);
+  COL.district   = find(["जिला कार्यालय","Current office/posting location (District)"]);
+  COL.service    = find(["सेवा के वर्ष","Years of completed"]);
+  COL.education  = find(["उच्चतम शैक्षणिक योग्यता","Highest education"]);
+  COL.training   = find(["पूर्व प्रशिक्षण","Prior training exposure"]);
+  COL.device     = find(["Device) की उपलब्धता","Device access for online"]);
+  COL.internet   = find(["इंटरनेट की गुणवत्ता","Internet access quality"]);
+  COL.timeAvail  = find(["सीखने के लिए उपलब्ध समय","Time available for learning"]);
+  COL.post       = find(["मूल पद","select your post"]);
+  COL.mode       = find(["पसंदीदा प्रशिक्षण","Preferred training mode"]);
+  COL.constraints= find(["बाधाएं","constraints","Main constraints"]);
+  COL.sw_msoffice= find(["MS Office]","MS Office)"]);
+  COL.sw_eoffice = find(["e-Office]","e-Office)"]);
+  COL.sw_stata   = find(["STATA/E-Views]"]);
+  COL.sw_rpy     = find(["R/Python]"]);
+  COL.sw_ai      = find(["AI Tools]","एआई"]);
+  COL.sw_hrms    = find(["e-HRMS]","एच.आर"]);
+  COL.sw_computer= find(["Computer Training]","कंप्युटर"]);
+  // Pre-compute all competency column indices (for fast row-level reading)
+  COL.allCompCols = headers.filter(h=>
+    (h.includes("कार्यात्मक दक्षताएँ")||h.includes("विषय-क्षेत्र (डोमेन) दक्षताएँ"))&&h.includes("[")
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// POST NORMALISATION — matches actual form answer text
+// ═══════════════════════════════════════════════════
+function normPost(s){
+  if(!s) return "Other";
+  const v=s.toLowerCase();
+  if(v.includes("अन्वेषक")||v.includes("investigator")||v.includes("block level")||v.includes("bli")||v.includes("blo")) return "BLI";
+  if(v.includes("सहायक सांख्यिकी")||v.includes("assistant statistical")) return "ASO";
+  if(v.includes("जिला सांख्यिकी")||v.includes("district statistical")) return "DSO";
+  if(v.includes("सहायक संचालक")||v.includes("assistant director")) return "AD";
+  if(v.includes("उप संचालक")||v.includes("deputy director")||v.includes("जिला योजना")||v.includes("district planning")) return "DD";
+  if(v.includes("संयुक्त")||v.includes("joint director")) return "JD";
+  return "Other";
+}
+
+// ═══════════════════════════════════════════════════
+// DISTRICT NORMALISATION
+// ═══════════════════════════════════════════════════
+const DMAP = {
+  "इन्दौर":"Indore","इंदौर":"Indore","indore":"Indore",
+  "धार":"Dhar","dhar":"Dhar",
+  "झाबुआ":"Jhabua","jhabua":"Jhabua",
+  "अलीराजपुर":"Alirajpur","alirajpur":"Alirajpur",
+  "खण्डवा":"Khandwa","खंडवा":"Khandwa","khandwa":"Khandwa",
+  "खरगोन":"Khargone","खरगौन":"Khargone","khargone":"Khargone",
+  "बड़वानी":"Barwani","बडवानी":"Barwani","barwani":"Barwani",
+  "बुरहानपुर":"Burhanpur","burhanpur":"Burhanpur",
+  "भोपाल":"Bhopal","bhopal":"Bhopal",
+  "रायसेन":"Raisen","raisen":"Raisen",
+  "सीहोर":"Sehore","sehore":"Sehore",
+  "राजगढ़":"Rajgarh","rajgarh":"Rajgarh",
+  "बैतूल":"Betul","betul":"Betul",
+  "विदिशा":"Vidisha","vidisha":"Vidisha",
+  "होशंगाबाद":"Hoshangabad","hoshangabad":"Hoshangabad",
+  "हरदा":"Harda","harda":"Harda",
+  "ग्वालियर":"Gwalior","gwalior":"Gwalior",
+  "दतिया":"Datia","datia":"Datia",
+  "गुना":"Guna","guna":"Guna",
+  "शिवपुरी":"Shivpuri","shivpuri":"Shivpuri",
+  "भिंड":"Bhind","भिण्ड":"Bhind","bhind":"Bhind",
+  "मुरैना":"Morena","morena":"Morena",
+  "श्योपुर":"Sheopur","शेओपुर":"Sheopur","sheopur":"Sheopur",
+  "अशोकनगर":"Ashoknagar","ashoknagar":"Ashoknagar",
+  "जबलपुर":"Jabalpur","jabalpur":"Jabalpur",
+  "बालाघाट":"Balaghat","balaghat":"Balaghat",
+  "छिंदवाड़ा":"Chhindwara","छिन्दवाड़ा":"Chhindwara","chhindwara":"Chhindwara",
+  "मंडला":"Mandla","मण्डला":"Mandla","mandla":"Mandla",
+  "नरसिंहपुर":"Narsinghpur","narsinghpur":"Narsinghpur",
+  "सिवनी":"Seoni","सियोनि":"Seoni","seoni":"Seoni",
+  "कटनी":"Katni","katni":"Katni",
+  "डींडोरी":"Dindori","डिण्डौरी":"Dindori","dindori":"Dindori",
+  "रीवा":"Rewa","rewa":"Rewa",
+  "सतना":"Satna","satna":"Satna",
+  "शहडोल":"Shahdol","shahdol":"Shahdol",
+  "सीधी":"Sidhi","sidhi":"Sidhi",
+  "सिंगरौली":"Singrauli","singrauli":"Singrauli",
+  "उमरिया":"Umaria","उमारिया":"Umaria","umaria":"Umaria",
+  "अनूपपुर":"Anuppur","अनुपपुर":"Anuppur","anuppur":"Anuppur",
+  "सागर":"Sagar","sagar":"Sagar",
+  "छतरपुर":"Chhatarpur","chhatarpur":"Chhatarpur",
+  "दमोह":"Damoh","damoh":"Damoh",
+  "पन्ना":"Panna","panna":"Panna",
+  "टीकमगढ़":"Tikamgarh","टीकमगढ":"Tikamgarh","tikamgarh":"Tikamgarh",
+  "निवारी":"Niwari","निवाड़ी":"Niwari","niwari":"Niwari",
+  "उज्जैन":"Ujjain","ujjain":"Ujjain",
+  "देवास":"Dewas","dewas":"Dewas",
+  "मन्दसौर":"Mandsaur","मंदसौर":"Mandsaur","mandsaur":"Mandsaur",
+  "रतलाम":"Ratlam","ratlam":"Ratlam",
+  "शाजापुर":"Shajapur","shajapur":"Shajapur",
+  "नीमच":"Neemuch","neemuch":"Neemuch",
+  "आगर मालवा":"Agar Malwa","आगरमालवा":"Agar Malwa","agar malwa":"Agar Malwa",
+  "des headquarters":"DES Headquarters","मुख्यालय":"DES Headquarters","des hq":"DES Headquarters",
+  "divisional office bhopal":"Divisional Office Bhopal","संभागीय कार्यालय भोपाल":"Divisional Office Bhopal",
+  "divisional office gwalior":"Divisional Office Gwalior","संभागीय कार्यालय ग्वालियर":"Divisional Office Gwalior",
+  "divisional office indore":"Divisional Office Indore","संभागीय कार्यालय इन्दौर":"Divisional Office Indore",
+  "divisional office jabalpur":"Divisional Office Jabalpur","संभागीय कार्यालय जबलपुर":"Divisional Office Jabalpur",
+  "divisional office rewa":"Divisional Office Rewa","संभागीय कार्यालय रीवा":"Divisional Office Rewa",
+  "divisional office sagar":"Divisional Office Sagar","संभागीय कार्यालय सागर":"Divisional Office Sagar",
+  "divisional office ujjain":"Divisional Office Ujjain","संभागीय कार्यालय उज्जैन":"Divisional Office Ujjain",
+};
+function normDist(s){
+  if(!s) return "";
+  const t=s.trim();
+  return DMAP[t]||DMAP[t.toLowerCase()]||t;
+}
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let RAW=[], FILT=[];
+
+// ═══════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════
+async function loadData(){
+  document.getElementById("loading-overlay").style.display="flex";
+  try{
+    const r=await fetch(SHEET_CSV_URL+"&t="+Date.now());
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const p=Papa.parse(await r.text(),{header:true,skipEmptyLines:true});
+    RAW=p.data;
+    buildColMap(p.meta.fields||Object.keys(RAW[0]||{}));
+    applyFilters();
+    document.getElementById("refresh-time").textContent=
+      new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){
+    RAW=[]; FILT=[]; renderAll();
+  }finally{
+    document.getElementById("loading-overlay").style.display="none";
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════════════════
+function applyFilters(){
+  const dv=document.getElementById("filter-division").value;
+  const dl=document.getElementById("filter-district").value;
+  const po=document.getElementById("filter-post").value;
+  updateDistDrop(dv);
+  FILT=RAW.filter(r=>{
+    const rd=normDist(r[COL.district]||"");
+    const rp=normPost(r[COL.post]||"");
+    const rv=(REG[rd]||{}).div||"";
+    if(dv!=="all"&&rv!==dv) return false;
+    if(dl!=="all"&&rd!==dl) return false;
+    if(po!=="all"&&rp!==po) return false;
+    return true;
+  });
+  renderAll();
+}
+
+function updateDistDrop(dv){
+  const el=document.getElementById("filter-district");
+  const cur=el.value;
+  let opts=['<option value="all">All Locations</option>'];
+  Object.entries(REG).forEach(([d,info])=>{
+    if(dv==="all"||info.div===dv){
+      const f=info.is_hq?" [HQ]":info.is_div_office?" [Div Office]":"";
+      opts.push(`<option value="${d}">${d}${f}</option>`);
+    }
+  });
+  el.innerHTML=opts.join("");
+  if([...el.options].some(o=>o.value===cur)) el.value=cur;
+}
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const pct=(n,d)=>d>0?Math.round(n/d*100):0;
+const fmt1=n=>isNaN(n)?"-":n.toFixed(1);
+const scCol=s=>s>=3?"#22c55e":s>=2?"#e07b30":s>=1?"#f97316":"#dc2626";
+function cntBy(data,fn){const m={};data.forEach(r=>{const k=fn(r);m[k]=(m[k]||0)+1;});return m;}
+function topN(obj,n){return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);}
+
+// Sparse competency reading: for a role-filtered dataset,
+// read only NON-EMPTY competency columns → naturally picks up the right section
+function getRoleComps(data, postFilter){
+  const rd = postFilter==="all" ? data : data.filter(r=>normPost(r[COL.post]||"")===postFilter);
+  if(!rd.length||!COL.allCompCols) return {};
+  const results={};
+  COL.allCompCols.forEach(col=>{
+    const vals=rd.map(r=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+    if(!vals.length) return;
+    const m=col.match(/\[([^\]]+)\]/);
+    if(!m) return;
+    // Strip the long Hindi preamble, keep the short English label after the last "-" or "("
+    let label=m[1];
+    const enMatch=label.match(/\(([^()]+)\)\s*$/);
+    if(enMatch) label=enMatch[1].replace(/^[^-]+-\s*/,"").trim();
+    else label=label.replace(/^.*[-–]\s*/,"").trim();
+    label=label.substring(0,55);
+    if(results[label]===undefined) results[label]=vals;
+    else results[label].push(...vals);
+  });
+  return Object.fromEntries(Object.entries(results).map(([k,v])=>[k,avg(v)]));
+}
+
+function getPriFreq(data, postFilter){
+  const rd=postFilter==="all"?data:data.filter(r=>normPost(r[COL.post]||"")===postFilter);
+  const freq={};
+  if(!rd.length||!rd[0]) return freq;
+  const headers=Object.keys(rd[0]);
+  const priCols=headers.filter(h=>
+    h.includes("प्राथमिकता")||h.toLowerCase().includes("priority areas")||
+    h.toLowerCase().includes("select up to 3")
+  );
+  rd.forEach(r=>priCols.forEach(col=>{
+    (r[col]||"").split(/[;,]/).map(s=>s.trim()).filter(Boolean).forEach(item=>{
+      const sh=item.substring(0,55);
+      freq[sh]=(freq[sh]||0)+1;
+    });
+  }));
+  return freq;
+}
+
+function getSwDemand(data){
+  const sw=[
+    {key:"MS Office",   col:COL.sw_msoffice,color:"#1a56a0"},
+    {key:"e-Office",    col:COL.sw_eoffice, color:"#138808"},
+    {key:"STATA/EViews",col:COL.sw_stata,   color:"#e07b30"},
+    {key:"R/Python",    col:COL.sw_rpy,     color:"#6d28d9"},
+    {key:"AI Tools",    col:COL.sw_ai,      color:"#b91c1c"},
+    {key:"e-HRMS",      col:COL.sw_hrms,    color:"#4a5268"},
+    {key:"Computer",    col:COL.sw_computer,color:"#0891b2"},
+  ];
+  return sw.map(s=>{
+    let beg=0,mid=0,adv=0;
+    data.forEach(r=>{
+      const v=(r[s.col]||"").toLowerCase().trim();
+      if(!v||v==="no"||v==="नहीं"||v==="not required"||v==="none"||v==="कोई नहीं") return;
+      if(v.includes("beginner")||v.includes("प्रारंभिक")) beg++;
+      else if(v.includes("intermediate")||v.includes("मध्यवर्ती")) mid++;
+      else if(v.includes("advanced")||v.includes("उन्नत")) adv++;
+      else beg++;
+    });
+    return {...s,beg,mid,adv,total:beg+mid+adv};
+  }).sort((a,b)=>b.total-a.total);
+}
+
+// Integrated prioritisation (Indore pilot STAT methodology)
+const THEMES=[
+  {name:"Survey Operations & Field Data Collection",
+   pKws:["survey","field","interview","schedule","questionnaire","data collection","navigation","क्षेत्र","सर्वेक्षण","साक्षात्कार"],
+   cKws:["Data Collection","Field Operations","Survey Instruments","Record Keeping","survey","field","क्षेत्र","सर्वेक्षण"]},
+  {name:"Data Management, Scrutiny & Quality Assurance",
+   pKws:["data management","scrutiny","consistency","completeness","database","validation","cleaning","record","डेटा प्रबंधन","संवीक्षा","सत्यापन"],
+   cKws:["Data Management","Data Scrutiny","Record Keeping","database","validation","डेटा","संवीक्षा","सत्यापन"]},
+  {name:"Digital Tools & Office Systems",
+   pKws:["digital","ms office","e-office","computer application","dak","डिजिटल","ई-ऑफिस","कार्यालय प्रबंधन"],
+   cKws:["Digital Fluency","Office Management","Computer Applications","e-office","digital","डिजिटल","कार्यालय"]},
+  {name:"Data Analysis, Statistics & Software",
+   pKws:["data analysis","visualization","stata","spss","r/python","software","statistical method","econometric","डेटा विश्लेषण","सांख्यिकीय विधि"],
+   cKws:["Data Analytics","Data Analysis","Statistical Methods","Statistical Concepts","Software","Analysis","विश्लेषण","सांख्यिकीय"]},
+  {name:"Statistical, Economic & Planning Concepts",
+   pKws:["economic","gdp","gddp","inflation","public finance","macro","micro","regional planning","आर्थिक","जीडीपी","योजना"],
+   cKws:["Economic Indicators","Economic Concepts","Statistical Concepts","Regional Planning","Public Finance","आर्थिक","लोक वित्त","आर्थिक संकेतक"]},
+  {name:"Coordination, Monitoring & Citizen Interface",
+   pKws:["monitoring","evaluation","m&e","programme monitoring","citizen","coordination","निगरानी","नागरिक","कार्यक्रम"],
+   cKws:["Monitoring","Evaluation","Citizen Centricity","Program Monitoring","District Planning","निगरानी","मूल्यांकन","नागरिक"]},
+  {name:"Reporting, Documentation & Communication",
+   pKws:["report","writing","communication","documentation","noting","drafting","रिपोर्ट","प्रलेखन","संचार"],
+   cKws:["Report Writing","Office Management","documentation","noting","drafting","रिपोर्ट","प्रस्ताव","ड्राफ्ट"]},
+];
+
+function computeThemes(data){
+  if(!data.length) return THEMES.map(t=>({...t,pri:0,need:0,combined:0}));
+  const priFreq=getPriFreq(data,"all");
+  const n=data.length;
+  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+
+  return THEMES.map(t=>{
+    // Priority signal
+    let priHits=0;
+    Object.entries(priFreq).forEach(([k,v])=>{
+      if(t.pKws.some(kw=>k.toLowerCase().includes(kw))) priHits+=v;
+    });
+    const pri=n>0?Math.min(Math.round(priHits/n*100),100):0;
+
+    // Need signal — weighted by post group size
+    let wGapSum=0,wN=0;
+    posts.forEach(post=>{
+      const rd=data.filter(r=>normPost(r[COL.post]||"")===post);
+      if(!rd.length||!COL.allCompCols) return;
+      const scores=[];
+      COL.allCompCols.forEach(col=>{
+        if(!t.cKws.some(kw=>col.toLowerCase().includes(kw))) return;
+        rd.forEach(r=>{const v=parseFloat(r[col]);if(!isNaN(v)&&v>=0&&v<=4)scores.push(v);});
+      });
+      if(scores.length){wGapSum+=(4-avg(scores))*rd.length;wN+=rd.length;}
+    });
+    const need=wN>0?Math.min(Math.round((wGapSum/wN)/4*100),100):0;
+    const combined=Math.round((pri+need)/2);
+    return {...t,pri,need,combined};
+  }).sort((a,b)=>b.combined-a.combined);
+}
+
+// ═══════════════════════════════════════════════════
+// FLAGS — analytical only (3 types)
+// ═══════════════════════════════════════════════════
+function renderFlags(data){
+  const el=document.getElementById("global-flags");
+  el.innerHTML="";
+  const n=data.length;
+  const distF=document.getElementById("filter-district").value;
+  const divF=document.getElementById("filter-division").value;
+  const add=(type,icon,msg)=>{
+    el.innerHTML+=`<div class="flag ${type}"><span class="flag-icon">${icon}</span><span>${msg}</span></div>`;
+  };
+
+  // 1. Small / insufficient sample
+  if(n===0){
+    add("small-n","⚠","No responses loaded yet. The dashboard will update automatically when responses are received.");
+    return;
+  }
+  if(n<5){
+    add("small-n","⚠",`Very small sample (n=${n}) — results are indicative only and should not be treated as conclusive. Minimum recommended is 5 responses per location.`);
+  } else if(n<10&&distF!=="all"){
+    add("small-n","⚠",`Low sample for ${distF} (n=${n}) — treat patterns as directional signals, not firm conclusions.`);
+  }
+
+  // 2. Post dominance
+  if(n>=5){
+    const posts=cntBy(data,r=>normPost(r[COL.post]||""));
+    const [topPost,topN]=Object.entries(posts).sort((a,b)=>b[1]-a[1])[0]||[];
+    if(topPost&&pct(topN,n)>80){
+      add("info","ℹ",`${pct(topN,n)}% of responses are from ${topPost} staff. Competency findings primarily reflect this cadre. Other post groups have limited representation in current data.`);
+    }
+  }
+
+  // 3. Zero-response locations (statewide only)
+  if(distF==="all"&&divF==="all"&&n>0){
+    const responded=new Set(data.map(r=>normDist(r[COL.district]||"")));
+    const zeros=Object.keys(REG).filter(loc=>getExpected(REG[loc])>0&&!responded.has(loc)).length;
+    if(zeros>0){
+      add("warn","⚠",`${zeros} location(s) have not responded yet. Coverage analysis is incomplete. Follow up with non-responding districts and offices to ensure representative statewide data.`);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════
+function renderBars(id,items,maxV,colorFn){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(!items.length){el.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';return;}
+  el.innerHTML=items.map(([label,val])=>{
+    const pw=Math.round((val/Math.max(maxV,1))*100);
+    const col=colorFn?colorFn(val,maxV):"var(--india-navy)";
+    return `<div class="prog-row">
+      <div class="prog-label" title="${label}">${label.length>28?label.substring(0,28)+"…":label}</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pw}%;background:${col}"></div></div>
+      <div class="prog-val">${typeof val==="number"&&val%1===0?val:fmt1(val)}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderCompBars(id,items){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(!items.length){el.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';return;}
+  el.innerHTML=items.map(([name,score])=>{
+    const gap=(4-score).toFixed(1);
+    const col=scCol(score);
+    return `<div class="comp-row">
+      <div class="comp-name" title="${name}">${name.length>60?name.substring(0,60)+"…":name}</div>
+      <div class="comp-bar-wrap">
+        <div class="comp-track"><div class="comp-fill" data-label="${fmt1(score)}" style="width:${Math.round(score/4*100)}%;background:${col}"></div></div>
+        <div class="comp-score" style="color:${col}">${fmt1(score)}</div>
+        <div class="comp-gap">gap ${gap}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════
+function renderAll(){
+  const d=FILT;
+  document.getElementById("header-date").textContent=
+    new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+  renderFlags(d);
+  renderOverview(d);
+  renderCoverage(d);
+  renderProfile(d);
+  renderCompetency(d);
+  renderPriorities(d);
+  renderSoftware(d);
+}
+
+// ── OVERVIEW ──
+function renderOverview(d){
+  const n=d.length;
+  const dvF=document.getElementById("filter-division").value;
+  const dlF=document.getElementById("filter-district").value;
+  let exp=0;
+  Object.entries(REG).forEach(([loc,info])=>{
+    if(dvF!=="all"&&info.div!==dvF) return;
+    if(dlF!=="all"&&loc!==dlF) return;
+    exp+=getExpected(info);
+  });
+  document.getElementById("kpi-total").textContent=n;
+  document.getElementById("kpi-expected").textContent=exp;
+  document.getElementById("kpi-completion").textContent=pct(n,exp)+"%";
+  const dists=new Set(d.map(r=>normDist(r[COL.district]||"")).filter(Boolean));
+  const divs=new Set([...dists].map(x=>(REG[x]||{}).div).filter(Boolean));
+  document.getElementById("kpi-divisions").textContent=divs.size;
+  document.getElementById("kpi-districts").textContent=dists.size;
+
+  // Weighted avg competency
+  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+  let wSum=0,wN=0;
+  posts.forEach(post=>{
+    const rd=d.filter(r=>normPost(r[COL.post]||"")===post);
+    if(!rd.length||!COL.allCompCols) return;
+    COL.allCompCols.forEach(col=>{
+      rd.forEach(r=>{const v=parseFloat(r[col]);if(!isNaN(v)&&v>=0&&v<=4){wSum+=v;wN++;}});
+    });
+  });
+  document.getElementById("kpi-avg-comp").textContent=wN>0?fmt1(wSum/wN):"—";
+
+  // Division bars
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const dExp={},dRec={};
+  divs7.forEach(dv=>{
+    dExp[dv]=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
+    dRec[dv]=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length;
+  });
+  renderBars("div-coverage-chart",divs7.map(dv=>[dv+" "+pct(dRec[dv],dExp[dv])+"% ("+dRec[dv]+"/"+dExp[dv]+")",dRec[dv]]),
+    Math.max(...divs7.map(dv=>dExp[dv]),1),(v,m)=>{const p=pct(v,m);return p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";});
+
+  const pf=getPriFreq(d,"all");
+  const t8=topN(pf,8);
+  renderBars("overview-priorities-chart",t8,Math.max(...t8.map(x=>x[1]),1),
+    (v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";});
+
+  const pc=cntBy(d,r=>normPost(r[COL.post]||""));
+  renderBars("overview-post-chart",[["BLI",pc.BLI||0],["ASO",pc.ASO||0],["DSO",pc.DSO||0],["AD",pc.AD||0],["DD/DPO",pc.DD||0],["JD",pc.JD||0]],
+    Math.max(...Object.values(pc),1));
+
+  const sw=getSwDemand(d).slice(0,6);
+  renderBars("overview-sw-chart",sw.map(s=>[s.key,s.total]),Math.max(...sw.map(s=>s.total),1),
+    (_,__,i)=>sw[i]?.color||"#1a56a0");
+}
+
+// ── COVERAGE ──
+function renderCoverage(d){
+  const dvF=document.getElementById("filter-division").value;
+  const dlF=document.getElementById("filter-district").value;
+  let totExp=0,zeros=0;
+  const rows=[];
+  Object.entries(REG).forEach(([loc,info])=>{
+    if(dvF!=="all"&&info.div!==dvF) return;
+    if(dlF!=="all"&&loc!==dlF) return;
+    const exp=getExpected(info);
+    const rec=d.filter(r=>normDist(r[COL.district]||"")===loc).length;
+    totExp+=exp;
+    if(rec===0) zeros++;
+    rows.push({loc,div:info.div,exp,rec,pend:Math.max(exp-rec,0),covPct:pct(rec,exp),
+      is_hq:info.is_hq,is_div:info.is_div_office});
+  });
+  rows.sort((a,b)=>a.covPct-b.covPct);
+  document.getElementById("cov-received").textContent=d.length;
+  document.getElementById("cov-pending").textContent=Math.max(totExp-d.length,0);
+  document.getElementById("cov-pct").textContent=pct(d.length,totExp)+"%";
+  document.getElementById("cov-zero").textContent=zeros;
+
+  document.getElementById("coverage-tbody").innerHTML=rows.map(r=>{
+    const bc=r.covPct>=75?"#1a7a4a":r.covPct>=40?"#e07b30":"#b91c1c";
+    const sc=r.covPct>=75?"high":r.covPct>=40?"mid":"low";
+    const sl=r.covPct>=75?"Good":r.covPct>=40?"Partial":"Low";
+    const loctag=r.is_hq?'<span class="hq-tag">HQ</span>':r.is_div?'<span class="div-tag">DIV</span>':"District";
+    const sm=r.rec>0&&r.rec<5?'<span class="badge small" title="n<5 — indicative only">n&lt;5</span>':"";
+    return `<tr>
+      <td><strong>${r.loc}</strong>${r.is_hq?'<span class="hq-tag" style="margin-left:5px">HQ</span>':r.is_div?'<span class="div-tag" style="margin-left:5px">DIV</span>':""}</td>
+      <td>${r.div}</td><td>${loctag}</td><td>${r.exp}</td>
+      <td><strong>${r.rec}</strong> ${sm}</td><td>${r.pend}</td>
+      <td><div class="cov-bar"><div class="cov-track"><div class="cov-fill" style="width:${r.covPct}%;background:${bc}"></div></div>
+        <span style="font-size:11px;font-weight:600;color:${bc}">${r.covPct}%</span></div></td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+    </tr>`;
+  }).join("");
+
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  renderBars("div-summary-chart",divs7.map(dv=>{
+    const exp=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
+    const rec=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length;
+    return [dv+" "+pct(rec,exp)+"% ("+rec+"/"+exp+")",rec];
+  }),Math.max(...divs7.map(dv=>Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0)),1),
+  (v,m)=>{const p=pct(v,m);return p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";});
+}
+
+// ── PROFILE ──
+function renderProfile(d){
+  const ids=["profile-service-chart","profile-edu-chart","profile-training-chart",
+    "profile-device-chart","profile-internet-chart","profile-time-chart",
+    "profile-mode-chart","profile-constraints-chart"];
+  if(!d.length){ids.forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';});return;}
+  const mc=(id,obj)=>{const it=topN(obj,8);renderBars(id,it,Math.max(...it.map(x=>x[1]),1));};
+  mc("profile-service-chart",cntBy(d,r=>{
+    const v=r[COL.service]||"";
+    if(v.includes("Less than 5")||v.includes("5 वर्ष से कम")) return "< 5 yrs";
+    if(v.includes("6–10")||v.includes("6-10")) return "6–10 yrs";
+    if(v.includes("11–15")||v.includes("11-15")) return "11–15 yrs";
+    if(v.includes("16–20")||v.includes("16-20")) return "16–20 yrs";
+    if(v.includes("20–30")||v.includes("20-30")) return "20–30 yrs";
+    if(v.includes("30+")) return "30+ yrs";
+    return v.substring(0,25)||"Not specified";
+  }));
+  mc("profile-edu-chart",cntBy(d,r=>{
+    const v=(r[COL.education]||"").toLowerCase();
+    if(v.includes("phd")||v.includes("mphil")||v.includes("पीएच")) return "PhD / MPhil";
+    if(v.includes("postgraduate")||v.includes("स्नातकोत्तर")||v.includes("post grad")) return "Post Graduate";
+    if(v.includes("graduate")||v.includes("स्नातक")) return "Graduate";
+    if(v.includes("12")||v.includes("higher sec")) return "12th / Higher Sec";
+    return v.substring(0,20)||"Not specified";
+  }));
+  mc("profile-training-chart",cntBy(d,r=>{
+    const v=r[COL.training]||"";
+    if(v.includes("No formal")||v.includes("केवल कार्य")) return "No formal training";
+    if(v.includes("Short")||v.includes("अल्पकालिक")) return "Short course/workshop";
+    if(v.includes("Certificate")||v.includes("प्रमाणपत्र")) return "Certificate course";
+    if(v.includes("nline")||v.includes("Coursera")||v.includes("NPTEL")) return "Online course";
+    if(v.includes("degree")||v.includes("Formal")||v.includes("डिग्री")) return "Formal degree/diploma";
+    return v.substring(0,30)||"Not specified";
+  }));
+  mc("profile-device-chart",cntBy(d,r=>{
+    const v=(r[COL.device]||"").toLowerCase();
+    if(v.includes("both")||v.includes("दोनों")) return "Both (Phone + Computer)";
+    if(v.includes("computer")||v.includes("laptop")||v.includes("कंप्यूटर")) return "Computer/Laptop only";
+    if(v.includes("smart")||v.includes("phone")||v.includes("मोबाइल")||v.includes("स्मार्टफोन")) return "Smartphone only";
+    if(v.includes("neither")||v.includes("कोई नहीं")) return "Neither";
+    return v.substring(0,25)||"Not specified";
+  }));
+  mc("profile-internet-chart",cntBy(d,r=>{
+    const v=(r[COL.internet]||"").toLowerCase();
+    if(v.includes("reliable")||v.includes("विश्वसनीय")) return "Reliable";
+    if(v.includes("sometimes")||v.includes("कभी-कभी")) return "Sometimes unreliable";
+    if(v.includes("not available")||v.includes("उपलब्ध नहीं")) return "Not available";
+    return v.substring(0,25)||"Not specified";
+  }));
+  mc("profile-time-chart",cntBy(d,r=>{
+    const v=r[COL.timeAvail]||"";
+    if(v.includes("Less than 5")||v.includes("से कम")) return "< 5 hrs/week";
+    if(v.includes("6–8")||v.includes("6-8")) return "6–8 hrs/week";
+    if(v.includes("8–10")||v.includes("8-10")) return "8–10 hrs/week";
+    if(v.includes("10+")||v.includes("10 घंटे")) return "10+ hrs/week";
+    return v.substring(0,25)||"Not specified";
+  }));
+  mc("profile-mode-chart",cntBy(d,r=>{
+    const v=(r[COL.mode]||"").toLowerCase();
+    if(v.includes("blended")||v.includes("मिश्रित")) return "Blended";
+    if(v.includes("classroom")||v.includes("in-person")||v.includes("कक्षा")) return "In-person / Classroom";
+    if(v.includes("online")||v.includes("ऑनलाइन")) return "Online / Self-paced";
+    return v.substring(0,25)||"Not specified";
+  }));
+  const cf={};
+  d.forEach(r=>(r[COL.constraints]||"").split(/[;,]/).map(s=>s.trim()).filter(Boolean).forEach(c=>{
+    const sh=c.substring(0,40);cf[sh]=(cf[sh]||0)+1;
+  }));
+  mc("profile-constraints-chart",cf);
+}
+
+// ── COMPETENCY ──
+function renderCompetency(d){
+  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+  let all=[];
+  posts.forEach(post=>{
+    const rd=d.filter(r=>normPost(r[COL.post]||"")===post);
+    if(!rd.length||!COL.allCompCols) return;
+    COL.allCompCols.forEach(col=>rd.forEach(r=>{const v=parseFloat(r[col]);if(!isNaN(v)&&v>=0&&v<=4)all.push(v);}));
+  });
+
+  const chartIds=["comp-bli-func","comp-bli-dom","comp-aso","comp-dso-ad","comp-dd-dpo","comp-jd","comp-integrated"];
+  if(!all.length){
+    chartIds.forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';});
+    ["comp-avg-all","comp-avg-gap","comp-weakest","comp-strongest"].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent="—";});
+    return;
+  }
+
+  const ov=avg(all);
+  document.getElementById("comp-avg-all").textContent=fmt1(ov);
+  document.getElementById("comp-avg-gap").textContent=fmt1(4-ov);
+
+  // BLI split functional vs domain
+  const bliD=d.filter(r=>normPost(r[COL.post]||"")==="BLI");
+  const bliFuncCols=(COL.allCompCols||[]).filter(h=>h.includes("कार्यात्मक दक्षताएँ"));
+  const bliDomCols=(COL.allCompCols||[]).filter(h=>h.includes("विषय-क्षेत्र (डोमेन)"));
+
+  function toItems(cols,rows){
+    const res={};
+    cols.forEach(col=>{
+      const vals=rows.map(r=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(!vals.length) return;
+      const m=col.match(/\(([^()]+)\)\s*$/);
+      let label=m?m[1].replace(/^[^-]+-\s*/,"").trim():col.substring(col.lastIndexOf("[")+1,col.lastIndexOf("]")).substring(0,50);
+      label=label.substring(0,55);
+      res[label]=avg(vals);
+    });
+    return Object.entries(res).sort((a,b)=>a[1]-b[1]);
+  }
+
+  renderCompBars("comp-bli-func",toItems(bliFuncCols,bliD));
+  renderCompBars("comp-bli-dom", toItems(bliDomCols,bliD));
+  renderCompBars("comp-aso",     Object.entries(getRoleComps(d,"ASO")).sort((a,b)=>a[1]-b[1]));
+  renderCompBars("comp-dso-ad",  Object.entries({...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")}).sort((a,b)=>a[1]-b[1]));
+  renderCompBars("comp-dd-dpo",  Object.entries(getRoleComps(d,"DD")).sort((a,b)=>a[1]-b[1]));
+  renderCompBars("comp-jd",      Object.entries(getRoleComps(d,"JD")).sort((a,b)=>a[1]-b[1]));
+
+  // Weakest/strongest
+  const combined={...getRoleComps(d,"BLI"),...getRoleComps(d,"ASO"),...getRoleComps(d,"DSO"),...getRoleComps(d,"AD"),...getRoleComps(d,"DD"),...getRoleComps(d,"JD")};
+  const sorted=Object.entries(combined).sort((a,b)=>a[1]-b[1]);
+  if(sorted.length){
+    document.getElementById("comp-weakest").textContent=sorted[0][0].substring(0,38);
+    document.getElementById("comp-strongest").textContent=sorted[sorted.length-1][0].substring(0,38);
+  }
+
+  // Integrated matrix
+  const themes=computeThemes(d);
+  const el=document.getElementById("comp-integrated");
+  if(el){
+    el.innerHTML=themes.map(t=>{
+      const cls=t.combined>=50?"immediate":t.combined>=35?"phase1b":"later";
+      const label=t.combined>=50?"Immediate (Phase 1A)":t.combined>=35?"Phase 1B":"Reinforcement";
+      return `<div class="theme-row" data-tip="${t.name}\nPriority Signal: ${t.pri}% | Need Signal: ${t.need}% | Combined: ${t.combined}">
+        <div class="theme-name">${t.name}</div>
+        <div class="theme-signal-block">
+          <div class="theme-sig-row">
+            <span class="theme-sig-label">Priority Signal</span>
+            <div class="theme-sig-track"><div class="theme-sig-fill" style="width:${t.pri}%;background:#1a56a0"></div></div>
+            <span class="theme-sig-val">${t.pri}%</span>
+          </div>
+          <div class="theme-sig-row">
+            <span class="theme-sig-label">Need Signal</span>
+            <div class="theme-sig-track"><div class="theme-sig-fill" style="width:${t.need}%;background:#e07b30"></div></div>
+            <span class="theme-sig-val">${t.need}%</span>
+          </div>
+        </div>
+        <div class="theme-score">${t.combined}</div>
+        <span class="theme-class cls-${cls}">${label}</span>
+      </div>`;
+    }).join("");
+  }
+}
+
+// ── PRIORITIES ──
+function renderPriorities(d){
+  const af=getPriFreq(d,"all");
+  renderBars("priorities-all",topN(af,15),Math.max(...Object.values(af),1),
+    (v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";});
+
+  const bf=getPriFreq(d,"BLI");
+  renderBars("priorities-bli",topN(bf,10),Math.max(...Object.values(bf),1));
+
+  const sf={};
+  ["ASO","DSO","AD","DD","JD"].forEach(post=>{
+    Object.entries(getPriFreq(d,post)).forEach(([k,v])=>sf[k]=(sf[k]||0)+v);
+  });
+  renderBars("priorities-sup",topN(sf,10),Math.max(...Object.values(sf),1));
+
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  renderBars("priorities-div",divs7.map(dv=>{
+    const dd=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const df=getPriFreq(dd,"all");
+    const top=topN(df,1)[0];
+    return [dv+": "+(top?top[0].substring(0,30):"No data"),dd.length];
+  }),Math.max(...divs7.map(dv=>d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length),1));
+}
+
+// ── SOFTWARE ──
+function renderSoftware(d){
+  const n=d.length,sw=getSwDemand(d);
+  document.getElementById("sw-top").textContent=sw[0]?sw[0].key:"—";
+  const ai=sw.find(s=>s.key==="AI Tools"),rpy=sw.find(s=>s.key==="R/Python"),stata=sw.find(s=>s.key==="STATA/EViews");
+  document.getElementById("sw-ai-pct").textContent=n&&ai?pct(ai.total,n)+"%":"—";
+  document.getElementById("sw-rpy-pct").textContent=n&&rpy?pct(rpy.total,n)+"%":"—";
+  document.getElementById("sw-stata-pct").textContent=n&&stata?pct(stata.total,n)+"%":"—";
+
+  // Level breakdown chart
+  const lvlEl=document.getElementById("sw-level-chart");
+  if(lvlEl){
+    const active=sw.filter(s=>s.total>0);
+    if(!active.length){lvlEl.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';}
+    else{
+      const maxT=Math.max(...active.map(s=>s.total),1);
+      lvlEl.innerHTML=active.map(s=>{
+        const bPct=Math.round(s.beg/maxT*100);
+        const mPct=Math.round(s.mid/maxT*100);
+        const aPct=Math.round(s.adv/maxT*100);
+        return `<div class="sw-row" data-tip="${s.key}: Total ${s.total} | Beginner: ${s.beg} | Intermediate: ${s.mid} | Advanced: ${s.adv}">
+          <div class="sw-name">${s.key}</div>
+          <div class="sw-stack-wrap">
+            <div class="sw-bar-row">
+              <span class="sw-bar-label">Beginner</span>
+              <div class="sw-bar-track"><div class="sw-bar-fill" style="width:${bPct}%;background:#f97316"></div></div>
+              <span class="sw-bar-val" style="color:#c2410c">${s.beg}</span>
+            </div>
+            <div class="sw-bar-row">
+              <span class="sw-bar-label">Intermediate</span>
+              <div class="sw-bar-track"><div class="sw-bar-fill" style="width:${mPct}%;background:#1a56a0"></div></div>
+              <span class="sw-bar-val" style="color:#1a56a0">${s.mid}</span>
+            </div>
+            <div class="sw-bar-row">
+              <span class="sw-bar-label">Advanced</span>
+              <div class="sw-bar-track"><div class="sw-bar-fill" style="width:${aPct}%;background:#15803d"></div></div>
+              <span class="sw-bar-val" style="color:#15803d">${s.adv}</span>
+            </div>
+          </div>
+          <span class="sw-total-badge">n=${s.total}</span>
+        </div>`;
+      }).join("");
+    }
+  }
+
+  // By post
+  const postEl=document.getElementById("sw-post-chart");
+  if(postEl){
+    const postLines=["BLI","ASO","DSO","AD","DD","JD"].map(post=>{
+      const pd=d.filter(r=>normPost(r[COL.post]||"")===post);
+      if(!pd.length) return "";
+      const psw=getSwDemand(pd).filter(s=>s.total>0);
+      if(!psw.length) return "";
+      const pm=Math.max(...psw.map(s=>s.total),1);
+      return `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;color:var(--india-navy);margin-bottom:6px">${post} (n=${pd.length})</div>`+
+        psw.map(s=>`<div class="prog-row">
+          <div class="prog-label" style="min-width:90px">${s.key}</div>
+          <div class="prog-track"><div class="prog-fill" style="width:${Math.round(s.total/pm*100)}%;background:${s.color}"></div></div>
+          <div class="prog-val">${s.total}</div>
+        </div>`).join("")+"</div>";
+    }).join("");
+    postEl.innerHTML=postLines||'<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';
+  }
+
+  // Division top
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  renderBars("sw-div-chart",divs7.map(dv=>{
+    const dd=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const dsw=getSwDemand(dd).filter(s=>s.total>0).slice(0,3).map(s=>s.key).join(", ");
+    return [dv+": "+(dsw||"No data"),dd.length];
+  }),Math.max(...divs7.map(dv=>d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length),1));
+}
+
+// ── UI ──
+function switchTab(name,btn){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  if(btn) btn.classList.add("active");
+}
+
+const ttEl=document.getElementById("tooltip");
+document.addEventListener("mousemove",e=>{
+  const el=e.target.closest("[data-tip]");
+  if(el){ttEl.textContent=el.dataset.tip;ttEl.classList.add("show");ttEl.style.left=(e.clientX+14)+"px";ttEl.style.top=(e.clientY+14)+"px";}
+  else ttEl.classList.remove("show");
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("header-date").textContent=
+    new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+  loadData();
+  setInterval(loadData,REFRESH_MS);
+});
+</script>
+</body>
+</html>
