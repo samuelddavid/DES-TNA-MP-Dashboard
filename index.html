@@ -584,7 +584,27 @@ const DMAP = {
 function normDist(s){
   if(!s) return "";
   const t=s.trim();
-  return DMAP[t]||DMAP[t.toLowerCase()]||t;
+  // Direct lookup first
+  if(DMAP[t]) return DMAP[t];
+  if(DMAP[t.toLowerCase()]) return DMAP[t.toLowerCase()];
+  // Handle bilingual pipe format: "इन्दौर | Indore" or "Indore | इन्दौर"
+  if(t.includes("|")){
+    const parts=t.split("|").map(p=>p.trim());
+    for(const p of parts){
+      if(DMAP[p]) return DMAP[p];
+      if(DMAP[p.toLowerCase()]) return DMAP[p.toLowerCase()];
+    }
+    // Try English part directly against registry keys
+    for(const p of parts){
+      const pl=p.toLowerCase();
+      const regKey=Object.keys(REG).find(k=>k.toLowerCase()===pl);
+      if(regKey) return regKey;
+    }
+  }
+  // Try direct registry key match (case-insensitive)
+  const regKey=Object.keys(REG).find(k=>k.toLowerCase()===t.toLowerCase());
+  if(regKey) return regKey;
+  return t;
 }
 
 // ═══════════════════════════════════════════════════
