@@ -16,9 +16,51 @@
   --accent-amber:#b45309;--accent-amber-light:#fef3c7;
   --accent-red:#b91c1c;--accent-red-light:#fee2e2;
   --accent-purple:#6d28d9;--accent-purple-light:#ede9fe;
-  --saffron:#e07b30;--india-navy:#1a356e;
+  --saffron:#e07b30;--india-navy:#1a356e;--card-bg:#ffffff;
 }
-body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6}
+body.dark{
+  --bg:#0f1117;--surface:#1a1f2e;--surface2:#232836;--border:#2e3448;--border-light:#2a3040;
+  --text:#e2e6f0;--text-mid:#9aa5bc;--text-dim:#5a6478;
+  --accent-blue:#4a90d9;--accent-blue-light:#1a2d47;
+  --accent-green:#2ea86a;--accent-green-light:#0d2a1a;
+  --accent-amber:#e09040;--accent-amber-light:#2a1e0a;
+  --accent-red:#e05050;--accent-red-light:#2a1010;
+  --accent-purple:#9a70f0;--accent-purple-light:#1e1535;
+  --card-bg:#1a1f2e;--india-navy:#2a3f80;
+}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6;transition:background .3s,color .3s}
+.tog-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:3px 9px;border-radius:12px;cursor:pointer;font-size:11px}
+.tog-btn:hover{background:rgba(255,255,255,.22)}
+/* Heatmap */
+.heatmap-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.heatmap-tbl th{background:var(--india-navy);color:#fff;padding:7px 8px;text-align:center;font-size:10px;font-weight:600;white-space:normal;line-height:1.3}
+.heatmap-tbl td{padding:8px 8px;text-align:center;font-weight:700;font-size:12px;border:1px solid var(--border)}
+.heatmap-tbl .row-label{text-align:left;font-weight:600;color:var(--text);white-space:nowrap;padding-left:10px}
+.hm-high{background:#fee2e2;color:#b91c1c}.hm-mid{background:#fef3c7;color:#b45309}.hm-low{background:#d4f0e2;color:#1a7a4a}.hm-none{background:var(--surface2);color:var(--text-dim)}
+/* KPI post row */
+.kpi-grid-posts{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:28px}
+.kpi-bar{height:3px;background:var(--surface2);border-radius:2px;margin-top:8px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+/* Comparison tab */
+.cmp-selectors{display:flex;gap:20px;margin-bottom:24px;align-items:flex-end;flex-wrap:wrap}
+.cmp-sel-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px}
+.cmp-sel-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
+.cmp-title{font-size:16px;font-weight:700;font-family:"EB Garamond",serif;margin-top:4px}
+.cmp-vs{font-size:20px;font-weight:700;color:var(--text-dim);padding-bottom:12px}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.cmp-card{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:16px 20px}
+.cmp-stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light)}
+.cmp-stat:last-child{border-bottom:none}
+.cmp-stat-label{font-size:12px;color:var(--text-mid)}
+.cmp-stat-val{font-size:13px;font-weight:700;color:var(--text);font-family:"EB Garamond",serif}
+.cmp-outcomes{background:var(--accent-blue-light);border:1px solid var(--accent-blue);border-radius:6px;padding:16px 20px;margin-bottom:20px}
+.cmp-outcomes h3{font-size:14px;font-weight:700;color:var(--accent-blue);margin-bottom:10px}
+.cmp-outcome-item{font-size:12px;color:var(--text-mid);margin-bottom:6px;padding-left:16px;position:relative}
+.cmp-outcome-item::before{content:"→";position:absolute;left:0;color:var(--accent-blue)}
+.cmp-donut{display:flex;justify-content:center;margin:10px 0}
+.pdf-btn{background:var(--accent-red);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
+@media print{.gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags{display:none!important}.tab-panel{display:block!important}body{font-size:11px}.card,.cmp-card{break-inside:avoid}}
+@media(max-width:900px){.kpi-grid-posts{grid-template-columns:repeat(3,1fr)}.cmp-grid{grid-template-columns:1fr}}
 .gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
 .gov-strip-text{color:rgba(255,255,255,.7);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
 .gov-strip-sep{color:rgba(255,255,255,.25)}
@@ -66,6 +108,7 @@ select.filter-select:focus{border-color:var(--accent-blue)}
 .kpi-card.amber::before{background:var(--saffron)}
 .kpi-card.red::before{background:var(--accent-red)}
 .kpi-card.purple::before{background:var(--accent-purple)}
+.kpi-card.slate::before{background:#64748b}
 .kpi-label{font-size:10.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
 .kpi-value{font-family:"EB Garamond",serif;font-size:32px;font-weight:700;color:var(--india-navy);line-height:1}
 .kpi-sub{font-size:11px;color:var(--text-dim);margin-top:4px}
@@ -155,11 +198,15 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 <div id="tooltip"></div>
 
 <div class="gov-strip">
-  <span class="gov-strip-text">Government of Madhya Pradesh</span>
+  <span class="gov-strip-text" data-en="Government of Madhya Pradesh" data-hi="मध्य प्रदेश सरकार">Government of Madhya Pradesh</span>
   <span class="gov-strip-sep">|</span>
-  <span class="gov-strip-text">Directorate of Economics &amp; Statistics</span>
+  <span class="gov-strip-text" data-en="Directorate of Economics &amp; Statistics" data-hi="संचालनालय, अर्थ एवं सांख्यिकी">Directorate of Economics &amp; Statistics</span>
   <span class="gov-strip-sep">|</span>
   <span class="gov-strip-text">GIZ India · DES–PIF MoU</span>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <button class="tog-btn" id="lang-btn" onclick="toggleLang()">🌐 हिंदी</button>
+    <button class="tog-btn" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
+  </div>
 </div>
 
 <header>
@@ -211,12 +258,13 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 </div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
-  <button class="tab-btn" onclick="switchTab('coverage',this)">Response Coverage</button>
-  <button class="tab-btn" onclick="switchTab('profile',this)">Respondent Profile</button>
-  <button class="tab-btn" onclick="switchTab('competency',this)">Competency Assessment</button>
-  <button class="tab-btn" onclick="switchTab('priorities',this)">Training Priorities</button>
-  <button class="tab-btn" onclick="switchTab('software',this)">Software Demand</button>
+  <button class="tab-btn active" onclick="switchTab('overview',this)" data-en="Overview" data-hi="सिंहावलोकन">Overview</button>
+  <button class="tab-btn" onclick="switchTab('coverage',this)" data-en="Response Coverage" data-hi="प्रतिक्रिया कवरेज">Response Coverage</button>
+  <button class="tab-btn" onclick="switchTab('profile',this)" data-en="Respondent Profile" data-hi="उत्तरदाता प्रोफाइल">Respondent Profile</button>
+  <button class="tab-btn" onclick="switchTab('competency',this)" data-en="Competency Assessment" data-hi="दक्षता आकलन">Competency Assessment</button>
+  <button class="tab-btn" onclick="switchTab('priorities',this)" data-en="Training Priorities" data-hi="प्रशिक्षण प्राथमिकताएं">Training Priorities</button>
+  <button class="tab-btn" onclick="switchTab('software',this)" data-en="Software Demand" data-hi="सॉफ्टवेयर मांग">Software Demand</button>
+  <button class="tab-btn" onclick="switchTab('comparison',this)" data-en="Division Comparison" data-hi="संभाग तुलना">Division Comparison</button>
 </div>
 
 <div class="main">
@@ -224,14 +272,32 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 
   <!-- TAB 1: OVERVIEW -->
   <div id="tab-overview" class="tab-panel active">
-    <div class="kpi-grid">
-      <div class="kpi-card blue"><div class="kpi-label">Total Responses</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Submissions received</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Expected Responses</div><div class="kpi-value" id="kpi-expected">—</div><div class="kpi-sub">Based on filled posts</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Completion Rate</div><div class="kpi-value" id="kpi-completion">—</div><div class="kpi-sub">State-wide coverage</div></div>
-      <div class="kpi-card blue"><div class="kpi-label">Divisions Covered</div><div class="kpi-value" id="kpi-divisions">—</div><div class="kpi-sub">of 7 divisions</div></div>
-      <div class="kpi-card blue"><div class="kpi-label">Locations Covered</div><div class="kpi-value" id="kpi-districts">—</div><div class="kpi-sub">Districts + Offices + HQ</div></div>
-      <div class="kpi-card purple"><div class="kpi-label">Avg Competency Score</div><div class="kpi-value" id="kpi-avg-comp">—</div><div class="kpi-sub">Weighted 0–4 scale</div></div>
+    <!-- Row 1: Main KPIs (4 cards) -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+      <div class="kpi-card blue">
+        <div class="kpi-label" data-en="Total Responses" data-hi="कुल प्रतिक्रियाएं">Total Responses</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" data-en="Submissions received" data-hi="प्राप्त प्रस्तुतियाँ">Submissions received</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-total-bar" style="width:0%;background:var(--accent-blue)"></div></div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label" data-en="Expected Responses" data-hi="अपेक्षित प्रतिक्रियाएं">Expected Responses</div>
+        <div class="kpi-value" id="kpi-expected">—</div>
+        <div class="kpi-sub" data-en="Based on filled posts" data-hi="भरे हुए पदों के आधार पर">Based on filled posts</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label" data-en="Completion Rate" data-hi="पूर्णता दर">Completion Rate</div>
+        <div class="kpi-value" id="kpi-completion">—</div>
+        <div class="kpi-sub" data-en="State-wide coverage" data-hi="राज्यव्यापी कवरेज">State-wide coverage</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label" data-en="Avg Competency Score" data-hi="औसत दक्षता स्कोर">Avg Competency Score</div>
+        <div class="kpi-value" id="kpi-avg-comp">—</div>
+        <div class="kpi-sub" data-en="Weighted 0–4 scale" data-hi="भारित 0–4 पैमाना">Weighted 0–4 scale</div>
+      </div>
     </div>
+    <!-- Row 2: Post-wise KPI cards (6 cards, filter-responsive) -->
+    <div class="kpi-grid-posts" id="post-kpi-row"></div>
     <div class="two-col">
       <div class="card"><div class="section-title">Division-wise Response Coverage</div><div id="div-coverage-chart"></div></div>
       <div class="card"><div class="section-title">Top 8 Training Priority Areas</div><div id="overview-priorities-chart"></div></div>
@@ -334,12 +400,22 @@ footer p{font-size:10.5px;color:var(--text-dim)}
     </div>
     <div class="card">
       <div class="section-title">Integrated Prioritisation Matrix — Combined Score (Demand × Gap)</div>
-      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px">
         Combined Score = (Priority Signal % + Need Signal %) ÷ 2 &nbsp;·&nbsp;
-        Methodology: Indore Pilot TNA Report, April 2026 (STAT Framework, UNSD/GIST) &nbsp;·&nbsp;
+        Source: Indore Pilot TNA Report, April 2026 (STAT Framework, UNSD/GIST) &nbsp;·&nbsp;
         Scores ≥50 = Immediate; 35–49 = Phase 1B; &lt;35 = Reinforcement
       </p>
       <div id="comp-integrated"></div>
+      <div style="margin-top:18px;background:var(--surface);border-radius:5px;padding:14px 16px;font-size:11.5px;color:var(--text-mid);line-height:1.9">
+        <strong style="color:var(--text);display:block;margin-bottom:6px">How to read this matrix (methodology: Indore Pilot TNA Report, Table 6.1–6.2)</strong>
+        <b>Priority Signal (%)</b> — The percentage of respondents who selected at least one competency in this theme as a top support need. Measures expressed demand — what staff say they need.<br>
+        <b>Need Signal (%)</b> — The weighted skill gap: (4 − average score) ÷ 4 × 100, weighted by number of respondents per post group (BLI, ASO, DSO, etc.). Measures actual capability distance from expert level independent of stated demand.<br>
+        <b>Combined Score</b> — Simple average of both signals (50:50). Balances what staff ask for with what their self-assessed scores reveal. A high combined score means both high demand AND a large gap — the strongest signal for intervention.<br>
+        <span style="display:inline-block;background:#1a356e;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-right:4px">Immediate (Phase 1A)</span> Score ≥ 50: Highest urgency. Design and deliver in first training cycle.<br>
+        <span style="display:inline-block;background:var(--accent-blue-light);color:var(--accent-blue);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-right:4px">Phase 1B</span> Score 35–49: Important. Schedule in first cycle, after Immediate themes.<br>
+        <span style="display:inline-block;background:var(--surface2);color:var(--text-dim);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-right:4px">Reinforcement</span> Score &lt;35: Lower urgency. Embed as supplementary modules in later cycles.<br>
+        <em style="font-size:10.5px">The seven themes follow exactly Table 6.1 of the Indore Division Pilot TNA Report, Pahlé India Foundation (PIF), New Delhi, April 2026. Thresholds follow Table 6.2 of the same report.</em>
+      </div>
     </div>
   </div>
 
@@ -384,6 +460,39 @@ footer p{font-size:10.5px;color:var(--text-dim)}
       <div class="card"><div class="section-title">Software Demand by Post</div><div id="sw-post-chart"></div></div>
       <div class="card"><div class="section-title">Division-wise Top Software Needs</div><div id="sw-div-chart"></div></div>
     </div>
+    <!-- Heatmap: Division × Competency Theme -->
+    <div class="card">
+      <div class="section-title" data-en="Division × Competency Theme — Training Need Heatmap" data-hi="संभाग × दक्षता विषय हीटमैप">Division × Competency Theme — Training Need Heatmap</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">Combined Score per division per theme (0–100). <span style="background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:2px;font-weight:600">Red ≥50</span> Immediate &nbsp;<span style="background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:2px;font-weight:600">Amber 35–49</span> Important &nbsp;<span style="background:#d4f0e2;color:#1a7a4a;padding:1px 6px;border-radius:2px;font-weight:600">Green &lt;35</span> Lower priority</p>
+      <div style="overflow-x:auto"><div id="heatmap-container"></div></div>
+    </div>
+  </div>
+
+  <!-- TAB 7: DIVISION COMPARISON -->
+  <div id="tab-comparison" class="tab-panel">
+    <div class="cmp-selectors">
+      <div class="cmp-sel-group">
+        <div class="cmp-sel-label" data-en="Division A" data-hi="संभाग A">Division A</div>
+        <select class="filter-select" id="cmp-div-a" onchange="renderComparison()" style="font-size:14px;padding:8px 12px">
+          <option value="">— Select Division —</option>
+          <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
+          <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+        </select>
+        <div class="cmp-title" id="cmp-title-a" style="color:var(--accent-blue)">—</div>
+      </div>
+      <div class="cmp-vs">VS</div>
+      <div class="cmp-sel-group">
+        <div class="cmp-sel-label" data-en="Division B" data-hi="संभाग B">Division B</div>
+        <select class="filter-select" id="cmp-div-b" onchange="renderComparison()" style="font-size:14px;padding:8px 12px">
+          <option value="">— Select Division —</option>
+          <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
+          <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+        </select>
+        <div class="cmp-title" id="cmp-title-b" style="color:var(--saffron)">—</div>
+      </div>
+      <button class="pdf-btn" onclick="printComparison()">⬇ Download PDF</button>
+    </div>
+    <div id="cmp-content"><div class="no-data"><div class="no-data-icon">📊</div>Select two divisions above to compare</div></div>
   </div>
 </div>
 
@@ -393,82 +502,109 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 </footer>
 
 <script>
-// ═══════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1fu274JL-ybQJUc0Xgyeu4L0FgNm0SG2dowlOk5U_nbY/gviz/tq?tqx=out:csv&sheet=Form%20Responses%201&gid=86946345";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1fu274JL-ybQJUc0Xgyeu4L0FgNm0SG2dowlOk5U_nbY/export?format=csv&gid=86946345";
 const REFRESH_MS = 3 * 60 * 1000;
 
-// ═══════════════════════════════════════════════════
-// STAFF REGISTRY — filled posts, Jan 2026
-// is_hq = DES Headquarters; is_div_office = Divisional Office
-// ═══════════════════════════════════════════════════
+// ── Language & Theme toggles ──
+let LANG = "en";
+function toggleLang(){
+  LANG = LANG==="en" ? "hi" : "en";
+  document.getElementById("lang-btn").textContent = LANG==="en" ? "🌐 हिंदी" : "🌐 English";
+  document.querySelectorAll("[data-en]").forEach(el=>{
+    el.textContent = LANG==="en" ? el.dataset.en : el.dataset.hi;
+  });
+}
+function toggleTheme(){
+  const dark = document.body.classList.toggle("dark");
+  document.getElementById("theme-btn").textContent = dark ? "☀ Light" : "🌙 Dark";
+}
+
+// ── Post expected counts per location ──
+// Correct state-wide totals from DES_Technical_Empl_Jan_2026.xlsx
+const STATE_TOTALS={BLI:200,ASO:153,DSO:23,AD:9,DD:3,DPO:3,JD:3};
+function getExpPost(post, dvF, dlF){
+  if(dvF==="all"&&dlF==="all") return STATE_TOTALS[post]||0;
+  let t=0;
+  Object.entries(REG).forEach(([loc,info])=>{
+    if(dvF!=="all" && info.div!==dvF) return;
+    if(dlF!=="all" && loc!==dlF) return;
+    t += (info[post]||0);
+  });
+  return t;
+}
+
+// ── STAFF REGISTRY — corrected from DES_Technical_Empl_Jan_2026.xlsx ──
+// BLI filled: 200 total (179 districts + 21 HQ)
+// ASO filled: 153; DSO: 23; AD: 9; DD: 3; DPO: 3; JD: 3
 const REG = {
-  "Bhopal":{"div":"Bhopal","DSO":0,"ASO":5,"BLI":3},
-  "Raisen":{"div":"Bhopal","DSO":1,"ASO":2,"BLI":1},
-  "Sehore":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2},
-  "Rajgarh":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":2},
-  "Betul":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":4},
-  "Vidisha":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2},
-  "Hoshangabad":{"div":"Bhopal","DSO":1,"ASO":1,"BLI":4},
-  "Harda":{"div":"Bhopal","DSO":0,"ASO":2,"BLI":1},
-  "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3},
-  "DES Headquarters":{"div":"Bhopal","is_hq":true,"Senior":9,"ASO":50,"BLI":21},
+  "Bhopal":{"div":"Bhopal","DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Raisen":{"div":"Bhopal","DSO":1,"ASO":2,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Sehore":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Rajgarh":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Betul":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Vidisha":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Hoshangabad":{"div":"Bhopal","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Harda":{"div":"Bhopal","DSO":0,"ASO":2,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "DES Headquarters":{"div":"Bhopal","is_hq":true,"DSO":0,"ASO":50,"BLI":21,"DPO":0,"DD":3,"AD":9,"JD":3},
   "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7},
   "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1},
   "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4},
   "Shivpuri":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2},
-  "Bhind":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":3},
-  "Morena":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":5},
-  "Sheopur":{"div":"Gwalior","DSO":0,"ASO":0,"BLI":2},
-  "Ashoknagar":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2},
-  "Divisional Office Gwalior":{"div":"Gwalior","is_div_office":true,"DSO":0,"ASO":3,"BLI":7},
-  "Indore":{"div":"Indore","DSO":1,"ASO":3,"BLI":8},
-  "Dhar":{"div":"Indore","DSO":0,"ASO":2,"BLI":5},
-  "Jhabua":{"div":"Indore","DSO":1,"ASO":2,"BLI":2},
-  "Alirajpur":{"div":"Indore","DSO":1,"ASO":2,"BLI":3},
-  "Khandwa":{"div":"Indore","DSO":0,"ASO":2,"BLI":3},
-  "Khargone":{"div":"Indore","DSO":1,"ASO":0,"BLI":3},
-  "Barwani":{"div":"Indore","DSO":1,"ASO":0,"BLI":5},
-  "Burhanpur":{"div":"Indore","DSO":0,"ASO":1,"BLI":1},
-  "Divisional Office Indore":{"div":"Indore","is_div_office":true,"DSO":1,"ASO":3,"BLI":8},
-  "Jabalpur":{"div":"Jabalpur","DSO":1,"ASO":9,"BLI":11},
-  "Balaghat":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":5},
-  "Chhindwara":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":7},
-  "Mandla":{"div":"Jabalpur","DSO":1,"ASO":2,"BLI":4},
-  "Narsinghpur":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":4},
-  "Seoni":{"div":"Jabalpur","DSO":1,"ASO":3,"BLI":3},
-  "Katni":{"div":"Jabalpur","DSO":0,"ASO":0,"BLI":2},
-  "Dindori":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":2},
-  "Divisional Office Jabalpur":{"div":"Jabalpur","is_div_office":true,"DSO":1,"ASO":2,"BLI":5},
-  "Rewa":{"div":"Rewa","DSO":0,"ASO":1,"BLI":6},
-  "Satna":{"div":"Rewa","DSO":0,"ASO":0,"BLI":6},
-  "Shahdol":{"div":"Rewa","DSO":1,"ASO":0,"BLI":3},
-  "Sidhi":{"div":"Rewa","DSO":0,"ASO":0,"BLI":2},
-  "Singrauli":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
-  "Umaria":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
-  "Anuppur":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1},
-  "Divisional Office Rewa":{"div":"Rewa","is_div_office":true,"DSO":0,"ASO":0,"BLI":6},
-  "Sagar":{"div":"Sagar","DSO":0,"ASO":1,"BLI":6},
-  "Chhatarpur":{"div":"Sagar","DSO":0,"ASO":0,"BLI":6},
-  "Damoh":{"div":"Sagar","DSO":1,"ASO":2,"BLI":2},
-  "Panna":{"div":"Sagar","DSO":0,"ASO":1,"BLI":2},
-  "Tikamgarh":{"div":"Sagar","DSO":1,"ASO":1,"BLI":2},
-  "Niwari":{"div":"Sagar","DSO":0,"ASO":1,"BLI":1},
-  "Divisional Office Sagar":{"div":"Sagar","is_div_office":true,"DSO":0,"ASO":2,"BLI":2},
-  "Ujjain":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":6},
-  "Dewas":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":1},
-  "Mandsaur":{"div":"Ujjain","DSO":1,"ASO":2,"BLI":3},
-  "Ratlam":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":4},
-  "Shajapur":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":1},
-  "Neemuch":{"div":"Ujjain","DSO":0,"ASO":2,"BLI":2},
-  "Agar Malwa":{"div":"Ujjain","DSO":0,"ASO":0,"BLI":2},
-  "Divisional Office Ujjain":{"div":"Ujjain","is_div_office":true,"DSO":1,"ASO":2,"BLI":3},
+  "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Shivpuri":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Bhind":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Morena":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Sheopur":{"div":"Gwalior","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Ashoknagar":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Gwalior":{"div":"Gwalior","is_div_office":true,"DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Indore":{"div":"Indore","DSO":1,"ASO":3,"BLI":8,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Dhar":{"div":"Indore","DSO":0,"ASO":2,"BLI":5,"DPO":1,"DD":0,"AD":0,"JD":0},
+  "Jhabua":{"div":"Indore","DSO":1,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Alirajpur":{"div":"Indore","DSO":1,"ASO":2,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Khandwa":{"div":"Indore","DSO":0,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Khargone":{"div":"Indore","DSO":1,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Barwani":{"div":"Indore","DSO":1,"ASO":1,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Burhanpur":{"div":"Indore","DSO":0,"ASO":9,"BLI":11,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Indore":{"div":"Indore","is_div_office":true,"DSO":1,"ASO":3,"BLI":8,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Jabalpur":{"div":"Jabalpur","DSO":1,"ASO":9,"BLI":11,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Balaghat":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Chhindwara":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Mandla":{"div":"Jabalpur","DSO":1,"ASO":2,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Narsinghpur":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Seoni":{"div":"Jabalpur","DSO":1,"ASO":3,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Katni":{"div":"Jabalpur","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Dindori":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Jabalpur":{"div":"Jabalpur","is_div_office":true,"DSO":1,"ASO":2,"BLI":5,"DPO":1,"DD":0,"AD":0,"JD":0},
+  "Rewa":{"div":"Rewa","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Satna":{"div":"Rewa","DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Shahdol":{"div":"Rewa","DSO":1,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Sidhi":{"div":"Rewa","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Singrauli":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Umaria":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Anuppur":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Rewa":{"div":"Rewa","is_div_office":true,"DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Sagar":{"div":"Sagar","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Chhatarpur":{"div":"Sagar","DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Damoh":{"div":"Sagar","DSO":1,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Panna":{"div":"Sagar","DSO":0,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Tikamgarh":{"div":"Sagar","DSO":1,"ASO":4,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Niwari":{"div":"Sagar","DSO":0,"ASO":4,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Sagar":{"div":"Sagar","is_div_office":true,"DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":1},
+  "Ujjain":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Dewas":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Mandsaur":{"div":"Ujjain","DSO":1,"ASO":2,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Ratlam":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Shajapur":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Neemuch":{"div":"Ujjain","DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Agar Malwa":{"div":"Ujjain","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Divisional Office Ujjain":{"div":"Ujjain","is_div_office":true,"DSO":1,"ASO":2,"BLI":3,"DPO":1,"DD":0,"AD":0,"JD":0},
 };
 
 function getExpected(info){
-  if(info.is_hq) return (info.Senior||0)+(info.ASO||0)+(info.BLI||0);
-  return (info.DSO||0)+(info.ASO||0)+(info.BLI||0);
+  return (info.DSO||0)+(info.ASO||0)+(info.BLI||0)+(info.DPO||0)+(info.DD||0)+(info.AD||0)+(info.JD||0);
 }
 
 // ═══════════════════════════════════════════════════
@@ -486,8 +622,8 @@ function buildColMap(headers){
   COL.internet   = find(["इंटरनेट की गुणवत्ता","Internet access quality"]);
   COL.timeAvail  = find(["सीखने के लिए उपलब्ध समय","Time available for learning"]);
   COL.post       = find(["मूल पद","select your post"]);
-  COL.mode       = find(["पसंदीदा प्रशिक्षण","Preferred training mode"]);
-  COL.constraints= find(["बाधाएं","constraints","Main constraints"]);
+  COL.mode      = find(["प्रशिक्षण मोड","Preferred training mode","training mode*"]);
+  COL.constraints= find(["Main constraints to completing","बाधाएं (Main","प्रशिक्षण पूरा"]);
   COL.sw_msoffice= find(["MS Office]","MS Office)"]);
   COL.sw_eoffice = find(["e-Office]","e-Office)"]);
   COL.sw_stata   = find(["STATA/E-Views]"]);
@@ -511,7 +647,8 @@ function normPost(s){
   if(v.includes("सहायक सांख्यिकी")||v.includes("assistant statistical")) return "ASO";
   if(v.includes("जिला सांख्यिकी")||v.includes("district statistical")) return "DSO";
   if(v.includes("सहायक संचालक")||v.includes("assistant director")) return "AD";
-  if(v.includes("उप संचालक")||v.includes("deputy director")||v.includes("जिला योजना")||v.includes("district planning")) return "DD";
+  if(v.includes("जिला योजना")||v.includes("district planning")) return "DPO";
+  if(v.includes("उप संचालक")||v.includes("deputy director")) return "DD";
   if(v.includes("संयुक्त")||v.includes("joint director")) return "JD";
   return "Other";
 }
@@ -573,6 +710,7 @@ const DMAP = {
   "नीमच":"Neemuch","neemuch":"Neemuch",
   "आगर मालवा":"Agar Malwa","आगरमालवा":"Agar Malwa","agar malwa":"Agar Malwa",
   "des headquarters":"DES Headquarters","मुख्यालय":"DES Headquarters","des hq":"DES Headquarters",
+  "des headquarters bhopal":"DES Headquarters","headquarters bhopal":"DES Headquarters","भोपाल मुख्यालय":"DES Headquarters","des headquarter bhopal":"DES Headquarters",
   "divisional office bhopal":"Divisional Office Bhopal","संभागीय कार्यालय भोपाल":"Divisional Office Bhopal",
   "divisional office gwalior":"Divisional Office Gwalior","संभागीय कार्यालय ग्वालियर":"Divisional Office Gwalior",
   "divisional office indore":"Divisional Office Indore","संभागीय कार्यालय इन्दौर":"Divisional Office Indore",
@@ -697,14 +835,30 @@ function getRoleComps(data, postFilter){
   COL.allCompCols.forEach(col=>{
     const vals=rd.map(r=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
     if(!vals.length) return;
-    const m=col.match(/\[([^\]]+)\]/);
-    if(!m) return;
-    // Strip the long Hindi preamble, keep the short English label after the last "-" or "("
-    let label=m[1];
-    const enMatch=label.match(/\(([^()]+)\)\s*$/);
-    if(enMatch) label=enMatch[1].replace(/^[^-]+-\s*/,"").trim();
-    else label=label.replace(/^.*[-–]\s*/,"").trim();
-    label=label.substring(0,55);
+    // Extract bracket content from column header
+    const bracketMatch=col.match(/\[([^\]]+)\]\s*$/);
+    if(!bracketMatch) return;
+    const inner=bracketMatch[1];
+    // Find the LAST English parenthesised section — handles "Hindi (English)"
+    const enMatches=[...inner.matchAll(/\(([^()]+)\)/g)];
+    let label="";
+    for(let i=enMatches.length-1;i>=0;i--){
+      const en=enMatches[i][1].trim();
+      if(/[a-zA-Z]{3,}/.test(en)){
+        // Clean: remove leading "Category - " prefix, remove trailing ) chars
+        label=en.replace(/^[A-Z][A-Za-z &\/]*[A-Za-z] - /,"").trim()
+          .replace(/[)]+$/,"").trim().substring(0,60);
+        if(label.length>=3) break;
+        label="";
+      }
+    }
+    if(!label){
+      // Fallback: take text after last dash, prefer English
+      const parts=inner.split(/[-–]/);
+      const last=parts[parts.length-1].trim().replace(/[()]+/g,"").trim();
+      label=last.substring(0,55);
+    }
+    if(!label||label.length<3) return;
     if(results[label]===undefined) results[label]=vals;
     else results[label].push(...vals);
   });
@@ -720,10 +874,56 @@ function getPriFreq(data, postFilter){
     h.includes("प्राथमिकता")||h.toLowerCase().includes("priority areas")||
     h.toLowerCase().includes("select up to 3")
   );
+
+  // Smart split: split on comma only when the next Devanagari word has " - " 
+  // in its HINDI portion (before any English parenthesis).
+  // This correctly handles items like "संगति, पूर्णता" (comma within one item)
+  // vs "...accuracy),कार्यालय" (comma between items).
+  function smartSplit(val){
+    if(!val||!val.trim()) return [];
+    const parts=val.split(',');
+    const result=[];
+    let current=parts[0]||"";
+    for(let i=1;i<parts.length;i++){
+      const stripped=parts[i].replace(/^\s+/,"");
+      const code=stripped.charCodeAt(0);
+      const isDevStart=code>=0x0900&&code<=0x097F;
+      if(isDevStart){
+        const parenPos=stripped.indexOf('(');
+        const hindiOnly=parenPos>0?stripped.substring(0,parenPos):stripped.substring(0,70);
+        if(hindiOnly.includes(' - ')||hindiOnly.includes(' – ')){
+          result.push(current.trim());
+          current=stripped;
+          continue;
+        }
+      }
+      current+=','+parts[i];
+    }
+    if(current.trim()) result.push(current.trim());
+    return result;
+  }
+
+  function extractLabel(item){
+    const ms=[...item.matchAll(/\(([^()]+)\)/g)];
+    for(let i=ms.length-1;i>=0;i--){
+      const c=ms[i][1].trim();
+      if(/[A-Za-z]{3,}/.test(c)){
+        const cleaned=c.replace(/^[A-Z][A-Za-z &\/]*[A-Za-z] - /,"").trim();
+        return cleaned.substring(0,60);
+      }
+    }
+    const d=item.lastIndexOf(' - ');
+    if(d>0) return item.substring(d+3).replace(/[()]/g,"").trim().substring(0,55);
+    return item.substring(0,50);
+  }
+
   rd.forEach(r=>priCols.forEach(col=>{
-    (r[col]||"").split(/[;,]/).map(s=>s.trim()).filter(Boolean).forEach(item=>{
-      const sh=item.substring(0,55);
-      freq[sh]=(freq[sh]||0)+1;
+    const val=r[col]||"";
+    if(!val.trim()) return;
+    smartSplit(val).forEach(item=>{
+      const label=extractLabel(item);
+      if(label&&label.length>3&&!/^\d+$/.test(label.trim()))
+        freq[label]=(freq[label]||0)+1;
     });
   }));
   return freq;
@@ -754,35 +954,36 @@ function getSwDemand(data){
 }
 
 // Integrated prioritisation (Indore pilot STAT methodology)
+// Exact theme names from Indore Pilot TNA Report Table 6.1 (April 2026)
 const THEMES=[
-  {name:"Survey Operations & Field Data Collection",
-   pKws:["survey","field","interview","schedule","questionnaire","data collection","navigation","क्षेत्र","सर्वेक्षण","साक्षात्कार"],
-   cKws:["Data Collection","Field Operations","Survey Instruments","Record Keeping","survey","field","क्षेत्र","सर्वेक्षण"]},
-  {name:"Data Management, Scrutiny & Quality Assurance",
+  {name:"Survey operations and field data collection",
+   pKws:["survey","field","interview","schedule","questionnaire","data collection","navigation","record keeping","क्षेत्र","सर्वेक्षण"],
+   cKws:["Data Collection","Field Operations","Survey Instruments","Record Keeping","Survey Management","field","survey"]},
+  {name:"Data management, scrutiny and quality assurance",
    pKws:["data management","scrutiny","consistency","completeness","database","validation","cleaning","record","डेटा प्रबंधन","संवीक्षा","सत्यापन"],
-   cKws:["Data Management","Data Scrutiny","Record Keeping","database","validation","डेटा","संवीक्षा","सत्यापन"]},
-  {name:"Digital Tools & Office Systems",
-   pKws:["digital","ms office","e-office","computer application","dak","डिजिटल","ई-ऑफिस","कार्यालय प्रबंधन"],
+   cKws:["Data Management","Data Scrutiny","Record Keeping","database","validation","डेटा","संवीक्षा"]},
+  {name:"Digital tools and office systems",
+   pKws:["digital","ms office","e-office","computer application","dak","डिजिटल","ई-ऑफिस","office management"],
    cKws:["Digital Fluency","Office Management","Computer Applications","e-office","digital","डिजिटल","कार्यालय"]},
-  {name:"Data Analysis, Statistics & Software",
+  {name:"Data analysis, statistics and software",
    pKws:["data analysis","visualization","stata","spss","r/python","software","statistical method","econometric","डेटा विश्लेषण","सांख्यिकीय विधि"],
    cKws:["Data Analytics","Data Analysis","Statistical Methods","Statistical Concepts","Software","Analysis","विश्लेषण","सांख्यिकीय"]},
-  {name:"Statistical, Economic & Planning Concepts",
-   pKws:["economic","gdp","gddp","inflation","public finance","macro","micro","regional planning","आर्थिक","जीडीपी","योजना"],
-   cKws:["Economic Indicators","Economic Concepts","Statistical Concepts","Regional Planning","Public Finance","आर्थिक","लोक वित्त","आर्थिक संकेतक"]},
-  {name:"Coordination, Monitoring & Citizen Interface",
-   pKws:["monitoring","evaluation","m&e","programme monitoring","citizen","coordination","निगरानी","नागरिक","कार्यक्रम"],
-   cKws:["Monitoring","Evaluation","Citizen Centricity","Program Monitoring","District Planning","निगरानी","मूल्यांकन","नागरिक"]},
-  {name:"Reporting, Documentation & Communication",
+  {name:"Statistical, economic and planning concepts",
+   pKws:["economic","gdp","gddp","inflation","public finance","macro","micro","regional planning","आर्थिक","जीडीपी","योजना","economic indicators"],
+   cKws:["Economic Indicators","Economic Concepts","Statistical Concepts","Regional Planning","Public Finance","Economic Analysis","आर्थिक","लोक वित्त"]},
+  {name:"Coordination, monitoring and citizen interface",
+   pKws:["monitoring","evaluation","m&e","programme monitoring","citizen","coordination","निगरानी","नागरिक","कार्यक्रम","project management"],
+   cKws:["Monitoring","Evaluation","Citizen Centricity","Program Monitoring","District Planning","Project Management","निगरानी","मूल्यांकन"]},
+  {name:"Reporting, documentation and communication",
    pKws:["report","writing","communication","documentation","noting","drafting","रिपोर्ट","प्रलेखन","संचार"],
-   cKws:["Report Writing","Office Management","documentation","noting","drafting","रिपोर्ट","प्रस्ताव","ड्राफ्ट"]},
+   cKws:["Report Writing","Office Management","documentation","noting","drafting","रिपोर्ट","Technical Proposal"]},
 ];
 
 function computeThemes(data){
   if(!data.length) return THEMES.map(t=>({...t,pri:0,need:0,combined:0}));
   const priFreq=getPriFreq(data,"all");
   const n=data.length;
-  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+  const posts=["BLI","ASO","DSO","AD","DPO","DD","JD"];
 
   return THEMES.map(t=>{
     // Priority signal
@@ -903,6 +1104,7 @@ function renderAll(){
   renderCompetency(d);
   renderPriorities(d);
   renderSoftware(d);
+  renderComparison();
 }
 
 // ── OVERVIEW ──
@@ -911,23 +1113,26 @@ function renderOverview(d){
   const dvF=document.getElementById("filter-division").value;
   const dlF=document.getElementById("filter-district").value;
   let exp=0;
-  Object.entries(REG).forEach(([loc,info])=>{
-    if(dvF!=="all"&&info.div!==dvF) return;
-    if(dlF!=="all"&&loc!==dlF) return;
-    exp+=getExpected(info);
-  });
+  if(dvF==="all"&&dlF==="all"){
+    // Use verified Excel totals — REG has minor counting errors
+    exp=Object.values(STATE_TOTALS).reduce((a,b)=>a+b,0);
+  } else {
+    Object.entries(REG).forEach(([loc,info])=>{
+      if(dvF!=="all"&&info.div!==dvF) return;
+      if(dlF!=="all"&&loc!==dlF) return;
+      exp+=getExpected(info);
+    });
+  }
   document.getElementById("kpi-total").textContent=n;
   document.getElementById("kpi-expected").textContent=exp;
   document.getElementById("kpi-completion").textContent=pct(n,exp)+"%";
-  const dists=new Set(d.map(r=>normDist(r[COL.district]||"")).filter(Boolean));
-  const divs=new Set([...dists].map(x=>(REG[x]||{}).div).filter(Boolean));
-  document.getElementById("kpi-divisions").textContent=divs.size;
-  document.getElementById("kpi-districts").textContent=dists.size;
+  const tbar=document.getElementById("kpi-total-bar");
+  if(tbar) tbar.style.width=pct(n,exp)+"%";
 
   // Weighted avg competency
-  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+  const allPosts=["BLI","ASO","DSO","AD","DPO","DD","JD"];
   let wSum=0,wN=0;
-  posts.forEach(post=>{
+  allPosts.forEach(post=>{
     const rd=d.filter(r=>normPost(r[COL.post]||"")===post);
     if(!rd.length||!COL.allCompCols) return;
     COL.allCompCols.forEach(col=>{
@@ -935,6 +1140,37 @@ function renderOverview(d){
     });
   });
   document.getElementById("kpi-avg-comp").textContent=wN>0?fmt1(wSum/wN):"—";
+
+  // ── Post KPI Row (6 cards, filter-responsive) ──
+  const pc=cntBy(d,r=>normPost(r[COL.post]||""));
+  const ddExp=getExpPost("DD",dvF,dlF), dpoExp=getExpPost("DPO",dvF,dlF);
+  const ddRec=pc["DD"]||0, dpoRec=pc["DPO"]||0;
+  let ddLabel="DD / DPO", ddRecTotal=ddRec+dpoRec, ddExpTotal=ddExp+dpoExp;
+  if(dvF!=="all"||dlF!=="all"){
+    if(ddExp>0&&dpoExp===0){ddLabel="Deputy Director";ddRecTotal=ddRec;ddExpTotal=ddExp;}
+    else if(dpoExp>0&&ddExp===0){ddLabel="Dist. Planning Officer";ddRecTotal=dpoRec;ddExpTotal=dpoExp;}
+  }
+  const postCards=[
+    {label:"BLI",color:"blue",  rec:pc["BLI"]||0,exp:getExpPost("BLI",dvF,dlF)},
+    {label:"ASO",color:"green", rec:pc["ASO"]||0,exp:getExpPost("ASO",dvF,dlF)},
+    {label:"DSO",color:"amber", rec:pc["DSO"]||0,exp:getExpPost("DSO",dvF,dlF)},
+    {label:"Asst. Director",color:"purple",rec:pc["AD"]||0,exp:getExpPost("AD",dvF,dlF)},
+    {label:ddLabel,color:"slate",rec:ddRecTotal,exp:ddExpTotal},
+    {label:"Joint Director",color:"red",rec:pc["JD"]||0,exp:getExpPost("JD",dvF,dlF)},
+  ];
+  const pkpiEl=document.getElementById("post-kpi-row");
+  if(pkpiEl){
+    pkpiEl.innerHTML=postCards.map(c=>{
+      const p=pct(c.rec,c.exp);
+      const bc=p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";
+      return`<div class="kpi-card ${c.color}">
+        <div class="kpi-label">${c.label}</div>
+        <div class="kpi-value">${c.rec}</div>
+        <div class="kpi-sub">${c.rec} of ${c.exp} posts (${p}%)</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${p}%;background:${bc}"></div></div>
+      </div>`;
+    }).join("");
+  }
 
   // Division bars
   const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
@@ -946,13 +1182,11 @@ function renderOverview(d){
   renderBars("div-coverage-chart",divs7.map(dv=>[dv+" "+pct(dRec[dv],dExp[dv])+"% ("+dRec[dv]+"/"+dExp[dv]+")",dRec[dv]]),
     Math.max(...divs7.map(dv=>dExp[dv]),1),(v,m)=>{const p=pct(v,m);return p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";});
 
-  const pf=getPriFreq(d,"all");
-  const t8=topN(pf,8);
+  const pf=getPriFreq(d,"all");const t8=topN(pf,8);
   renderBars("overview-priorities-chart",t8,Math.max(...t8.map(x=>x[1]),1),
     (v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";});
 
-  const pc=cntBy(d,r=>normPost(r[COL.post]||""));
-  renderBars("overview-post-chart",[["BLI",pc.BLI||0],["ASO",pc.ASO||0],["DSO",pc.DSO||0],["AD",pc.AD||0],["DD/DPO",pc.DD||0],["JD",pc.JD||0]],
+  renderBars("overview-post-chart",[["BLI",pc.BLI||0],["ASO",pc.ASO||0],["DSO",pc.DSO||0],["AD",pc.AD||0],["DD/DPO",ddRecTotal],["JD",pc.JD||0]],
     Math.max(...Object.values(pc),1));
 
   const sw=getSwDemand(d).slice(0,6);
@@ -1066,21 +1300,34 @@ function renderProfile(d){
   }));
   mc("profile-mode-chart",cntBy(d,r=>{
     const v=(r[COL.mode]||"").toLowerCase();
+    if(!v||v==="not specified") return "Not specified";
     if(v.includes("blended")||v.includes("मिश्रित")) return "Blended";
-    if(v.includes("classroom")||v.includes("in-person")||v.includes("कक्षा")) return "In-person / Classroom";
-    if(v.includes("online")||v.includes("ऑनलाइन")) return "Online / Self-paced";
+    if(v.includes("classroom")||v.includes("in-person")||v.includes("कक्षा")||v.includes("इन-पर्सन")) return "In-person / Classroom";
+    if(v.includes("online")||v.includes("ऑनलाइन")||v.includes("self-paced")||v.includes("स्व-गति")) return "Online / Self-paced";
+    // Try to extract English from Hindi (English) format
+    const en=v.match(/\(([^)]+)\)/);
+    if(en) return en[1].replace(/^[A-Z][A-Za-z &\/]*[A-Za-z] - /,"").trim().substring(0,30);
     return v.substring(0,25)||"Not specified";
   }));
+  // Constraints: same fix — split on comma only before Devanagari
   const cf={};
-  d.forEach(r=>(r[COL.constraints]||"").split(/[;,]/).map(s=>s.trim()).filter(Boolean).forEach(c=>{
-    const sh=c.substring(0,40);cf[sh]=(cf[sh]||0)+1;
-  }));
+  d.forEach(r=>{
+    const val=r[COL.constraints]||"";
+    if(!val.trim()) return;
+    const items=val.split(/,\s*(?=[^\u0000-\u00FF])/).map(s=>s.trim()).filter(Boolean);
+    items.forEach(c=>{
+      // Extract English label if present
+      const en=c.match(/\(([^()]+)\)/);
+      const label=en?en[1].trim().substring(0,45):c.substring(0,45);
+      if(label) cf[label]=(cf[label]||0)+1;
+    });
+  });
   mc("profile-constraints-chart",cf);
 }
 
 // ── COMPETENCY ──
 function renderCompetency(d){
-  const posts=["BLI","ASO","DSO","AD","DD","JD"];
+  const posts=["BLI","ASO","DSO","AD","DPO","DD","JD"];
   let all=[];
   posts.forEach(post=>{
     const rd=d.filter(r=>normPost(r[COL.post]||"")===post);
@@ -1109,10 +1356,27 @@ function renderCompetency(d){
     cols.forEach(col=>{
       const vals=rows.map(r=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
       if(!vals.length) return;
-      const m=col.match(/\(([^()]+)\)\s*$/);
-      let label=m?m[1].replace(/^[^-]+-\s*/,"").trim():col.substring(col.lastIndexOf("[")+1,col.lastIndexOf("]")).substring(0,50);
-      label=label.substring(0,55);
-      res[label]=avg(vals);
+      const bracketMatch=col.match(/\[([^\]]+)\]\s*$/);
+      let label="";
+      if(bracketMatch){
+        const inner=bracketMatch[1];
+        const enMatches=[...inner.matchAll(/\(([^()]+)\)/g)];
+        for(let i=enMatches.length-1;i>=0;i--){
+          const en=enMatches[i][1].trim();
+          if(/[a-zA-Z]{3,}/.test(en)){
+            label=en.replace(/^[A-Z][A-Za-z &\/]*[A-Za-z] - /,"").trim()
+              .replace(/[)]+$/,"").trim().substring(0,60);
+            if(label.length>=3) break;
+            label="";
+          }
+        }
+        if(!label){
+          const parts=inner.split(/[-–]/);
+          label=parts[parts.length-1].trim().replace(/[()]+/g,"").trim().substring(0,55);
+        }
+      }
+      if(!label||label.length<3) label=col.substring(col.lastIndexOf("[")+1,Math.min(col.length,col.lastIndexOf("[")+45));
+      if(label&&label.length>=3) res[label]=avg(vals);
     });
     return Object.entries(res).sort((a,b)=>a[1]-b[1]);
   }
@@ -1232,7 +1496,7 @@ function renderSoftware(d){
   // By post
   const postEl=document.getElementById("sw-post-chart");
   if(postEl){
-    const postLines=["BLI","ASO","DSO","AD","DD","JD"].map(post=>{
+    const postLines=["BLI","ASO","DSO","AD","DPO","DD","JD"].map(post=>{
       const pd=d.filter(r=>normPost(r[COL.post]||"")===post);
       if(!pd.length) return "";
       const psw=getSwDemand(pd).filter(s=>s.total>0);
@@ -1255,6 +1519,143 @@ function renderSoftware(d){
     const dsw=getSwDemand(dd).filter(s=>s.total>0).slice(0,3).map(s=>s.key).join(", ");
     return [dv+": "+(dsw||"No data"),dd.length];
   }),Math.max(...divs7.map(dv=>d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length),1));
+  renderHeatmap(RAW);
+}
+
+// ── HEATMAP ──
+function renderHeatmap(data){
+  const el=document.getElementById("heatmap-container");if(!el)return;
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const shortName=t=>t.name.split(" ").slice(0,3).join(" ")+"…";
+  let html='<table class="heatmap-tbl"><thead><tr><th style="text-align:left;padding-left:10px">Division</th>'+
+    THEMES.map(t=>`<th title="${t.name}">${shortName(t)}</th>`).join("")+'<th>n</th></tr></thead><tbody>';
+  divs7.forEach(dv=>{
+    const dvData=data.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const themes=computeThemes(dvData);const n=dvData.length;
+    html+=`<tr><td class="row-label">${dv}</td>`;
+    THEMES.forEach(th=>{
+      const found=themes.find(t=>t.name===th.name)||{combined:0};
+      const c=found.combined;
+      const cls=n===0?"hm-none":c>=50?"hm-high":c>=35?"hm-mid":"hm-low";
+      html+=`<td class="${cls}" title="${th.name}: ${c}">${n>0?c:"—"}</td>`;
+    });
+    html+=`<td style="font-weight:600;color:var(--text)">${n}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+// ── DIVISION COMPARISON ──
+function renderComparison(){
+  const divA=document.getElementById("cmp-div-a")?.value||"";
+  const divB=document.getElementById("cmp-div-b")?.value||"";
+  const titleA=document.getElementById("cmp-title-a");
+  const titleB=document.getElementById("cmp-title-b");
+  if(titleA) titleA.textContent=divA||"—";
+  if(titleB) titleB.textContent=divB||"—";
+  const el=document.getElementById("cmp-content");if(!el)return;
+  if(!divA||!divB){el.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>Select two divisions above to compare</div>';return;}
+  if(divA===divB){el.innerHTML='<div class="no-data"><div class="no-data-icon">⚠</div>Please select two different divisions</div>';return;}
+
+  const dataA=RAW.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===divA);
+  const dataB=RAW.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===divB);
+
+  function divStats(data,dv){
+    const exp=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
+    const n=data.length;
+    let wS=0,wN=0;
+    ["BLI","ASO","DSO","AD","DPO","DD","JD"].forEach(post=>{
+      const rd=data.filter(r=>normPost(r[COL.post]||"")===post);
+      if(!rd.length||!COL.allCompCols)return;
+      COL.allCompCols.forEach(col=>rd.forEach(r=>{const v=parseFloat(r[col]);if(!isNaN(v)&&v>=0&&v<=4){wS+=v;wN++;}}));
+    });
+    const ca=wN>0?wS/wN:0;
+    const themes=computeThemes(data);
+    const sw=getSwDemand(data);
+    const pf=getPriFreq(data,"all");const topPri=topN(pf,1)[0];
+    return{n,exp,cov:pct(n,exp),compAvg:fmt1(ca),topTheme:themes[0]?themes[0].name:"—",topSw:sw[0]?sw[0].key:"—",topPri:topPri?topPri[0].substring(0,45):"—",themes};
+  }
+
+  const sA=divStats(dataA,divA),sB=divStats(dataB,divB);
+
+  function donutSVG(pctVal,color){
+    const r=36,cx=50,cy=50,circ=2*Math.PI*r;
+    const dash=circ*pctVal/100;
+    return`<svg width="100" height="100" viewBox="0 0 100 100">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="11"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="11"
+        stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round"/>
+      <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--text)">${pctVal}%</text>
+      <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="9" fill="var(--text-dim)">Coverage</text>
+    </svg>`;
+  }
+
+  function statCard(title,s,color,small){
+    return`<div class="cmp-card">
+      <div style="font-size:15px;font-weight:700;color:${color};margin-bottom:10px;font-family:'EB Garamond',serif">${title}</div>
+      <div class="cmp-donut">${donutSVG(s.cov,color)}</div>
+      <div class="cmp-stat"><span class="cmp-stat-label">Responses received</span><span class="cmp-stat-val">${s.n} of ${s.exp}</span></div>
+      <div class="cmp-stat"><span class="cmp-stat-label">Avg competency score</span><span class="cmp-stat-val">${s.compAvg} / 4</span></div>
+      <div class="cmp-stat"><span class="cmp-stat-label">Top priority theme</span><span class="cmp-stat-val" style="font-size:11px">${s.topTheme.substring(0,45)}</span></div>
+      <div class="cmp-stat"><span class="cmp-stat-label">Top software demand</span><span class="cmp-stat-val">${s.topSw}</span></div>
+      <div class="cmp-stat"><span class="cmp-stat-label">Top stated priority</span><span class="cmp-stat-val" style="font-size:11px">${s.topPri}</span></div>
+      ${small?'<div style="font-size:10.5px;color:var(--accent-amber);margin-top:8px">⚠ Small sample — treat as indicative only</div>':""}
+    </div>`;
+  }
+
+  const outcomes=[];
+  if(sA.cov!==sB.cov){
+    const higher=sA.cov>sB.cov?divA:divB,lower=sA.cov>sB.cov?divB:divA;
+    const hPct=sA.cov>sB.cov?sA.cov:sB.cov,lPct=sA.cov>sB.cov?sB.cov:sA.cov;
+    outcomes.push(`${higher} has higher survey participation (${hPct}% vs ${lPct}%). Follow up with ${lower} to improve coverage before drawing firm conclusions.`);
+  }
+  if(sA.compAvg!==sB.compAvg){
+    const higher=parseFloat(sA.compAvg)>parseFloat(sB.compAvg)?divA:divB;
+    const lower=higher===divA?divB:divA;
+    const hScore=higher===divA?sA.compAvg:sB.compAvg,lScore=higher===divA?sB.compAvg:sA.compAvg;
+    outcomes.push(`${higher} reports higher average competency (${hScore}) vs ${lower} (${lScore}). ${lower} may require more intensive capacity building.`);
+  }
+  if(sA.topTheme===sB.topTheme) outcomes.push(`Both divisions share the same top priority theme: "${sA.topTheme}". This signals a common statewide training need that should be addressed in the first cycle.`);
+  else outcomes.push(`Divergent top themes: ${divA} → "${sA.topTheme.substring(0,40)}", ${divB} → "${sB.topTheme.substring(0,40)}". Division-specific workshop designs may be warranted.`);
+  if(sA.topSw!==sB.topSw) outcomes.push(`Different top software demands: ${divA} → ${sA.topSw}, ${divB} → ${sB.topSw}. Consider separate software training schedules per division.`);
+  if(dataA.length<5||dataB.length<5) outcomes.push(`One or both divisions have very few responses (${divA}: ${sA.n}, ${divB}: ${sB.n}). Treat all conclusions as indicative only.`);
+
+  let themeHtml='<table style="width:100%;border-collapse:collapse;font-size:11.5px"><thead><tr><th style="background:var(--india-navy);color:#fff;padding:8px 10px;text-align:left">Theme</th><th style="background:var(--india-navy);color:#fff;padding:8px 10px;text-align:center">'+divA+'</th><th style="background:var(--india-navy);color:#fff;padding:8px 10px;text-align:center">'+divB+'</th><th style="background:var(--india-navy);color:#fff;padding:8px 10px;text-align:center">Diff</th></tr></thead><tbody>';
+  THEMES.forEach(th=>{
+    const tA=sA.themes.find(t=>t.name===th.name)||{combined:0};
+    const tB=sB.themes.find(t=>t.name===th.name)||{combined:0};
+    const diff=tA.combined-tB.combined;
+    const dc=diff>10?"#b91c1c":diff<-10?"#1a7a4a":"var(--text-dim)";
+    const rb=Math.max(tA.combined,tB.combined)>=50?"rgba(185,28,28,.06)":Math.max(tA.combined,tB.combined)>=35?"rgba(180,83,9,.04)":"";
+    themeHtml+=`<tr style="background:${rb}">
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border-light);color:var(--text-mid)">${th.name}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border-light);text-align:center;font-weight:700;color:var(--accent-blue)">${sA.n>0?tA.combined:"—"}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border-light);text-align:center;font-weight:700;color:var(--saffron)">${sB.n>0?tB.combined:"—"}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border-light);text-align:center;font-weight:700;color:${dc}">${sA.n>0&&sB.n>0?(diff>0?"+":"")+diff:"—"}</td>
+    </tr>`;
+  });
+  themeHtml+='</tbody></table>';
+
+  el.innerHTML=`
+    <div class="cmp-grid">${statCard(divA,sA,"var(--accent-blue)",sA.n<5)}${statCard(divB,sB,"var(--saffron)",sB.n<5)}</div>
+    <div class="cmp-outcomes">
+      <h3>📊 Comparison Outcomes</h3>
+      ${outcomes.map(o=>`<div class="cmp-outcome-item">${o}</div>`).join("")}
+    </div>
+    <div class="card">
+      <div class="section-title">Theme-by-Theme Combined Score Comparison</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px">Higher = greater training urgency. ≥50 = Immediate (Phase 1A), 35–49 = Phase 1B.</p>
+      ${themeHtml}
+    </div>`;
+}
+
+function printComparison(){
+  const a=document.getElementById("cmp-div-a")?.value;
+  const b=document.getElementById("cmp-div-b")?.value;
+  if(!a||!b){alert("Please select both divisions before downloading.");return;}
+  document.title=`TNA Comparison — ${a} vs ${b} — DES MP`;
+  window.print();
+  setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},2000);
 }
 
 // ── UI ──
@@ -1262,7 +1663,7 @@ function switchTab(name,btn){
   document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+name).classList.add("active");
-  if(btn) btn.classList.add("active");
+  if(btn)btn.classList.add("active");
 }
 
 const ttEl=document.getElementById("tooltip");
