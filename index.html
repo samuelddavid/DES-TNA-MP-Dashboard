@@ -1086,10 +1086,8 @@ function renderFlags(data, audit){
     el.innerHTML+=`<div class="flag ${type}"><span class="flag-icon">${icon}</span><span>${msg}</span></div>`;
   };
 
-  // Data quality audit banner
-  if(audit&&audit.total>0){
-    add("warn","🔍",`Data Quality: ${audit.hi} response(s) flagged with HIGH severity issues (straight-lining, location mismatch, missing data), ${audit.med} with MEDIUM issues. See Response Coverage tab for row-by-row details.`);
-  }
+  // NOTE: Quality audit banner removed from display per user request.
+  // Audit still runs internally and shows badges in the Coverage table.
 
   // 1. Small / insufficient sample
   if(n===0){
@@ -1284,38 +1282,16 @@ function renderCoverage(d,audit){
   document.getElementById("cov-pct").textContent=pct(d.length,totExp)+"%";
   document.getElementById("cov-zero").textContent=zeros;
 
-  // Build quality summary per location from audit
-  const locQuality={};
-  if(audit){
-    RAW.forEach((r,i)=>{
-      if(!QUALITY_MAP[i]) return;
-      const loc=normDist(r[COL.district]||"");
-      if(!locQuality[loc]) locQuality[loc]={hi:0,med:0,msgs:[]};
-      QUALITY_MAP[i].forEach(iss=>{
-        if(iss.sev==="HIGH") locQuality[loc].hi++;
-        else locQuality[loc].med++;
-        locQuality[loc].msgs.push(iss.msg);
-      });
-    });
-  }
-
   document.getElementById("coverage-tbody").innerHTML=rows.map(r=>{
     const bc=r.covPct>=75?"#1a7a4a":r.covPct>=40?"#e07b30":"#b91c1c";
     const sc=r.covPct>=75?"high":r.covPct>=40?"mid":"low";
     const sl=r.covPct>=75?"Good":r.covPct>=40?"Partial":"Low";
     const loctag=r.is_hq?'<span class="hq-tag">HQ</span>':r.is_div?'<span class="div-tag">DIV</span>':"District";
     const sm=r.rec>0&&r.rec<5?'<span class="badge small" title="n<5 — indicative only">n&lt;5</span>':"";
-    // Quality badge
-    const q=locQuality[r.loc];
-    const qBadge=q
-      ?q.hi>0
-        ?`<span class="badge low" title="${q.msgs.join(' | ')}" style="cursor:help;margin-left:4px">🔴 ${q.hi} flag${q.hi>1?"s":""}</span>`
-        :`<span class="badge mid" title="${q.msgs.join(' | ')}" style="cursor:help;margin-left:4px">🟡 review</span>`
-      :"";
     return `<tr>
       <td><strong>${r.loc}</strong>${r.is_hq?'<span class="hq-tag" style="margin-left:5px">HQ</span>':r.is_div?'<span class="div-tag" style="margin-left:5px">DIV</span>':""}</td>
       <td>${r.div}</td><td>${loctag}</td><td>${r.exp}</td>
-      <td><strong>${r.rec}</strong> ${sm}${qBadge}</td><td>${r.pend}</td>
+      <td><strong>${r.rec}</strong> ${sm}</td><td>${r.pend}</td>
       <td><div class="cov-bar"><div class="cov-track"><div class="cov-fill" style="width:${r.covPct}%;background:${bc}"></div></div>
         <span style="font-size:11px;font-weight:600;color:${bc}">${r.covPct}%</span></div></td>
       <td><span class="badge ${sc}">${sl}</span></td>
