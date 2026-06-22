@@ -498,12 +498,12 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 
 <footer>
   <p><strong>DES–PIF MoU</strong> signed 21 May 2025 · GIZ India GSDP/GDDP Framework Project · Indore Division Pilot: April 2026 · STAT Framework (UNSD/GIST)</p>
-  <p>Developed by <strong>Samuel D. David</strong> · <strong>Pahlé India Foundation (PIF), New Delhi</strong> · Data: Google Forms → Sheets (Live · Auto-refreshes every 3 min)</p>
+  <p>Developed by <strong>Samuel D. David</strong> · <strong>Pahlé India Foundation (PIF), New Delhi</strong> · Data: Google Forms → Sheets (Live · Auto-refreshes every 10 min)</p>
 </footer>
 
 <script>
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1fu274JL-ybQJUc0Xgyeu4L0FgNm0SG2dowlOk5U_nbY/export?format=csv&gid=86946345";
-const REFRESH_MS = 3 * 60 * 1000;
+const REFRESH_MS = 10 * 60 * 1000; // 10 minutes
 
 // ── Language & Theme toggles ──
 let LANG = "en";
@@ -622,8 +622,8 @@ function buildColMap(headers){
   COL.internet   = find(["इंटरनेट की गुणवत्ता","Internet access quality"]);
   COL.timeAvail  = find(["सीखने के लिए उपलब्ध समय","Time available for learning"]);
   COL.post       = find(["मूल पद","select your post"]);
-  COL.mode      = find(["प्रशिक्षण मोड","Preferred training mode","training mode*"]);
-  COL.constraints= find(["Main constraints to completing","बाधाएं (Main","प्रशिक्षण पूरा"]);
+  COL.mode      = find(["पसंदीदा प्रशिक्षण मोड","प्रशिक्षण मोड","Preferred training mode","training mode"]);
+  COL.constraints= find(["प्रशिक्षण पूरा करने में","Main constraints to completing","बाधाएं (Main","मुख्य बाधाएं"]);
   COL.sw_msoffice= find(["MS Office]","MS Office)"]);
   COL.sw_eoffice = find(["e-Office]","e-Office)"]);
   COL.sw_stata   = find(["STATA/E-Views]"]);
@@ -749,6 +749,68 @@ function normDist(s){
 // STATE
 // ═══════════════════════════════════════════════════
 let RAW=[], FILT=[];
+
+
+// ═══════════════════════════════════════════════════
+// DATA QUALITY AUDIT
+// 7 statistical/logical checks per response row
+// ═══════════════════════════════════════════════════
+function auditRow(r){
+  const issues=[];
+  const dist=normDist(r[COL.district]||"");
+  const divVal=(r[COL.division]||"").toLowerCase();
+
+  // 1. Missing critical fields
+  if(!r[COL.post]||!r[COL.post].trim())
+    issues.push({sev:"HIGH",msg:"Missing post/designation"});
+  if(!r[COL.district]||!r[COL.district].trim())
+    issues.push({sev:"HIGH",msg:"Missing district/location"});
+
+  // 2. Unrecognised location
+  if(dist&&!REG[dist]&&dist.length>2&&dist!=="Other")
+    issues.push({sev:"HIGH",msg:`Unknown location: "${dist.substring(0,25)}"`});
+
+  // 3. Division–district mismatch
+  if(dist&&REG[dist]){
+    const regDiv=REG[dist].div.toLowerCase();
+    const dmap2={"bhopal":["bhopal","भोपाल"],"gwalior":["gwalior","ग्वालियर"],"indore":["indore","इंदौर","इन्दौर"],"jabalpur":["jabalpur","जबलपुर"],"rewa":["rewa","रीवा"],"sagar":["sagar","सागर"],"ujjain":["ujjain","उज्जैन"]};
+    let formDiv="";
+    for(const [k,kws] of Object.entries(dmap2)){if(kws.some(kw=>divVal.includes(kw))){formDiv=k;break;}}
+    if(formDiv&&formDiv!==regDiv)
+      issues.push({sev:"HIGH",msg:`Division–district mismatch (form: ${formDiv}, registry: ${regDiv})`});
+  }
+
+  // 4. Straight-lining (all comp scores identical)
+  if(COL.allCompCols){
+    const scores=COL.allCompCols.map(col=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+    if(scores.length>=5&&new Set(scores).size===1)
+      issues.push({sev:"HIGH",msg:`Straight-lining: all ${scores.length} scores = ${scores[0]}`});
+    // 5. All-zero rating
+    if(scores.length>=5&&scores.every(s=>s===0))
+      issues.push({sev:"MEDIUM",msg:"All-zero competency ratings"});
+    // 6. Expert rating for very junior staff
+    const svc=r[COL.service]||"";
+    const junior=svc.includes("5 वर्ष से कम")||svc.toLowerCase().includes("less than 5");
+    if(junior&&scores.length>=5&&avg(scores)>3.5)
+      issues.push({sev:"MEDIUM",msg:`High avg score (${avg(scores).toFixed(1)}) for <5yr service`});
+  }
+
+  return issues;
+}
+
+let QUALITY_MAP={};
+function runQualityAudit(data){
+  QUALITY_MAP={};
+  let hi=0,med=0;
+  data.forEach((r,i)=>{
+    const iss=auditRow(r);
+    if(iss.length){
+      QUALITY_MAP[i]=iss;
+      if(iss.some(x=>x.sev==="HIGH")) hi++; else med++;
+    }
+  });
+  return{hi,med,total:hi+med};
+}
 
 // ═══════════════════════════════════════════════════
 // DATA LOADING
@@ -1014,7 +1076,7 @@ function computeThemes(data){
 // ═══════════════════════════════════════════════════
 // FLAGS — analytical only (3 types)
 // ═══════════════════════════════════════════════════
-function renderFlags(data){
+function renderFlags(data, audit){
   const el=document.getElementById("global-flags");
   el.innerHTML="";
   const n=data.length;
@@ -1024,13 +1086,18 @@ function renderFlags(data){
     el.innerHTML+=`<div class="flag ${type}"><span class="flag-icon">${icon}</span><span>${msg}</span></div>`;
   };
 
+  // Data quality audit banner
+  if(audit&&audit.total>0){
+    add("warn","🔍",`Data Quality: ${audit.hi} response(s) flagged with HIGH severity issues (straight-lining, location mismatch, missing data), ${audit.med} with MEDIUM issues. See Response Coverage tab for row-by-row details.`);
+  }
+
   // 1. Small / insufficient sample
   if(n===0){
     add("small-n","⚠","No responses loaded yet. The dashboard will update automatically when responses are received.");
     return;
   }
   if(n<5){
-    add("small-n","⚠",`Very small sample (n=${n}) — results are indicative only and should not be treated as conclusive. Minimum recommended is 5 responses per location.`);
+    add("small-n","⚠",`Very small sample (n=${n}) — results are indicative only and should not be treated as conclusive.`);
   } else if(n<10&&distF!=="all"){
     add("small-n","⚠",`Low sample for ${distF} (n=${n}) — treat patterns as directional signals, not firm conclusions.`);
   }
@@ -1040,7 +1107,7 @@ function renderFlags(data){
     const posts=cntBy(data,r=>normPost(r[COL.post]||""));
     const [topPost,topN]=Object.entries(posts).sort((a,b)=>b[1]-a[1])[0]||[];
     if(topPost&&pct(topN,n)>80){
-      add("info","ℹ",`${pct(topN,n)}% of responses are from ${topPost} staff. Competency findings primarily reflect this cadre. Other post groups have limited representation in current data.`);
+      add("info","ℹ",`${pct(topN,n)}% of responses are from ${topPost} staff. Competency findings primarily reflect this cadre.`);
     }
   }
 
@@ -1049,7 +1116,7 @@ function renderFlags(data){
     const responded=new Set(data.map(r=>normDist(r[COL.district]||"")));
     const zeros=Object.keys(REG).filter(loc=>getExpected(REG[loc])>0&&!responded.has(loc)).length;
     if(zeros>0){
-      add("warn","⚠",`${zeros} location(s) have not responded yet. Coverage analysis is incomplete. Follow up with non-responding districts and offices to ensure representative statewide data.`);
+      add("warn","⚠",`${zeros} location(s) have not responded yet. Coverage analysis is incomplete.`);
     }
   }
 }
@@ -1097,9 +1164,10 @@ function renderAll(){
   const d=FILT;
   document.getElementById("header-date").textContent=
     new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
-  renderFlags(d);
+  const audit=runQualityAudit(RAW);
+  renderFlags(d,audit);
   renderOverview(d);
-  renderCoverage(d);
+  renderCoverage(d,audit);
   renderProfile(d);
   renderCompetency(d);
   renderPriorities(d);
@@ -1195,7 +1263,7 @@ function renderOverview(d){
 }
 
 // ── COVERAGE ──
-function renderCoverage(d){
+function renderCoverage(d,audit){
   const dvF=document.getElementById("filter-division").value;
   const dlF=document.getElementById("filter-district").value;
   let totExp=0,zeros=0;
@@ -1216,16 +1284,38 @@ function renderCoverage(d){
   document.getElementById("cov-pct").textContent=pct(d.length,totExp)+"%";
   document.getElementById("cov-zero").textContent=zeros;
 
+  // Build quality summary per location from audit
+  const locQuality={};
+  if(audit){
+    RAW.forEach((r,i)=>{
+      if(!QUALITY_MAP[i]) return;
+      const loc=normDist(r[COL.district]||"");
+      if(!locQuality[loc]) locQuality[loc]={hi:0,med:0,msgs:[]};
+      QUALITY_MAP[i].forEach(iss=>{
+        if(iss.sev==="HIGH") locQuality[loc].hi++;
+        else locQuality[loc].med++;
+        locQuality[loc].msgs.push(iss.msg);
+      });
+    });
+  }
+
   document.getElementById("coverage-tbody").innerHTML=rows.map(r=>{
     const bc=r.covPct>=75?"#1a7a4a":r.covPct>=40?"#e07b30":"#b91c1c";
     const sc=r.covPct>=75?"high":r.covPct>=40?"mid":"low";
     const sl=r.covPct>=75?"Good":r.covPct>=40?"Partial":"Low";
     const loctag=r.is_hq?'<span class="hq-tag">HQ</span>':r.is_div?'<span class="div-tag">DIV</span>':"District";
     const sm=r.rec>0&&r.rec<5?'<span class="badge small" title="n<5 — indicative only">n&lt;5</span>':"";
+    // Quality badge
+    const q=locQuality[r.loc];
+    const qBadge=q
+      ?q.hi>0
+        ?`<span class="badge low" title="${q.msgs.join(' | ')}" style="cursor:help;margin-left:4px">🔴 ${q.hi} flag${q.hi>1?"s":""}</span>`
+        :`<span class="badge mid" title="${q.msgs.join(' | ')}" style="cursor:help;margin-left:4px">🟡 review</span>`
+      :"";
     return `<tr>
       <td><strong>${r.loc}</strong>${r.is_hq?'<span class="hq-tag" style="margin-left:5px">HQ</span>':r.is_div?'<span class="div-tag" style="margin-left:5px">DIV</span>':""}</td>
       <td>${r.div}</td><td>${loctag}</td><td>${r.exp}</td>
-      <td><strong>${r.rec}</strong> ${sm}</td><td>${r.pend}</td>
+      <td><strong>${r.rec}</strong> ${sm}${qBadge}</td><td>${r.pend}</td>
       <td><div class="cov-bar"><div class="cov-track"><div class="cov-fill" style="width:${r.covPct}%;background:${bc}"></div></div>
         <span style="font-size:11px;font-weight:600;color:${bc}">${r.covPct}%</span></div></td>
       <td><span class="badge ${sc}">${sl}</span></td>
@@ -1300,26 +1390,35 @@ function renderProfile(d){
   }));
   mc("profile-mode-chart",cntBy(d,r=>{
     const v=(r[COL.mode]||"").toLowerCase();
-    if(!v||v==="not specified") return "Not specified";
-    if(v.includes("blended")||v.includes("मिश्रित")) return "Blended";
-    if(v.includes("classroom")||v.includes("in-person")||v.includes("कक्षा")||v.includes("इन-पर्सन")) return "In-person / Classroom";
-    if(v.includes("online")||v.includes("ऑनलाइन")||v.includes("self-paced")||v.includes("स्व-गति")) return "Online / Self-paced";
-    // Try to extract English from Hindi (English) format
+    if(!v||v.trim()==="") return "Not specified";
+    if(v.includes("blended")||v.includes("मिश्रित")||v.includes("online + classroom")||v.includes("online+classroom")) return "Blended (online + classroom)";
+    if(v.includes("traditional")||v.includes("classroom")||v.includes("in-person")||v.includes("कक्षा")||v.includes("पारंपरिक")) return "Traditional classroom";
+    if(v.includes("online")||v.includes("ऑनलाइन")||v.includes("self-paced")||v.includes("स्व-गति")||v.includes("mobile-friendly")||v.includes("मोबाइल")) return "Online self-paced (mobile-friendly)";
+    // Fallback: extract English from parens
     const en=v.match(/\(([^)]+)\)/);
-    if(en) return en[1].replace(/^[A-Z][A-Za-z &\/]*[A-Za-z] - /,"").trim().substring(0,30);
-    return v.substring(0,25)||"Not specified";
+    if(en&&en[1].length>3) return en[1].trim().substring(0,40);
+    return v.substring(0,30)||"Not specified";
   }));
-  // Constraints: same fix — split on comma only before Devanagari
+
+  // Constraints: each option is "Hindi / text (English text)"
+  // Multiple selections separated by ", " — split on comma + Devanagari start
+  // Constraint options use "/" not " - " so we need simple Devanagari-start split
   const cf={};
   d.forEach(r=>{
     const val=r[COL.constraints]||"";
     if(!val.trim()) return;
-    const items=val.split(/,\s*(?=[^\u0000-\u00FF])/).map(s=>s.trim()).filter(Boolean);
+    // Split on comma when followed by a Devanagari character (start of new option)
+    const items=val.split(/,\s*(?=[\u0900-\u097F])/).map(s=>s.trim()).filter(Boolean);
     items.forEach(c=>{
-      // Extract English label if present
-      const en=c.match(/\(([^()]+)\)/);
-      const label=en?en[1].trim().substring(0,45):c.substring(0,45);
-      if(label) cf[label]=(cf[label]||0)+1;
+      // Extract English label from last (English text) portion
+      const enMatches=[...c.matchAll(/\(([^()]+)\)/g)];
+      let label="";
+      for(let i=enMatches.length-1;i>=0;i--){
+        const en=enMatches[i][1].trim();
+        if(/[A-Za-z]{4,}/.test(en)){label=en.substring(0,50);break;}
+      }
+      if(!label) label=c.substring(0,45);
+      if(label&&label.length>3) cf[label]=(cf[label]||0)+1;
     });
   });
   mc("profile-constraints-chart",cf);
@@ -1348,11 +1447,15 @@ function renderCompetency(d){
 
   // BLI split functional vs domain
   const bliD=d.filter(r=>normPost(r[COL.post]||"")==="BLI");
-  const bliFuncCols=(COL.allCompCols||[]).filter(h=>h.includes("कार्यात्मक दक्षताएँ"));
-  const bliDomCols=(COL.allCompCols||[]).filter(h=>h.includes("विषय-क्षेत्र (डोमेन)"));
+  const bliFuncCols=(COL.allCompCols||[]).filter(h=>
+    h.includes("कार्यात्मक दक्षताएँ")||h.toLowerCase().includes("functional competenc")
+  );
+  const bliDomCols=(COL.allCompCols||[]).filter(h=>
+    h.includes("विषय-क्षेत्र (डोमेन)")||h.toLowerCase().includes("domain competenc")
+  );
 
   function toItems(cols,rows){
-    const res={};
+    const res={};  // label → [scores] — accumulate, don't overwrite
     cols.forEach(col=>{
       const vals=rows.map(r=>parseFloat(r[col])).filter(v=>!isNaN(v)&&v>=0&&v<=4);
       if(!vals.length) return;
@@ -1376,9 +1479,12 @@ function renderCompetency(d){
         }
       }
       if(!label||label.length<3) label=col.substring(col.lastIndexOf("[")+1,Math.min(col.length,col.lastIndexOf("[")+45));
-      if(label&&label.length>=3) res[label]=avg(vals);
+      if(label&&label.length>=3){
+        if(!res[label]) res[label]=[];
+        res[label].push(...vals);
+      }
     });
-    return Object.entries(res).sort((a,b)=>a[1]-b[1]);
+    return Object.entries(res).map(([k,v])=>[k,avg(v)]).sort((a,b)=>a[1]-b[1]);
   }
 
   renderCompBars("comp-bli-func",toItems(bliFuncCols,bliD));
