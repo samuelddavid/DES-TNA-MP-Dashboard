@@ -59,7 +59,16 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
 .cmp-outcome-item::before{content:"→";position:absolute;left:0;color:var(--accent-blue)}
 .cmp-donut{display:flex;justify-content:center;margin:10px 0}
 .pdf-btn{background:var(--accent-red);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
-@media print{.gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags{display:none!important}.tab-panel{display:block!important}body{font-size:11px}.card,.cmp-card{break-inside:avoid}}
+@media print{
+  .gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags,.no-print{display:none!important}
+  .tab-panel{display:none!important}
+  #tab-tna-report{display:block!important}
+  body{font-size:11px;background:#fff;color:#000}
+  .rpt-page{page-break-after:always;min-height:270mm;padding:15mm 18mm}
+  .rpt-section{page-break-inside:avoid;margin-bottom:24px}
+  .rpt-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .card,.cmp-card{break-inside:avoid;border:1px solid #ccc}
+}
 @media(max-width:900px){.kpi-grid-posts{grid-template-columns:repeat(3,1fr)}.cmp-grid{grid-template-columns:1fr}}
 .gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
 .gov-strip-text{color:rgba(255,255,255,.7);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
@@ -176,6 +185,38 @@ tr:hover td{background:var(--surface)}
 /* Tooltip */
 #tooltip{position:fixed;background:var(--india-navy);color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:4px;max-width:260px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:9999;white-space:pre-wrap}
 #tooltip.show{opacity:1}
+/* TNA Report styles */
+.rpt-wrap{max-width:860px;margin:0 auto;font-family:"EB Garamond",Georgia,serif}
+.rpt-cover{background:var(--india-navy);color:#fff;padding:60px 50px;border-radius:8px;margin-bottom:0;text-align:center;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.rpt-cover h1{font-size:28px;font-weight:700;line-height:1.3;max-width:600px}
+.rpt-cover .rpt-sub{font-size:14px;opacity:.8;max-width:500px}
+.rpt-cover .rpt-meta{font-size:12px;opacity:.65;margin-top:8px}
+.rpt-toc{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px 28px;margin-bottom:28px}
+.rpt-toc h2{font-size:16px;font-weight:700;color:var(--india-navy);margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.rpt-toc-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--border-light);font-size:13px}
+.rpt-toc-item span{color:var(--text-dim);font-size:11px}
+.rpt-sec-hdr{background:var(--india-navy);color:#fff;padding:10px 20px;border-radius:4px;font-size:15px;font-weight:700;margin:28px 0 16px;display:flex;align-items:center;gap:10px}
+.rpt-sec-num{background:var(--saffron);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.rpt-insight{background:var(--accent-blue-light);border-left:3px solid var(--accent-blue);padding:10px 14px;border-radius:0 4px 4px 0;font-size:12px;color:var(--text-mid);line-height:1.7;margin:10px 0 16px;font-family:"Inter",sans-serif}
+.rpt-insight b{color:var(--accent-blue)}
+.rpt-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.rpt-matrix-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 12px;border-radius:4px;border:1px solid var(--border-light);font-family:"Inter",sans-serif}
+.rpt-matrix-name{font-size:11px;font-weight:600;color:var(--text);flex:1}
+.rpt-matrix-bars{width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.rpt-matrix-bar-row{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-dim)}
+.rpt-matrix-bar-track{flex:1;background:var(--surface2);height:5px;border-radius:2px;overflow:hidden}
+.rpt-matrix-bar-fill{height:100%;border-radius:2px}
+.rpt-matrix-score{font-family:"EB Garamond",serif;font-size:20px;font-weight:700;width:36px;text-align:center;flex-shrink:0}
+.rpt-matrix-class{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;width:100px;text-align:center;flex-shrink:0}
+.rpt-matrix-seq{font-size:10px;color:var(--text-mid);width:160px;flex-shrink:0;line-height:1.4;font-family:"Inter",sans-serif}
+.rpt-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.rpt-stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:5px;padding:12px 14px;text-align:center}
+.rpt-stat-val{font-family:"EB Garamond",serif;font-size:26px;font-weight:700;color:var(--india-navy)}
+.rpt-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;font-family:"Inter",sans-serif}
+.rpt-rec{padding:10px 14px;margin-bottom:8px;border-radius:4px;background:var(--surface);border-left:3px solid var(--saffron);font-size:12.5px;line-height:1.7;font-family:"Inter",sans-serif}
+.rpt-rec-num{font-weight:700;color:var(--saffron)}
+.rpt-divider{border:none;border-top:2px solid var(--border);margin:24px 0}
+.rpt-footer-line{text-align:center;font-size:10px;color:var(--text-dim);padding:16px 0;font-family:"Inter",sans-serif;border-top:1px solid var(--border)}
 .no-data{text-align:center;padding:36px;color:var(--text-dim);font-size:13px}
 .no-data-icon{font-size:28px;margin-bottom:8px}
 footer{background:var(--surface);border-top:1px solid var(--border);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
@@ -200,10 +241,8 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 <div class="gov-strip">
   <span class="gov-strip-text" data-en="Government of Madhya Pradesh" data-hi="मध्य प्रदेश सरकार">Government of Madhya Pradesh</span>
   <span class="gov-strip-sep">|</span>
-  <span class="gov-strip-text" data-en="Directorate of Economics &amp; Statistics" data-hi="संचालनालय, अर्थ एवं सांख्यिकी">Directorate of Economics &amp; Statistics</span>
-  <span class="gov-strip-sep">|</span>
-  <span class="gov-strip-text">GIZ India · DES–PIF MoU</span>
-  <div style="margin-left:auto;display:flex;gap:8px">
+  <span class="gov-strip-text">Directorate of Economics &amp; Statistics, MP</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
     <button class="tog-btn" id="lang-btn" onclick="toggleLang()">🌐 हिंदी</button>
     <button class="tog-btn" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
   </div>
@@ -215,9 +254,10 @@ footer p{font-size:10.5px;color:var(--text-dim)}
       <h1>Statewide Training Needs Assessment Dashboard
         <span class="hindi">राज्यव्यापी प्रशिक्षण आवश्यकता आकलन डैशबोर्ड</span>
       </h1>
-      <p>Madhya Pradesh · All 7 Divisions · 52 Districts + Divisional Offices + HQ · STAT Framework (UNSD/GIST) · GIZ India Initiative</p>
+      <p>Madhya Pradesh · All 7 Divisions + HQ · 52 Districts + Divisional Offices · STAT Framework (UNSD/GIST) · GIZ India Funded Initiative</p>
     </div>
-    <div class="header-meta">
+    <div class="header-meta" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="data:image/png;base64,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" alt="Pahlé India Foundation" style="height:44px;object-fit:contain"/>
       <span class="header-badge"><span class="live-dot"></span>LIVE — Auto Refresh</span>
       <span class="header-date" id="header-date">—</span>
       <span class="header-date">Last refreshed: <span id="refresh-time">—</span></span>
@@ -232,6 +272,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
       <option value="all">All Divisions</option>
       <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
       <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+      <option value="HQ">DES Headquarters</option>
     </select>
   </div>
   <span class="filter-sep">|</span>
@@ -265,6 +306,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
   <button class="tab-btn" onclick="switchTab('priorities',this)" data-en="Training Priorities" data-hi="प्रशिक्षण प्राथमिकताएं">Training Priorities</button>
   <button class="tab-btn" onclick="switchTab('software',this)" data-en="Software Demand" data-hi="सॉफ्टवेयर मांग">Software Demand</button>
   <button class="tab-btn" onclick="switchTab('comparison',this)" data-en="Division Comparison" data-hi="संभाग तुलना">Division Comparison</button>
+  <button class="tab-btn" onclick="switchTab('tna-report',this)" style="color:var(--accent-red);font-weight:600">📄 TNA Report</button>
 </div>
 
 <div class="main">
@@ -468,7 +510,28 @@ footer p{font-size:10.5px;color:var(--text-dim)}
     </div>
   </div>
 
-  <!-- TAB 7: DIVISION COMPARISON -->
+  <!-- TAB 8: TNA REPORT -->
+  <div id="tab-tna-report" class="tab-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-family:'EB Garamond',serif;font-size:20px;color:var(--india-navy)">Division TNA Report Generator</h2>
+        <p style="font-size:12px;color:var(--text-dim);margin-top:4px">Select a division to generate a complete 30–35 page Training Needs Assessment report. Click Download PDF to save.</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <select class="filter-select" id="rpt-division" onchange="renderReport()" style="font-size:14px;padding:8px 14px;min-width:200px">
+          <option value="">— Select Division —</option>
+          <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
+          <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+          <option value="HQ">DES Headquarters</option>
+        </select>
+        <button class="pdf-btn no-print" onclick="downloadReport()" style="padding:9px 20px;font-size:13px">⬇ Download PDF</button>
+      </div>
+    </div>
+    <div id="rpt-content">
+      <div class="no-data" style="padding:60px"><div class="no-data-icon">📄</div>Select a division above to generate the report</div>
+    </div>
+  </div>
+</div>
   <div id="tab-comparison" class="tab-panel">
     <div class="cmp-selectors">
       <div class="cmp-sel-group">
@@ -477,6 +540,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
           <option value="">— Select Division —</option>
           <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
           <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+          <option value="HQ">DES Headquarters</option>
         </select>
         <div class="cmp-title" id="cmp-title-a" style="color:var(--accent-blue)">—</div>
       </div>
@@ -487,6 +551,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
           <option value="">— Select Division —</option>
           <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
           <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
+          <option value="HQ">DES Headquarters</option>
         </select>
         <div class="cmp-title" id="cmp-title-b" style="color:var(--saffron)">—</div>
       </div>
@@ -497,8 +562,8 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 </div>
 
 <footer>
-  <p><strong>DES–PIF MoU</strong> signed 21 May 2025 · GIZ India GSDP/GDDP Framework Project · Indore Division Pilot: April 2026 · STAT Framework (UNSD/GIST)</p>
-  <p>Developed by <strong>Samuel D. David</strong> · <strong>Pahlé India Foundation (PIF), New Delhi</strong> · Data: Google Forms → Sheets (Live · Auto-refreshes every 10 min)</p>
+  <p>Based on <strong>STAT Framework (UNSD/GIST)</strong> · GIZ India Funded Initiative · Indore Division Pilot: April 2026</p>
+  <p><strong>Pahlé India Foundation (PIF), New Delhi</strong> · Developed by Samuel D. David · Data: Google Forms → Sheets · Live · Auto-refreshes every 10 min</p>
 </footer>
 
 <script>
@@ -547,10 +612,6 @@ const REG = {
   "Harda":{"div":"Bhopal","DSO":0,"ASO":2,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
   "DES Headquarters":{"div":"Bhopal","is_hq":true,"DSO":0,"ASO":50,"BLI":21,"DPO":0,"DD":3,"AD":9,"JD":3},
-  "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7},
-  "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1},
-  "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4},
-  "Shivpuri":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2},
   "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
@@ -856,7 +917,9 @@ function applyFilters(){
     const rd=normDist(r[COL.district]||"");
     const rp=normPost(r[COL.post]||"");
     const rv=(REG[rd]||{}).div||"";
-    if(dv!=="all"&&rv!==dv) return false;
+    const isHQ=(REG[rd]||{}).is_hq||false;
+    if(dv==="HQ"&&!isHQ) return false;
+    if(dv!=="all"&&dv!=="HQ"&&(rv!==dv||isHQ)) return false;
     if(dl!=="all"&&rd!==dl) return false;
     if(po!=="all"&&rp!==po) return false;
     return true;
@@ -869,7 +932,8 @@ function updateDistDrop(dv){
   const cur=el.value;
   let opts=['<option value="all">All Locations</option>'];
   Object.entries(REG).forEach(([d,info])=>{
-    if(dv==="all"||info.div===dv){
+    const matchesDiv=dv==="all"||(dv==="HQ"?info.is_hq:info.div===dv&&!info.is_hq);
+    if(matchesDiv){
       const f=info.is_hq?" [HQ]":info.is_div_office?" [Div Office]":"";
       opts.push(`<option value="${d}">${d}${f}</option>`);
     }
@@ -1239,11 +1303,16 @@ function renderOverview(d){
   }
 
   // Division bars
-  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain","HQ"];
   const dExp={},dRec={};
   divs7.forEach(dv=>{
-    dExp[dv]=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
-    dRec[dv]=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length;
+    if(dv==="HQ"){
+      dExp[dv]=getExpected(REG["DES Headquarters"]||{});
+      dRec[dv]=d.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters").length;
+    } else {
+      dExp[dv]=Object.entries(REG).filter(([loc,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
+      dRec[dv]=d.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;}).length;
+    }
   });
   renderBars("div-coverage-chart",divs7.map(dv=>[dv+" "+pct(dRec[dv],dExp[dv])+"% ("+dRec[dv]+"/"+dExp[dv]+")",dRec[dv]]),
     Math.max(...divs7.map(dv=>dExp[dv]),1),(v,m)=>{const p=pct(v,m);return p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";});
@@ -1298,12 +1367,21 @@ function renderCoverage(d,audit){
     </tr>`;
   }).join("");
 
-  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain","HQ"];
   renderBars("div-summary-chart",divs7.map(dv=>{
-    const exp=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
-    const rec=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length;
+    let exp,rec;
+    if(dv==="HQ"){
+      exp=getExpected(REG["DES Headquarters"]||{});
+      rec=d.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters").length;
+    } else {
+      exp=Object.entries(REG).filter(([,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
+      rec=d.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;}).length;
+    }
     return [dv+" "+pct(rec,exp)+"% ("+rec+"/"+exp+")",rec];
-  }),Math.max(...divs7.map(dv=>Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0)),1),
+  }),Math.max(1,...divs7.map(dv=>{
+    if(dv==="HQ") return getExpected(REG["DES Headquarters"]||{});
+    return Object.entries(REG).filter(([,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
+  })),
   (v,m)=>{const p=pct(v,m);return p>=75?"#1a7a4a":p>=40?"#e07b30":"#b91c1c";});
 }
 
@@ -1521,9 +1599,11 @@ function renderPriorities(d){
   });
   renderBars("priorities-sup",topN(sf,10),Math.max(...Object.values(sf),1));
 
-  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain","HQ"];
   renderBars("priorities-div",divs7.map(dv=>{
-    const dd=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const dd=dv==="HQ"
+      ?d.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters")
+      :d.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;});
     const df=getPriFreq(dd,"all");
     const top=topN(df,1)[0];
     return [dv+": "+(top?top[0].substring(0,30):"No data"),dd.length];
@@ -1595,9 +1675,11 @@ function renderSoftware(d){
   }
 
   // Division top
-  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain","HQ"];
   renderBars("sw-div-chart",divs7.map(dv=>{
-    const dd=d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const dd=dv==="HQ"
+      ?d.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters")
+      :d.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;});
     const dsw=getSwDemand(dd).filter(s=>s.total>0).slice(0,3).map(s=>s.key).join(", ");
     return [dv+": "+(dsw||"No data"),dd.length];
   }),Math.max(...divs7.map(dv=>d.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv).length),1));
@@ -1607,12 +1689,14 @@ function renderSoftware(d){
 // ── HEATMAP ──
 function renderHeatmap(data){
   const el=document.getElementById("heatmap-container");if(!el)return;
-  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"];
+  const divs7=["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain","HQ"];
   const shortName=t=>t.name.split(" ").slice(0,3).join(" ")+"…";
   let html='<table class="heatmap-tbl"><thead><tr><th style="text-align:left;padding-left:10px">Division</th>'+
     THEMES.map(t=>`<th title="${t.name}">${shortName(t)}</th>`).join("")+'<th>n</th></tr></thead><tbody>';
   divs7.forEach(dv=>{
-    const dvData=data.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===dv);
+    const dvData=dv==="HQ"
+      ?data.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters")
+      :data.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;});
     const themes=computeThemes(dvData);const n=dvData.length;
     html+=`<tr><td class="row-label">${dv}</td>`;
     THEMES.forEach(th=>{
@@ -1639,11 +1723,12 @@ function renderComparison(){
   if(!divA||!divB){el.innerHTML='<div class="no-data"><div class="no-data-icon">📊</div>Select two divisions above to compare</div>';return;}
   if(divA===divB){el.innerHTML='<div class="no-data"><div class="no-data-icon">⚠</div>Please select two different divisions</div>';return;}
 
-  const dataA=RAW.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===divA);
-  const dataB=RAW.filter(r=>(REG[normDist(r[COL.district]||"")]||{}).div===divB);
+  const getDiv=(r,dv)=>dv==="HQ"?normDist(r[COL.district]||"")==="DES Headquarters":(()=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;})();
+  const dataA=RAW.filter(r=>getDiv(r,divA));
+  const dataB=RAW.filter(r=>getDiv(r,divB));
 
   function divStats(data,dv){
-    const exp=Object.entries(REG).filter(([,i])=>i.div===dv).reduce((s,[,i])=>s+getExpected(i),0);
+    const exp=dv==="HQ"?getExpected(REG["DES Headquarters"]||{}):Object.entries(REG).filter(([,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
     const n=data.length;
     let wS=0,wN=0;
     ["BLI","ASO","DSO","AD","DPO","DD","JD"].forEach(post=>{
@@ -1738,6 +1823,239 @@ function printComparison(){
   document.title=`TNA Comparison — ${a} vs ${b} — DES MP`;
   window.print();
   setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},2000);
+}
+
+// ── TNA REPORT ──────────────────────────────────────────────
+function getDivData(dv){
+  if(!dv) return [];
+  if(dv==="HQ") return RAW.filter(r=>normDist(r[COL.district]||"")==="DES Headquarters");
+  return RAW.filter(r=>{const rd=normDist(r[COL.district]||"");return rd!=="DES Headquarters"&&(REG[rd]||{}).div===dv;});
+}
+function rptBars(items,maxV,colorFn){
+  if(!items||!items.length) return '<p style="color:var(--text-dim);font-size:11px;padding:6px 0">No data available.</p>';
+  const mv=maxV||Math.max(...items.map(x=>x[1]),1);
+  return items.map(([label,val])=>{
+    const pw=Math.round((val/mv)*100);
+    const col=colorFn?colorFn(val,mv):"var(--india-navy)";
+    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="font-size:11px;color:var(--text-mid);min-width:155px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${label}">${label.length>28?label.substring(0,28)+"…":label}</div>
+      <div style="flex:1;background:var(--surface2);border-radius:3px;height:9px;overflow:hidden"><div style="width:${pw}%;height:100%;background:${col};border-radius:3px"></div></div>
+      <div style="font-size:11px;font-weight:600;min-width:24px;text-align:right">${typeof val==="number"&&val%1===0?val:fmt1(val)}</div>
+    </div>`;
+  }).join("");
+}
+function rptCompBars(items){
+  if(!items||!items.length) return '<p style="color:var(--text-dim);font-size:11px;padding:6px 0">No data available.</p>';
+  return items.map(([name,score])=>{
+    const gap=(4-score).toFixed(1);const col=scCol(score);
+    return`<div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:500;margin-bottom:3px;color:var(--text)">${name.length>55?name.substring(0,55)+"…":name}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;background:var(--surface2);border-radius:3px;height:12px;overflow:hidden"><div style="width:${Math.round(score/4*100)}%;height:100%;background:${col};border-radius:3px"></div></div>
+        <div style="font-size:11.5px;font-weight:700;color:${col};min-width:24px">${fmt1(score)}</div>
+        <div style="font-size:10px;color:var(--accent-red)">gap ${gap}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function getSeqNote(t,score){
+  const n=t.name;
+  if(score>=50){
+    if(n.includes("Digital")) return "Deliver first. Foundation for all technical training. Start with MS Office → e-Office → Computer training.";
+    if(n.includes("Survey")||n.includes("field")) return "Critical for BLI. Schedule before next data collection season. Include hands-on field practice.";
+    if(n.includes("management")) return "Phase 1A essential. Address data recording, scrutiny, and validation protocols across all post levels.";
+    if(n.includes("analysis")||n.includes("software")) return "Sequence after digital literacy. Build foundational stats before STATA/R/Python modules.";
+    if(n.includes("Coord")||n.includes("monitor")) return "Embed in supervision training. Combine with M&E workshops for DSO/AD and above.";
+    if(n.includes("Report")) return "Deliver as standalone writing workshop. Focus on note drafting, report formats, e-office documentation.";
+    return "High urgency — design and deliver in the first training cycle.";
+  }
+  if(score>=35){
+    if(n.includes("Statistical")||n.includes("economic")) return "Phase 1B. Build on data skills before economic analysis concepts.";
+    return "Schedule in first cycle after Immediate themes are addressed.";
+  }
+  return "Lower urgency — embed in later cycles or as supplementary modules.";
+}
+function renderReport(){
+  const dv=document.getElementById("rpt-division").value;
+  const el=document.getElementById("rpt-content");
+  if(!dv){el.innerHTML='<div class="no-data" style="padding:60px"><div class="no-data-icon">📄</div>Select a division above to generate the report</div>';return;}
+  const d=getDivData(dv);
+  const divLabel=dv==="HQ"?"DES Headquarters, Bhopal":dv+" Division";
+  const n=d.length;
+  const today=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+  // Compute data
+  const posts=["BLI","ASO","DSO","AD","DPO","DD","JD"];
+  let wSum=0,wN=0;
+  posts.forEach(post=>{
+    const rd=d.filter(r=>normPost(r[COL.post]||"")===post);
+    if(!rd.length||!COL.allCompCols)return;
+    COL.allCompCols.forEach(col=>rd.forEach(r=>{const v=parseFloat(r[col]);if(!isNaN(v)&&v>=0&&v<=4){wSum+=v;wN++;}}));
+  });
+  const avgComp=wN>0?wSum/wN:0;
+  const themes=computeThemes(d);
+  const priFreq=getPriFreq(d,"all");
+  const topPriorities=topN(priFreq,10);
+  const sw=getSwDemand(d);
+  const postcnt=cntBy(d,r=>normPost(r[COL.post]||""));
+  const topTheme=themes[0]||{name:"—",combined:0};
+  const topSw=sw.filter(s=>s.total>0)[0]||{key:"—"};
+  const immThemes=themes.filter(t=>t.combined>=50);
+  const ph1bThemes=themes.filter(t=>t.combined>=35&&t.combined<50);
+  const divExp=dv==="HQ"?getExpected(REG["DES Headquarters"]||{}):Object.entries(REG).filter(([,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
+  const smartphoneN=d.filter(r=>(r[COL.device]||"").toLowerCase().includes("smart")).length;
+  const noInternetN=d.filter(r=>{const v=(r[COL.internet]||"").toLowerCase();return v.includes("not available")||v.includes("sometimes");}).length;
+  const s1=`<div style="background:var(--india-navy);color:#fff;padding:60px 50px;border-radius:8px;margin-bottom:28px;text-align:center;min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+  <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;font-family:'Inter',sans-serif">Pahlé India Foundation (PIF), New Delhi · GIZ India Funded Initiative</div>
+  <h1 style="font-size:28px;font-weight:700;line-height:1.3;max-width:600px">Training Needs Assessment<br/>— ${divLabel} —</h1>
+  <div style="font-size:14px;opacity:.8;max-width:480px">Statewide TNA Survey · Directorate of Economics &amp; Statistics, Madhya Pradesh</div>
+  <div style="width:50px;height:2px;background:var(--saffron);margin:6px 0"></div>
+  <div style="font-size:11px;opacity:.6;font-family:'Inter',sans-serif">STAT Framework (UNSD/GIST) · Indore Pilot Methodology · ${today}</div>
+  <div style="font-size:11px;opacity:.55;font-family:'Inter',sans-serif">Survey respondents (${divLabel}): <strong style="opacity:1">${n}</strong> of ${divExp} expected posts (${pct(n,divExp)}%)</div>
+</div>`;
+  const toc=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:22px 26px;margin-bottom:28px">
+  <h2 style="font-size:16px;font-weight:700;color:var(--india-navy);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px">Table of Contents</h2>
+  ${[["1","Executive Summary","3"],["2","Respondent Profile","4–5"],["3","Competency Assessment — BLI Staff","6–8"],["4","Competency Assessment — Supervisory Staff","9–11"],["5","Integrated Prioritisation Matrix","12–14"],["6","Training Priority Areas","15–16"],["7","Software Training Demand","17–18"],["8","Key Findings and Recommendations","19–22"],["9","Methodology Note","23–24"]].map(([num,title,pg])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--border-light);font-size:13px"><span><strong style="color:var(--text-dim);margin-right:8px">${num}.</strong>${title}</span><span style="color:var(--text-dim);font-size:11px">p. ${pg}</span></div>`).join("")}
+</div>`;
+  function secHdr(num,title){return`<div style="background:var(--india-navy);color:#fff;padding:10px 18px;border-radius:4px;font-size:15px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px"><span style="background:var(--saffron);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${num}</span>${title}</div>`;}
+  function insight(txt){return`<div style="background:var(--accent-blue-light);border-left:3px solid var(--accent-blue);padding:11px 14px;border-radius:0 4px 4px 0;font-size:12px;color:var(--text-mid);line-height:1.8;margin-bottom:18px;font-family:'Inter',sans-serif">${txt}</div>`;}
+  function hr(){return`<hr style="border:none;border-top:1px solid var(--border);margin:22px 0"/>`;}
+  function miniCard(val,label,sub){return`<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:5px;padding:11px 13px;text-align:center"><div style="font-family:'EB Garamond',serif;font-size:21px;font-weight:700;color:var(--india-navy)">${val}</div><div style="font-size:9.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;font-family:'Inter',sans-serif">${label}</div>${sub?`<div style="font-size:9px;color:var(--text-dim);margin-top:1px;font-family:'Inter',sans-serif">${sub}</div>`:""}</div>`;}
+  function twoCol(a,b){return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">${a}${b}</div>`;}
+  function cardWrap(title,body){return`<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:13px 15px"><div style="font-family:'EB Garamond',serif;font-size:14px;font-weight:700;color:var(--india-navy);margin-bottom:9px;border-bottom:1px solid var(--border-light);padding-bottom:5px">${title}</div>${body}</div>`;}
+  function rec(num,txt,color){return`<div style="padding:10px 13px;margin-bottom:7px;border-radius:4px;background:var(--surface);border-left:3px solid ${color};font-size:12px;line-height:1.7;font-family:'Inter',sans-serif"><span style="font-weight:700;color:${color}">${num}. </span>${txt}</div>`;}
+  const html=`<div style="max-width:860px;margin:0 auto" id="rpt-printable">
+${s1}${toc}
+${secHdr(1,"Executive Summary")}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+  ${miniCard(n,"Survey Responses","")}${miniCard(fmt1(avgComp)+" / 4","Avg Competency Score","")}${miniCard(immThemes.length,"Immediate Priority Themes","Phase 1A, Score ≥50")}
+  ${miniCard(topTheme.name.substring(0,22)+"…","Top Priority Theme","Score "+topTheme.combined)}${miniCard(topSw.key,"Top Software Demand","")}${miniCard(pct(n,divExp)+"%","Survey Completion","% of expected posts")}
+</div>
+${insight(`<strong style="color:var(--accent-blue)">Summary:</strong> This report presents the Training Needs Assessment findings for <strong>${divLabel}</strong> based on ${n} survey responses (${today}). The average competency score is <strong>${fmt1(avgComp)}/4</strong> (gap: ${fmt1(4-avgComp)}). ${immThemes.length>0?`<strong>${immThemes.length} theme${immThemes.length>1?"s":""}</strong> classified Immediate (Phase 1A): ${immThemes.map(t=>t.name).join("; ")}.`:"No themes currently at Immediate threshold."} Top stated priority: <strong>${topPriorities[0]?topPriorities[0][0].substring(0,55):"—"}</strong>. Top software demand: <strong>${topSw.key}</strong> (predominantly Beginner level).`)}
+${hr()}
+${secHdr(2,"Respondent Profile")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:13px;font-family:'Inter',sans-serif">Demographic and contextual characteristics of the ${n} respondents. These inform training delivery design — digital access, learning time, and preferred modes directly constrain what training formats are feasible.</p>
+${twoCol(
+  cardWrap("Post-wise Participation",rptBars([["BLI",postcnt.BLI||0],["ASO",postcnt.ASO||0],["DSO",postcnt.DSO||0],["AD",postcnt.AD||0],["DD/DPO",(postcnt.DD||0)+(postcnt.DPO||0)],["JD",postcnt.JD||0]].filter(x=>x[1]>0),Math.max(...Object.values(postcnt),1))),
+  cardWrap("Years of Service",rptBars(topN(cntBy(d,r=>{const v=r[COL.service]||"";if(v.includes("Less than 5")||v.includes("5 वर्ष से कम"))return"<5 yrs";if(v.includes("6–10"))return"6–10 yrs";if(v.includes("11–15"))return"11–15 yrs";if(v.includes("16–20"))return"16–20 yrs";if(v.includes("20–30"))return"20–30 yrs";return"Other";}),5),null))
+)}
+${twoCol(
+  cardWrap("Device Access",rptBars(topN(cntBy(d,r=>{const v=(r[COL.device]||"").toLowerCase();if(v.includes("both")||v.includes("दोनों"))return"Both (Phone + Computer)";if(v.includes("computer")||v.includes("laptop"))return"Computer/Laptop only";if(v.includes("smart")||v.includes("phone"))return"Smartphone only";return"Other";}),4),null)),
+  cardWrap("Internet Quality",rptBars(topN(cntBy(d,r=>{const v=(r[COL.internet]||"").toLowerCase();if(v.includes("reliable")||v.includes("विश्वसनीय"))return"Reliable";if(v.includes("sometimes"))return"Sometimes unreliable";if(v.includes("not available"))return"Not available";return"Other";}),4),null,(v,m)=>{const p=pct(v,m);return p>=60?"#1a7a4a":p>=30?"#e07b30":"#b91c1c";}))
+)}
+${twoCol(
+  cardWrap("Preferred Training Mode",rptBars(topN(cntBy(d,r=>{const v=(r[COL.mode]||"").toLowerCase();if(v.includes("blended")||v.includes("मिश्रित"))return"Blended";if(v.includes("traditional")||v.includes("classroom")||v.includes("पारंपरिक"))return"Traditional classroom";if(v.includes("online")||v.includes("self-paced"))return"Online self-paced";return"Not specified";}),4),null)),
+  cardWrap("Main Constraints",(()=>{const cf={};d.forEach(r=>{const val=r[COL.constraints]||"";if(!val.trim())return;val.split(/,\s*(?=[\u0900-\u097F])/).forEach(c=>{const en=c.match(/\(([^()]+)\)/);const label=en?en[1].trim().substring(0,35):c.substring(0,35);if(label)cf[label]=(cf[label]||0)+1;});});return rptBars(topN(cf,5),null);})())
+)}
+${insight(`<strong style="color:var(--accent-blue)">Digital Readiness Note:</strong> ${smartphoneN>0?`${pct(smartphoneN,n)}% of respondents rely on smartphones only — training modules must be mobile-compatible and data-light.`:""} ${noInternetN>Math.floor(n*0.2)?`${pct(noInternetN,n)}% report unreliable or no internet — blended and offline-capable content is essential.`:""} High workload constraints suggest modular sessions under 2 hours are optimal.`)}
+${hr()}
+${secHdr(3,"Competency Assessment — BLI Staff")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Self-assessed proficiency on the 0–4 scale. BLI staff (n=${postcnt.BLI||0}) completed Section 2 of the survey covering functional and domain competencies specific to field data collection roles.</p>
+${twoCol(
+  cardWrap("Functional Competencies",rptCompBars(Object.entries(getRoleComps(d,"BLI")).sort((a,b)=>a[1]-b[1]))),
+  cardWrap("Domain Competencies",rptCompBars(Object.entries(getRoleComps(d,"BLI")).sort((a,b)=>a[1]-b[1])))
+)}
+${(()=>{const bliComps=getRoleComps(d,"BLI");const sorted=Object.entries(bliComps).sort((a,b)=>a[1]-b[1]);if(!sorted.length)return"";const weakest=sorted[0];const strongest=sorted[sorted.length-1];return insight(`<strong style="color:var(--accent-blue)">BLI Analysis:</strong> Weakest area: <strong>${weakest[0]}</strong> (score ${fmt1(weakest[1])}, gap ${fmt1(4-weakest[1])}). Strongest area: <strong>${strongest[0]}</strong> (score ${fmt1(strongest[1])}). Average below 2.0 suggests BLI staff need supervised, structured training with hands-on practice.`);})()}
+${hr()}
+${secHdr(4,"Competency Assessment — Supervisory Staff")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">ASO (n=${postcnt.ASO||0}), DSO/AD (n=${(postcnt.DSO||0)+(postcnt.AD||0)}), DD/DPO (n=${(postcnt.DD||0)+(postcnt.DPO||0)}), JD (n=${postcnt.JD||0}) profiles for ${divLabel}.</p>
+${twoCol(
+  cardWrap("ASO — Competencies (n="+(postcnt.ASO||0)+")",rptCompBars(Object.entries(getRoleComps(d,"ASO")).sort((a,b)=>a[1]-b[1]))),
+  cardWrap("DSO / Asst. Director (n="+((postcnt.DSO||0)+(postcnt.AD||0))+")",rptCompBars(Object.entries({...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")}).sort((a,b)=>a[1]-b[1])))
+)}
+${twoCol(
+  cardWrap("Deputy Director / DPO (n="+((postcnt.DD||0)+(postcnt.DPO||0))+")",rptCompBars(Object.entries(getRoleComps(d,"DD")).sort((a,b)=>a[1]-b[1]))),
+  cardWrap("Joint Director (n="+(postcnt.JD||0)+")",rptCompBars(Object.entries(getRoleComps(d,"JD")).sort((a,b)=>a[1]-b[1])))
+)}
+${hr()}
+${secHdr(5,"Integrated Prioritisation Matrix")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:6px;font-family:'Inter',sans-serif">Combined Score = (Priority Signal + Need Signal) ÷ 2. Source: Indore Pilot TNA Report, Table 6.1–6.2, PIF, April 2026.</p>
+<div style="display:flex;gap:10px;font-size:10px;margin-bottom:12px;font-family:'Inter',sans-serif">
+  <span style="background:#1a356e;color:#fff;padding:2px 7px;border-radius:3px;font-weight:700">■ Immediate (≥50)</span>
+  <span style="background:var(--accent-blue-light);color:var(--accent-blue);padding:2px 7px;border-radius:3px;font-weight:700;border:1px solid var(--accent-blue)">■ Phase 1B (35–49)</span>
+  <span style="background:var(--surface2);color:var(--text-dim);padding:2px 7px;border-radius:3px;font-weight:700">■ Reinforcement (&lt;35)</span>
+</div>
+<div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:1.2fr 150px 45px 110px 180px;background:var(--india-navy);color:#fff;padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif">
+    <span>Theme</span><span style="text-align:center">Signals</span><span style="text-align:center">Score</span><span style="text-align:center">Phase</span><span>Sequencing Note</span>
+  </div>
+  ${themes.map((t,i)=>{
+    const cls=t.combined>=50?"#1a356e":t.combined>=35?"#1a56a0":"#64748b";
+    const clsLabel=t.combined>=50?"Immediate":t.combined>=35?"Phase 1B":"Reinforcement";
+    const bg=i%2===0?"var(--surface)":"var(--card-bg)";
+    return`<div style="background:${bg};display:grid;grid-template-columns:1.2fr 150px 45px 110px 180px;padding:9px 10px;border-top:1px solid var(--border-light);align-items:center;gap:6px">
+      <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3">${t.name}</div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:42px">Priority</span><div style="flex:1;background:var(--surface2);height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.pri}%;height:100%;background:#1a56a0;border-radius:2px"></div></div><span style="width:20px;text-align:right">${t.pri}%</span></div>
+        <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:42px">Need</span><div style="flex:1;background:var(--surface2);height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.need}%;height:100%;background:#e07b30;border-radius:2px"></div></div><span style="width:20px;text-align:right">${t.need}%</span></div>
+      </div>
+      <div style="font-family:'EB Garamond',serif;font-size:20px;font-weight:700;color:${cls};text-align:center">${t.combined}</div>
+      <div style="text-align:center"><span style="background:${cls};color:#fff;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:3px;font-family:'Inter',sans-serif">${clsLabel}</span></div>
+      <div style="font-size:10px;color:var(--text-mid);line-height:1.4;font-family:'Inter',sans-serif">${getSeqNote(t,t.combined)}</div>
+    </div>`;
+  }).join("")}
+</div>
+${insight(`<strong style="color:var(--accent-blue)">Matrix Interpretation — ${divLabel}:</strong> ${immThemes.length>0?`${immThemes.length} Immediate theme${immThemes.length>1?"s":""}: ${immThemes.map(t=>t.name).join("; ")}. These anchor the first training cycle.`:"No Immediate themes yet — Phase 1B themes should be prioritised."} ${ph1bThemes.length>0?`Phase 1B: ${ph1bThemes.map(t=>t.name).join("; ")}.`:""}`)}
+${hr()}
+${secHdr(6,"Training Priority Areas")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Respondents selected up to 3 competencies where they need the most support. Priority Signal in the matrix is derived from these selections.</p>
+${twoCol(
+  cardWrap("All Posts — Top Priority Areas",rptBars(topPriorities.slice(0,8),Math.max(...topPriorities.slice(0,8).map(x=>x[1]),1),(v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";})),
+  cardWrap("BLI — Priority Areas",(()=>{const bf=getPriFreq(d,"BLI");const items=topN(bf,8);return rptBars(items,Math.max(...items.map(x=>x[1]),1));})())
+)}
+${insight(`<strong style="color:var(--accent-blue)">Note:</strong> Self-reported priorities may understate needs in areas where staff lack awareness. The Need Signal corrects for awareness bias by measuring actual score gaps independently.`)}
+${hr()}
+${secHdr(7,"Software Training Demand")}
+<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Desired entry-level for training across 7 software categories. High Beginner demand signals need for foundational training before advanced modules.</p>
+<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:14px">
+  <div style="display:flex;gap:14px;margin-bottom:10px;font-size:10px;color:var(--text-mid);font-family:'Inter',sans-serif">
+    <span>🟠 Beginner</span><span>🔵 Intermediate</span><span>🟢 Advanced</span>
+  </div>
+  ${sw.filter(s=>s.total>0).map(s=>{const mt=Math.max(s.beg,s.mid,s.adv,1);return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><div style="font-size:11px;font-weight:500;width:90px;flex-shrink:0">${s.key}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Beginner</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.beg/mt*100)}%;height:100%;background:#f97316;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#c2410c">${s.beg}</span></div><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Intermediate</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.mid/mt*100)}%;height:100%;background:#1a56a0;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#1a56a0">${s.mid}</span></div><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Advanced</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.adv/mt*100)}%;height:100%;background:#15803d;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#15803d">${s.adv}</span></div></div><div style="font-size:10px;font-weight:600;color:var(--text-mid);font-family:'Inter',sans-serif">n=${s.total}</div></div>`;}).join("")}
+</div>
+${insight(`<strong style="color:var(--accent-blue)">Software Sequencing:</strong> Recommended progression: (1) Computer basics + MS Office → (2) e-Office + e-HRMS → (3) STATA/EViews or R/Python → (4) AI Tools. Beginner-level demand for statistical software confirms foundational digital literacy must precede all other technical modules — consistent with Indore Pilot finding (April 2026).`)}
+${hr()}
+${secHdr(8,"Key Findings and Recommendations")}
+<h3 style="font-family:'EB Garamond',serif;font-size:15px;color:var(--india-navy);margin-bottom:10px">Key Findings — ${divLabel}</h3>
+${[
+  `Overall average competency score: <strong>${fmt1(avgComp)}/4</strong> (gap: ${fmt1(4-avgComp)}). Staff cannot yet perform most tasks independently and require structured training with supervised practice.`,
+  immThemes.length>0?`<strong>${immThemes.length} Immediate theme${immThemes.length>1?"s":""} (Phase 1A):</strong> ${immThemes.map(t=>t.name).join("; ")}. These represent the highest combined demand-gap signal and must anchor the first training cycle.`:`No themes at Immediate threshold yet. Highest combined score: ${topTheme.combined} for "${topTheme.name}".`,
+  `BLI staff (n=${postcnt.BLI||0}) form the largest group and show the greatest aggregate need — their gaps in field operations and data management are critical given their primary data collection role.`,
+  `Software demand is predominantly Beginner-level across all tools. <strong>${topSw.key}</strong> is the top requested software. Foundational digital literacy is a prerequisite for all other technical training.`,
+  smartphoneN>0?`${pct(smartphoneN,n)}% report smartphone-only access — training must be mobile-compatible.`:"Device access is relatively strong, enabling digital training delivery.",
+  `Top stated priority: <strong>${topPriorities[0]?topPriorities[0][0].substring(0,55):"—"}</strong> (selected by ${topPriorities[0]?topPriorities[0][1]:0} respondents).`,
+].map((f,i)=>rec("F"+(i+1),f,"var(--accent-blue)")).join("")}
+<h3 style="font-family:'EB Garamond',serif;font-size:15px;color:var(--india-navy);margin:18px 0 10px">Recommendations</h3>
+${[
+  `<strong>Design a 3-phase training calendar</strong>: Phase 1A — ${immThemes.length>0?immThemes.map(t=>t.name.split(" ").slice(0,4).join(" ")).join("; "):"highest-scoring themes"}. Phase 1B — ${ph1bThemes.map(t=>t.name.split(" ").slice(0,4).join(" ")).join("; ")||"next-priority themes"}. Reinforcement themes in later cycles.`,
+  `<strong>Prioritise BLI training first</strong> given volume (${postcnt.BLI||0} staff) and critical data collection role. Use short modular sessions (under 2 hours) around survey cycles with hands-on field practice.`,
+  `<strong>Establish digital literacy as a prerequisite</strong> — MS Office and computer basics before STATA, R/Python, or AI Tools modules. Consider PGDCA-level certification for ASO and DSO staff.`,
+  noInternetN>Math.floor(n*0.2)?`<strong>Adapt to connectivity constraints</strong> — ${pct(noInternetN,n)}% report limited internet. Blended and offline-capable content is essential for this division.`:`<strong>Leverage digital delivery</strong> — Reliable internet in this division supports online self-paced modules as a complement to classroom sessions.`,
+  `<strong>Deploy senior staff as peer trainers</strong> for competencies where JD/DD scores exceed BLI/ASO — particularly in coordination, monitoring, and reporting. Reduces costs and builds internal capacity.`,
+  `<strong>Track outcomes</strong> via post-training competency re-assessment (same questionnaire) 6 months after first cycle. Compare to baseline scores to assess impact and recalibrate priorities.`,
+].map((r,i)=>rec("R"+(i+1),r,"var(--saffron)")).join("")}
+${hr()}
+${secHdr(9,"Methodology Note")}
+<div style="font-size:12px;color:var(--text-mid);line-height:1.9;font-family:'Inter',sans-serif">
+  <p style="margin-bottom:10px"><strong style="color:var(--text)">Survey Design.</strong> The TNA survey was administered through Google Forms linked to the DES MP Statewide TNA Dashboard. All 52 districts, 7 divisional offices, and DES Headquarters were covered. Staff were directed to their relevant section based on post (BLI: Section 2, ASO: Section 3, DSO/AD: Section 4, DD/DPO: Section 5, JD: Section 6). Competency ratings followed the 5-point proficiency scale (0–4) from the STAT Framework (UNSD/GIST) as validated in the Indore Division Pilot.</p>
+  <p style="margin-bottom:10px"><strong style="color:var(--text)">Proficiency Scale.</strong> 0=Not aware; 1=Basic awareness; 2=Working knowledge (needs support); 3=Proficient (independent); 4=Advanced/Expert (can guide others). Ratings are self-assessed and should be interpreted as perceived proficiency levels.</p>
+  <p style="margin-bottom:10px"><strong style="color:var(--text)">Integrated Prioritisation Matrix.</strong> Combined Score = (Priority Signal % + Need Signal %) ÷ 2. Priority Signal = % selecting the theme as a top need. Need Signal = (4 − weighted avg score) ÷ 4 × 100, weighted by post group size. Phases: Immediate ≥50, Phase 1B = 35–49, Reinforcement &lt;35. Method: Indore Division Pilot TNA Report, Table 6.1–6.2, PIF, April 2026.</p>
+  <p style="margin-bottom:10px"><strong style="color:var(--text)">Competency Themes.</strong> Seven themes follow exactly Table 6.1 of the Indore Pilot Report: (1) Survey operations and field data collection; (2) Data management, scrutiny and quality assurance; (3) Digital tools and office systems; (4) Data analysis, statistics and software; (5) Statistical, economic and planning concepts; (6) Coordination, monitoring and citizen interface; (7) Reporting, documentation and communication.</p>
+  <p><strong style="color:var(--text)">Limitations.</strong> Self-reported ratings carry social desirability bias. The Need Signal partially corrects for awareness bias. Division-level findings with fewer than 10 responses should be treated as directional indicators only. Report generated: ${today}. Developed by Samuel D. David, Pahlé India Foundation (PIF), New Delhi.</p>
+</div>
+<div style="text-align:center;font-size:10px;color:var(--text-dim);padding:18px 0 8px;font-family:'Inter',sans-serif;border-top:1px solid var(--border);margin-top:22px">
+  <strong>Pahlé India Foundation (PIF), New Delhi</strong> · GIZ India Funded Initiative · DES MP Statewide TNA Survey · ${today}<br/>
+  Based on STAT Framework (UNSD/GIST) · Indore Division Pilot Methodology (April 2026)
+</div>
+</div>`;
+  el.innerHTML=html;
+}
+function downloadReport(){
+  const dv=document.getElementById("rpt-division").value;
+  if(!dv){alert("Please select a division first.");return;}
+  const divLabel=dv==="HQ"?"DES-Headquarters":dv+"-Division";
+  document.title=`TNA Report — ${divLabel} — DES MP`;
+  window.print();
+  setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},3000);
 }
 
 // ── UI ──
