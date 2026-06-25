@@ -50,14 +50,25 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
 .cmp-donut{display:flex;justify-content:center;margin:10px 0}
 .pdf-btn{background:var(--accent-red);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
 @media print{
-  .gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags,.no-print{display:none!important}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags,.no-print,
+  header,.header-meta,#rpt-division{display:none!important}
   .tab-panel{display:none!important}
-  #tab-tna-report{display:block!important}
-  body{font-size:11px;background:#fff;color:#000}
-  .rpt-page{page-break-after:always;min-height:270mm;padding:15mm 18mm}
-  .rpt-section{page-break-inside:avoid;margin-bottom:24px}
-  .rpt-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-  .card,.cmp-card{break-inside:avoid;border:1px solid #ccc}
+  #tab-tna-report{display:block!important;padding:0!important;margin:0!important}
+  body{font-size:12pt;background:#fff!important;color:#000!important;margin:0;padding:0}
+  .main{padding:0!important;max-width:100%!important}
+  /* Each .rpt-pg class = new A4 page */
+  .rpt-pg{page-break-after:always;min-height:257mm;padding:18mm 20mm 14mm;box-sizing:border-box;background:#fff}
+  .rpt-pg:last-child{page-break-after:auto}
+  /* Force section headers to not break */
+  .rpt-sec-hdr,.rpt-sechdr{page-break-after:avoid;page-break-inside:avoid}
+  /* Prevent cards/charts from breaking across pages */
+  .rpt-card,.rpt-2col>div{page-break-inside:avoid;break-inside:avoid}
+  .rpt-2col{page-break-inside:avoid}
+  /* Typography for print */
+  p,div{orphans:3;widows:3}
+  /* Hide screen-only elements */
+  .screen-only{display:none!important}
 }
 @media(max-width:900px){.kpi-grid-posts{grid-template-columns:repeat(3,1fr)}.cmp-grid{grid-template-columns:1fr}}
 .gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
@@ -1870,7 +1881,8 @@ function renderReport(){
   const divLabel=dv==="HQ"?"DES Headquarters, Bhopal":dv+" Division";
   const n=d.length;
   const today=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
-  // Compute data
+
+  // ── Compute all data ──
   const posts=["BLI","ASO","DSO","AD","DPO","DD","JD"];
   let wSum=0,wN=0;
   posts.forEach(post=>{
@@ -1881,161 +1893,540 @@ function renderReport(){
   const avgComp=wN>0?wSum/wN:0;
   const themes=computeThemes(d);
   const priFreq=getPriFreq(d,"all");
-  const topPriorities=topN(priFreq,10);
+  const topPriorities=topN(priFreq,15);
   const sw=getSwDemand(d);
   const postcnt=cntBy(d,r=>normPost(r[COL.post]||""));
-  const topTheme=themes[0]||{name:"—",combined:0};
+  const topTheme=themes[0]||{name:"No data",combined:0};
   const topSw=sw.filter(s=>s.total>0)[0]||{key:"—"};
   const immThemes=themes.filter(t=>t.combined>=50);
   const ph1bThemes=themes.filter(t=>t.combined>=35&&t.combined<50);
   const divExp=dv==="HQ"?getExpected(REG["DES Headquarters"]||{}):Object.entries(REG).filter(([,i])=>i.div===dv&&!i.is_hq).reduce((s,[,i])=>s+getExpected(i),0);
-  const smartphoneN=d.filter(r=>(r[COL.device]||"").toLowerCase().includes("smart")).length;
-  const noInternetN=d.filter(r=>{const v=(r[COL.internet]||"").toLowerCase();return v.includes("not available")||v.includes("sometimes");}).length;
-  const s1=`<div style="background:var(--india-navy);color:#fff;padding:60px 50px;border-radius:8px;margin-bottom:28px;text-align:center;min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
-  <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;font-family:'Inter',sans-serif">Pahlé India Foundation (PIF), New Delhi · GIZ India Funded Initiative</div>
-  <h1 style="font-size:28px;font-weight:700;line-height:1.3;max-width:600px">Training Needs Assessment<br/>— ${divLabel} —</h1>
-  <div style="font-size:14px;opacity:.8;max-width:480px">Statewide TNA Survey · Directorate of Economics &amp; Statistics, Madhya Pradesh</div>
-  <div style="width:50px;height:2px;background:var(--saffron);margin:6px 0"></div>
-  <div style="font-size:11px;opacity:.6;font-family:'Inter',sans-serif">STAT Framework (UNSD/GIST) · Indore Pilot Methodology · ${today}</div>
-  <div style="font-size:11px;opacity:.55;font-family:'Inter',sans-serif">Survey respondents (${divLabel}): <strong style="opacity:1">${n}</strong> of ${divExp} expected posts (${pct(n,divExp)}%)</div>
-</div>`;
-  const toc=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:22px 26px;margin-bottom:28px">
-  <h2 style="font-size:16px;font-weight:700;color:var(--india-navy);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px">Table of Contents</h2>
-  ${[["1","Executive Summary","3"],["2","Respondent Profile","4–5"],["3","Competency Assessment — BLI Staff","6–8"],["4","Competency Assessment — Supervisory Staff","9–11"],["5","Integrated Prioritisation Matrix","12–14"],["6","Training Priority Areas","15–16"],["7","Software Training Demand","17–18"],["8","Key Findings and Recommendations","19–22"],["9","Methodology Note","23–24"]].map(([num,title,pg])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--border-light);font-size:13px"><span><strong style="color:var(--text-dim);margin-right:8px">${num}.</strong>${title}</span><span style="color:var(--text-dim);font-size:11px">p. ${pg}</span></div>`).join("")}
-</div>`;
-  function secHdr(num,title){return`<div style="background:var(--india-navy);color:#fff;padding:10px 18px;border-radius:4px;font-size:15px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px"><span style="background:var(--saffron);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${num}</span>${title}</div>`;}
-  function insight(txt){return`<div style="background:var(--accent-blue-light);border-left:3px solid var(--accent-blue);padding:11px 14px;border-radius:0 4px 4px 0;font-size:12px;color:var(--text-mid);line-height:1.8;margin-bottom:18px;font-family:'Inter',sans-serif">${txt}</div>`;}
-  function hr(){return`<hr style="border:none;border-top:1px solid var(--border);margin:22px 0"/>`;}
-  function miniCard(val,label,sub){return`<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:5px;padding:11px 13px;text-align:center"><div style="font-family:'EB Garamond',serif;font-size:21px;font-weight:700;color:var(--india-navy)">${val}</div><div style="font-size:9.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;font-family:'Inter',sans-serif">${label}</div>${sub?`<div style="font-size:9px;color:var(--text-dim);margin-top:1px;font-family:'Inter',sans-serif">${sub}</div>`:""}</div>`;}
-  function twoCol(a,b){return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">${a}${b}</div>`;}
-  function cardWrap(title,body){return`<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:13px 15px"><div style="font-family:'EB Garamond',serif;font-size:14px;font-weight:700;color:var(--india-navy);margin-bottom:9px;border-bottom:1px solid var(--border-light);padding-bottom:5px">${title}</div>${body}</div>`;}
-  function rec(num,txt,color){return`<div style="padding:10px 13px;margin-bottom:7px;border-radius:4px;background:var(--surface);border-left:3px solid ${color};font-size:12px;line-height:1.7;font-family:'Inter',sans-serif"><span style="font-weight:700;color:${color}">${num}. </span>${txt}</div>`;}
-  const html=`<div style="max-width:860px;margin:0 auto" id="rpt-printable">
-${s1}${toc}
-${secHdr(1,"Executive Summary")}
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-  ${miniCard(n,"Survey Responses","")}${miniCard(fmt1(avgComp)+" / 4","Avg Competency Score","")}${miniCard(immThemes.length,"Immediate Priority Themes","Phase 1A, Score ≥50")}
-  ${miniCard(topTheme.name.substring(0,22)+"…","Top Priority Theme","Score "+topTheme.combined)}${miniCard(topSw.key,"Top Software Demand","")}${miniCard(pct(n,divExp)+"%","Survey Completion","% of expected posts")}
-</div>
-${insight(`<strong style="color:var(--accent-blue)">Summary:</strong> This report presents the Training Needs Assessment findings for <strong>${divLabel}</strong> based on ${n} survey responses (${today}). The average competency score is <strong>${fmt1(avgComp)}/4</strong> (gap: ${fmt1(4-avgComp)}). ${immThemes.length>0?`<strong>${immThemes.length} theme${immThemes.length>1?"s":""}</strong> classified Immediate (Phase 1A): ${immThemes.map(t=>t.name).join("; ")}.`:"No themes currently at Immediate threshold."} Top stated priority: <strong>${topPriorities[0]?topPriorities[0][0].substring(0,55):"—"}</strong>. Top software demand: <strong>${topSw.key}</strong> (predominantly Beginner level).`)}
-${hr()}
-${secHdr(2,"Respondent Profile")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:13px;font-family:'Inter',sans-serif">Demographic and contextual characteristics of the ${n} respondents. These inform training delivery design — digital access, learning time, and preferred modes directly constrain what training formats are feasible.</p>
-${twoCol(
-  cardWrap("Post-wise Participation",rptBars([["BLI",postcnt.BLI||0],["ASO",postcnt.ASO||0],["DSO",postcnt.DSO||0],["AD",postcnt.AD||0],["DD/DPO",(postcnt.DD||0)+(postcnt.DPO||0)],["JD",postcnt.JD||0]].filter(x=>x[1]>0),Math.max(...Object.values(postcnt),1))),
-  cardWrap("Years of Service",rptBars(topN(cntBy(d,r=>{const v=r[COL.service]||"";if(v.includes("Less than 5")||v.includes("5 वर्ष से कम"))return"<5 yrs";if(v.includes("6–10"))return"6–10 yrs";if(v.includes("11–15"))return"11–15 yrs";if(v.includes("16–20"))return"16–20 yrs";if(v.includes("20–30"))return"20–30 yrs";return"Other";}),5),null))
-)}
-${twoCol(
-  cardWrap("Device Access",rptBars(topN(cntBy(d,r=>{const v=(r[COL.device]||"").toLowerCase();if(v.includes("both")||v.includes("दोनों"))return"Both (Phone + Computer)";if(v.includes("computer")||v.includes("laptop"))return"Computer/Laptop only";if(v.includes("smart")||v.includes("phone"))return"Smartphone only";return"Other";}),4),null)),
-  cardWrap("Internet Quality",rptBars(topN(cntBy(d,r=>{const v=(r[COL.internet]||"").toLowerCase();if(v.includes("reliable")||v.includes("विश्वसनीय"))return"Reliable";if(v.includes("sometimes"))return"Sometimes unreliable";if(v.includes("not available"))return"Not available";return"Other";}),4),null,(v,m)=>{const p=pct(v,m);return p>=60?"#1a7a4a":p>=30?"#e07b30":"#b91c1c";}))
-)}
-${twoCol(
-  cardWrap("Preferred Training Mode",rptBars(topN(cntBy(d,r=>{const v=(r[COL.mode]||"").toLowerCase();if(v.includes("blended")||v.includes("मिश्रित"))return"Blended";if(v.includes("traditional")||v.includes("classroom")||v.includes("पारंपरिक"))return"Traditional classroom";if(v.includes("online")||v.includes("self-paced"))return"Online self-paced";return"Not specified";}),4),null)),
-  cardWrap("Main Constraints",(()=>{const cf={};d.forEach(r=>{const val=r[COL.constraints]||"";if(!val.trim())return;val.split(/,\s*(?=[\u0900-\u097F])/).forEach(c=>{const en=c.match(/\(([^()]+)\)/);const label=en?en[1].trim().substring(0,35):c.substring(0,35);if(label)cf[label]=(cf[label]||0)+1;});});return rptBars(topN(cf,5),null);})())
-)}
-${insight(`<strong style="color:var(--accent-blue)">Digital Readiness Note:</strong> ${smartphoneN>0?`${pct(smartphoneN,n)}% of respondents rely on smartphones only — training modules must be mobile-compatible and data-light.`:""} ${noInternetN>Math.floor(n*0.2)?`${pct(noInternetN,n)}% report unreliable or no internet — blended and offline-capable content is essential.`:""} High workload constraints suggest modular sessions under 2 hours are optimal.`)}
-${hr()}
-${secHdr(3,"Competency Assessment — BLI Staff")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Self-assessed proficiency on the 0–4 scale. BLI staff (n=${postcnt.BLI||0}) completed Section 2 of the survey covering functional and domain competencies specific to field data collection roles.</p>
-${twoCol(
-  cardWrap("Functional Competencies",rptCompBars(Object.entries(getRoleComps(d,"BLI")).sort((a,b)=>a[1]-b[1]))),
-  cardWrap("Domain Competencies",rptCompBars(Object.entries(getRoleComps(d,"BLI")).sort((a,b)=>a[1]-b[1])))
-)}
-${(()=>{const bliComps=getRoleComps(d,"BLI");const sorted=Object.entries(bliComps).sort((a,b)=>a[1]-b[1]);if(!sorted.length)return"";const weakest=sorted[0];const strongest=sorted[sorted.length-1];return insight(`<strong style="color:var(--accent-blue)">BLI Analysis:</strong> Weakest area: <strong>${weakest[0]}</strong> (score ${fmt1(weakest[1])}, gap ${fmt1(4-weakest[1])}). Strongest area: <strong>${strongest[0]}</strong> (score ${fmt1(strongest[1])}). Average below 2.0 suggests BLI staff need supervised, structured training with hands-on practice.`);})()}
-${hr()}
-${secHdr(4,"Competency Assessment — Supervisory Staff")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">ASO (n=${postcnt.ASO||0}), DSO/AD (n=${(postcnt.DSO||0)+(postcnt.AD||0)}), DD/DPO (n=${(postcnt.DD||0)+(postcnt.DPO||0)}), JD (n=${postcnt.JD||0}) profiles for ${divLabel}.</p>
-${twoCol(
-  cardWrap("ASO — Competencies (n="+(postcnt.ASO||0)+")",rptCompBars(Object.entries(getRoleComps(d,"ASO")).sort((a,b)=>a[1]-b[1]))),
-  cardWrap("DSO / Asst. Director (n="+((postcnt.DSO||0)+(postcnt.AD||0))+")",rptCompBars(Object.entries({...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")}).sort((a,b)=>a[1]-b[1])))
-)}
-${twoCol(
-  cardWrap("Deputy Director / DPO (n="+((postcnt.DD||0)+(postcnt.DPO||0))+")",rptCompBars(Object.entries(getRoleComps(d,"DD")).sort((a,b)=>a[1]-b[1]))),
-  cardWrap("Joint Director (n="+(postcnt.JD||0)+")",rptCompBars(Object.entries(getRoleComps(d,"JD")).sort((a,b)=>a[1]-b[1])))
-)}
-${hr()}
-${secHdr(5,"Integrated Prioritisation Matrix")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:6px;font-family:'Inter',sans-serif">Combined Score = (Priority Signal + Need Signal) ÷ 2. Source: Indore Pilot TNA Report, Table 6.1–6.2, PIF, April 2026.</p>
-<div style="display:flex;gap:10px;font-size:10px;margin-bottom:12px;font-family:'Inter',sans-serif">
-  <span style="background:#1a356e;color:#fff;padding:2px 7px;border-radius:3px;font-weight:700">■ Immediate (≥50)</span>
-  <span style="background:var(--accent-blue-light);color:var(--accent-blue);padding:2px 7px;border-radius:3px;font-weight:700;border:1px solid var(--accent-blue)">■ Phase 1B (35–49)</span>
-  <span style="background:var(--surface2);color:var(--text-dim);padding:2px 7px;border-radius:3px;font-weight:700">■ Reinforcement (&lt;35)</span>
-</div>
-<div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px">
-  <div style="display:grid;grid-template-columns:1.2fr 150px 45px 110px 180px;background:var(--india-navy);color:#fff;padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif">
-    <span>Theme</span><span style="text-align:center">Signals</span><span style="text-align:center">Score</span><span style="text-align:center">Phase</span><span>Sequencing Note</span>
-  </div>
-  ${themes.map((t,i)=>{
-    const cls=t.combined>=50?"#1a356e":t.combined>=35?"#1a56a0":"#64748b";
-    const clsLabel=t.combined>=50?"Immediate":t.combined>=35?"Phase 1B":"Reinforcement";
-    const bg=i%2===0?"var(--surface)":"var(--card-bg)";
-    return`<div style="background:${bg};display:grid;grid-template-columns:1.2fr 150px 45px 110px 180px;padding:9px 10px;border-top:1px solid var(--border-light);align-items:center;gap:6px">
-      <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3">${t.name}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-        <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:42px">Priority</span><div style="flex:1;background:var(--surface2);height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.pri}%;height:100%;background:#1a56a0;border-radius:2px"></div></div><span style="width:20px;text-align:right">${t.pri}%</span></div>
-        <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:42px">Need</span><div style="flex:1;background:var(--surface2);height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.need}%;height:100%;background:#e07b30;border-radius:2px"></div></div><span style="width:20px;text-align:right">${t.need}%</span></div>
-      </div>
-      <div style="font-family:'EB Garamond',serif;font-size:20px;font-weight:700;color:${cls};text-align:center">${t.combined}</div>
-      <div style="text-align:center"><span style="background:${cls};color:#fff;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:3px;font-family:'Inter',sans-serif">${clsLabel}</span></div>
-      <div style="font-size:10px;color:var(--text-mid);line-height:1.4;font-family:'Inter',sans-serif">${getSeqNote(t,t.combined)}</div>
+
+  const bliComps=getRoleComps(d,"BLI");
+  const bliSorted=Object.entries(bliComps).sort((a,b)=>a[1]-b[1]);
+  const weakest=bliSorted[0]||["—",0];
+  const strongest=bliSorted[bliSorted.length-1]||["—",0];
+  const smartN=d.filter(r=>(r[COL.device]||"").toLowerCase().includes("smart")).length;
+  const noIntN=d.filter(r=>{const v=(r[COL.internet]||"").toLowerCase();return v.includes("not available")||v.includes("sometimes");}).length;
+  const bliBeLow=d.filter(r=>normPost(r[COL.post]||"")==="BLI"&&COL.allCompCols&&COL.allCompCols.some(col=>{const v=parseFloat(r[col]);return!isNaN(v)&&v<2;})).length;
+
+  // ── Helper render functions ──
+  function pg(content){return`<div class="rpt-pg">${content}</div>`;}
+  function sechdr(num,title,sub){
+    return`<div style="background:#1a356e;color:#fff;padding:12px 20px;border-radius:5px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+      <span style="background:#e07b30;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:Inter,sans-serif">${num}</span>
+      <div><div style="font-size:16px;font-weight:700">${title}</div>${sub?`<div style="font-size:11px;opacity:.75;margin-top:2px">${sub}</div>`:""}</div>
     </div>`;
-  }).join("")}
-</div>
-${insight(`<strong style="color:var(--accent-blue)">Matrix Interpretation — ${divLabel}:</strong> ${immThemes.length>0?`${immThemes.length} Immediate theme${immThemes.length>1?"s":""}: ${immThemes.map(t=>t.name).join("; ")}. These anchor the first training cycle.`:"No Immediate themes yet — Phase 1B themes should be prioritised."} ${ph1bThemes.length>0?`Phase 1B: ${ph1bThemes.map(t=>t.name).join("; ")}.`:""}`)}
-${hr()}
-${secHdr(6,"Training Priority Areas")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Respondents selected up to 3 competencies where they need the most support. Priority Signal in the matrix is derived from these selections.</p>
-${twoCol(
-  cardWrap("All Posts — Top Priority Areas",rptBars(topPriorities.slice(0,8),Math.max(...topPriorities.slice(0,8).map(x=>x[1]),1),(v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";})),
-  cardWrap("BLI — Priority Areas",(()=>{const bf=getPriFreq(d,"BLI");const items=topN(bf,8);return rptBars(items,Math.max(...items.map(x=>x[1]),1));})())
-)}
-${insight(`<strong style="color:var(--accent-blue)">Note:</strong> Self-reported priorities may understate needs in areas where staff lack awareness. The Need Signal corrects for awareness bias by measuring actual score gaps independently.`)}
-${hr()}
-${secHdr(7,"Software Training Demand")}
-<p style="font-size:12px;color:var(--text-mid);margin-bottom:12px;font-family:'Inter',sans-serif">Desired entry-level for training across 7 software categories. High Beginner demand signals need for foundational training before advanced modules.</p>
-<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:14px">
-  <div style="display:flex;gap:14px;margin-bottom:10px;font-size:10px;color:var(--text-mid);font-family:'Inter',sans-serif">
-    <span>🟠 Beginner</span><span>🔵 Intermediate</span><span>🟢 Advanced</span>
-  </div>
-  ${sw.filter(s=>s.total>0).map(s=>{const mt=Math.max(s.beg,s.mid,s.adv,1);return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><div style="font-size:11px;font-weight:500;width:90px;flex-shrink:0">${s.key}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Beginner</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.beg/mt*100)}%;height:100%;background:#f97316;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#c2410c">${s.beg}</span></div><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Intermediate</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.mid/mt*100)}%;height:100%;background:#1a56a0;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#1a56a0">${s.mid}</span></div><div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-dim);font-family:'Inter',sans-serif"><span style="width:65px">Advanced</span><div style="flex:1;background:var(--surface2);height:6px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.adv/mt*100)}%;height:100%;background:#15803d;border-radius:2px"></div></div><span style="width:18px;text-align:right;font-weight:600;color:#15803d">${s.adv}</span></div></div><div style="font-size:10px;font-weight:600;color:var(--text-mid);font-family:'Inter',sans-serif">n=${s.total}</div></div>`;}).join("")}
-</div>
-${insight(`<strong style="color:var(--accent-blue)">Software Sequencing:</strong> Recommended progression: (1) Computer basics + MS Office → (2) e-Office + e-HRMS → (3) STATA/EViews or R/Python → (4) AI Tools. Beginner-level demand for statistical software confirms foundational digital literacy must precede all other technical modules — consistent with Indore Pilot finding (April 2026).`)}
-${hr()}
-${secHdr(8,"Key Findings and Recommendations")}
-<h3 style="font-family:'EB Garamond',serif;font-size:15px;color:var(--india-navy);margin-bottom:10px">Key Findings — ${divLabel}</h3>
-${[
-  `Overall average competency score: <strong>${fmt1(avgComp)}/4</strong> (gap: ${fmt1(4-avgComp)}). Staff cannot yet perform most tasks independently and require structured training with supervised practice.`,
-  immThemes.length>0?`<strong>${immThemes.length} Immediate theme${immThemes.length>1?"s":""} (Phase 1A):</strong> ${immThemes.map(t=>t.name).join("; ")}. These represent the highest combined demand-gap signal and must anchor the first training cycle.`:`No themes at Immediate threshold yet. Highest combined score: ${topTheme.combined} for "${topTheme.name}".`,
-  `BLI staff (n=${postcnt.BLI||0}) form the largest group and show the greatest aggregate need — their gaps in field operations and data management are critical given their primary data collection role.`,
-  `Software demand is predominantly Beginner-level across all tools. <strong>${topSw.key}</strong> is the top requested software. Foundational digital literacy is a prerequisite for all other technical training.`,
-  smartphoneN>0?`${pct(smartphoneN,n)}% report smartphone-only access — training must be mobile-compatible.`:"Device access is relatively strong, enabling digital training delivery.",
-  `Top stated priority: <strong>${topPriorities[0]?topPriorities[0][0].substring(0,55):"—"}</strong> (selected by ${topPriorities[0]?topPriorities[0][1]:0} respondents).`,
-].map((f,i)=>rec("F"+(i+1),f,"var(--accent-blue)")).join("")}
-<h3 style="font-family:'EB Garamond',serif;font-size:15px;color:var(--india-navy);margin:18px 0 10px">Recommendations</h3>
-${[
-  `<strong>Design a 3-phase training calendar</strong>: Phase 1A — ${immThemes.length>0?immThemes.map(t=>t.name.split(" ").slice(0,4).join(" ")).join("; "):"highest-scoring themes"}. Phase 1B — ${ph1bThemes.map(t=>t.name.split(" ").slice(0,4).join(" ")).join("; ")||"next-priority themes"}. Reinforcement themes in later cycles.`,
-  `<strong>Prioritise BLI training first</strong> given volume (${postcnt.BLI||0} staff) and critical data collection role. Use short modular sessions (under 2 hours) around survey cycles with hands-on field practice.`,
-  `<strong>Establish digital literacy as a prerequisite</strong> — MS Office and computer basics before STATA, R/Python, or AI Tools modules. Consider PGDCA-level certification for ASO and DSO staff.`,
-  noInternetN>Math.floor(n*0.2)?`<strong>Adapt to connectivity constraints</strong> — ${pct(noInternetN,n)}% report limited internet. Blended and offline-capable content is essential for this division.`:`<strong>Leverage digital delivery</strong> — Reliable internet in this division supports online self-paced modules as a complement to classroom sessions.`,
-  `<strong>Deploy senior staff as peer trainers</strong> for competencies where JD/DD scores exceed BLI/ASO — particularly in coordination, monitoring, and reporting. Reduces costs and builds internal capacity.`,
-  `<strong>Track outcomes</strong> via post-training competency re-assessment (same questionnaire) 6 months after first cycle. Compare to baseline scores to assess impact and recalibrate priorities.`,
-].map((r,i)=>rec("R"+(i+1),r,"var(--saffron)")).join("")}
-${hr()}
-${secHdr(9,"Methodology Note")}
-<div style="font-size:12px;color:var(--text-mid);line-height:1.9;font-family:'Inter',sans-serif">
-  <p style="margin-bottom:10px"><strong style="color:var(--text)">Survey Design.</strong> The TNA survey was administered through Google Forms linked to the DES MP Statewide TNA Dashboard. All 52 districts, 7 divisional offices, and DES Headquarters were covered. Staff were directed to their relevant section based on post (BLI: Section 2, ASO: Section 3, DSO/AD: Section 4, DD/DPO: Section 5, JD: Section 6). Competency ratings followed the 5-point proficiency scale (0–4) from the STAT Framework (UNSD/GIST) as validated in the Indore Division Pilot.</p>
-  <p style="margin-bottom:10px"><strong style="color:var(--text)">Proficiency Scale.</strong> 0=Not aware; 1=Basic awareness; 2=Working knowledge (needs support); 3=Proficient (independent); 4=Advanced/Expert (can guide others). Ratings are self-assessed and should be interpreted as perceived proficiency levels.</p>
-  <p style="margin-bottom:10px"><strong style="color:var(--text)">Integrated Prioritisation Matrix.</strong> Combined Score = (Priority Signal % + Need Signal %) ÷ 2. Priority Signal = % selecting the theme as a top need. Need Signal = (4 − weighted avg score) ÷ 4 × 100, weighted by post group size. Phases: Immediate ≥50, Phase 1B = 35–49, Reinforcement &lt;35. Method: Indore Division Pilot TNA Report, Table 6.1–6.2, PIF, April 2026.</p>
-  <p style="margin-bottom:10px"><strong style="color:var(--text)">Competency Themes.</strong> Seven themes follow exactly Table 6.1 of the Indore Pilot Report: (1) Survey operations and field data collection; (2) Data management, scrutiny and quality assurance; (3) Digital tools and office systems; (4) Data analysis, statistics and software; (5) Statistical, economic and planning concepts; (6) Coordination, monitoring and citizen interface; (7) Reporting, documentation and communication.</p>
-  <p><strong style="color:var(--text)">Limitations.</strong> Self-reported ratings carry social desirability bias. The Need Signal partially corrects for awareness bias. Division-level findings with fewer than 10 responses should be treated as directional indicators only. Report generated: ${today}. Developed by Samuel D. David, Pahlé India Foundation (PIF), New Delhi.</p>
-</div>
-<div style="text-align:center;font-size:10px;color:var(--text-dim);padding:18px 0 8px;font-family:'Inter',sans-serif;border-top:1px solid var(--border);margin-top:22px">
-  <strong>Pahlé India Foundation (PIF), New Delhi</strong> · GIZ India Funded Initiative · DES MP Statewide TNA Survey · ${today}<br/>
-  Based on STAT Framework (UNSD/GIST) · Indore Division Pilot Methodology (April 2026)
-</div>
-</div>`;
-  el.innerHTML=html;
+  }
+  function insight(txt,color){color=color||"#1a56a0";
+    return`<div style="background:${color}18;border-left:4px solid ${color};padding:12px 16px;border-radius:0 5px 5px 0;font-size:12px;color:#2a2a3a;line-height:1.85;margin:12px 0;font-family:Inter,sans-serif">${txt}</div>`;}
+  function twoCol(a,b){return`<div class="rpt-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">${a}${b}</div>`;}
+  function threeCol(a,b,cc){return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">${a}${b}${cc}</div>`;}
+  function card(title,body,accent){accent=accent||"#1a356e";
+    return`<div class="rpt-card" style="background:#fff;border:1px solid #d6d9e0;border-radius:6px;padding:14px 16px;break-inside:avoid">
+      <div style="font-family:'EB Garamond',Georgia,serif;font-size:14px;font-weight:700;color:${accent};margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8eaef">${title}</div>
+      ${body}
+    </div>`;
+  }
+  function kpiCard(val,label,sub,color){color=color||"#1a356e";
+    return`<div style="background:#fff;border:1px solid #d6d9e0;border-radius:6px;padding:14px;text-align:center;break-inside:avoid">
+      <div style="font-family:'EB Garamond',Georgia,serif;font-size:26px;font-weight:700;color:${color}">${val}</div>
+      <div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:.05em;margin-top:3px;font-family:Inter,sans-serif">${label}</div>
+      ${sub?`<div style="font-size:9.5px;color:#aab;margin-top:2px;font-family:Inter,sans-serif">${sub}</div>`:""}
+    </div>`;}
+  function barRow(label,val,maxV,color){
+    const pw=Math.round((val/Math.max(maxV,1))*100);color=color||"#1a356e";
+    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <div style="font-size:11px;color:#4a5268;min-width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:Inter,sans-serif">${label}</div>
+      <div style="flex:1;background:#eef0f4;border-radius:3px;height:10px;overflow:hidden"><div style="width:${pw}%;height:100%;background:${color};border-radius:3px"></div></div>
+      <div style="font-size:11px;font-weight:600;min-width:28px;text-align:right;font-family:Inter,sans-serif">${typeof val==="number"&&val%1===0?val:fmt1(val)}</div>
+    </div>`;}
+  function compBar(name,score){
+    const col=scCol(score);const gap=(4-score).toFixed(1);
+    return`<div style="margin-bottom:11px;break-inside:avoid">
+      <div style="font-size:11px;font-weight:500;margin-bottom:3px;color:#1a1f2e;font-family:Inter,sans-serif">${name.length>58?name.substring(0,58)+"…":name}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;background:#eef0f4;border-radius:3px;height:13px;overflow:hidden"><div style="width:${Math.round(score/4*100)}%;height:100%;background:${col};border-radius:3px"></div></div>
+        <div style="font-size:12px;font-weight:700;color:${col};min-width:26px;font-family:Inter,sans-serif">${fmt1(score)}</div>
+        <div style="font-size:10px;color:#b91c1c;font-family:Inter,sans-serif">gap ${gap}</div>
+      </div>
+    </div>`;}
+  function barsBlock(items,maxV,colorFn){
+    if(!items||!items.length) return`<p style="color:#8892a4;font-size:11px;padding:8px 0;font-family:Inter,sans-serif">No data available for this unit.</p>`;
+    const mv=maxV||Math.max(...items.map(x=>x[1]),1);
+    return items.map(([l,v])=>barRow(l,v,mv,colorFn?colorFn(v,mv):"#1a356e")).join("");
+  }
+  function compBlock(comps){
+    const items=Object.entries(comps).sort((a,b)=>a[1]-b[1]);
+    if(!items.length) return`<p style="color:#8892a4;font-size:11px;padding:8px 0;font-family:Inter,sans-serif">No responses for this post group.</p>`;
+    return items.map(([name,score])=>compBar(name,score)).join("");
+  }
+  function hr(){return`<hr style="border:none;border-top:1px solid #d6d9e0;margin:18px 0"/>`;}
+  function para(txt){return`<p style="font-size:12pt;line-height:1.85;color:#2a2a3a;margin-bottom:12px;font-family:Inter,sans-serif;text-align:justify">${txt}</p>`;}
+  function rec(num,txt,color){color=color||"#e07b30";
+    return`<div style="padding:11px 14px;margin-bottom:10px;border-radius:5px;background:#f7f8fa;border-left:4px solid ${color};font-size:12px;line-height:1.8;font-family:Inter,sans-serif;break-inside:avoid">
+      <span style="font-weight:700;color:${color}">${num}  </span>${txt}</div>`;}
+  function finding(num,txt){return rec(num,txt,"#1a56a0");}
+  function swRow(s){
+    const mt=Math.max(s.beg,s.mid,s.adv,1);
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;break-inside:avoid">
+      <div style="font-size:11.5px;font-weight:600;width:100px;flex-shrink:0;font-family:Inter,sans-serif">${s.key}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;font-size:9.5px;color:#6a6a7a;font-family:Inter,sans-serif">
+          <span style="width:68px">Beginner</span><div style="flex:1;background:#eef0f4;height:7px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.beg/mt*100)}%;height:100%;background:#f97316;border-radius:2px"></div></div>
+          <span style="width:18px;text-align:right;font-weight:600;color:#c2410c">${s.beg}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;font-size:9.5px;color:#6a6a7a;font-family:Inter,sans-serif">
+          <span style="width:68px">Intermediate</span><div style="flex:1;background:#eef0f4;height:7px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.mid/mt*100)}%;height:100%;background:#1a56a0;border-radius:2px"></div></div>
+          <span style="width:18px;text-align:right;font-weight:600;color:#1a56a0">${s.mid}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#6a6a7a;font-family:Inter,sans-serif">
+          <span style="width:68px">Advanced</span><div style="flex:1;background:#eef0f4;height:7px;border-radius:2px;overflow:hidden"><div style="width:${Math.round(s.adv/mt*100)}%;height:100%;background:#15803d;border-radius:2px"></div></div>
+          <span style="width:18px;text-align:right;font-weight:600;color:#15803d">${s.adv}</span>
+        </div>
+      </div>
+      <span style="font-size:10.5px;font-weight:600;color:#6a6a7a;background:#eef0f4;padding:2px 7px;border-radius:3px;white-space:nowrap;font-family:Inter,sans-serif">n=${s.total}</span>
+    </div>`;}
+
+  // ── Profile helpers ──
+  const svcDist=cntBy(d,r=>{const v=r[COL.service]||"";if(v.includes("Less than 5")||v.includes("5 वर्ष से कम"))return"< 5 yrs";if(v.includes("6–10"))return"6–10 yrs";if(v.includes("11–15"))return"11–15 yrs";if(v.includes("16–20"))return"16–20 yrs";if(v.includes("20–30"))return"20–30 yrs";if(v.includes("30+"))return"30+ yrs";return"Not specified";});
+  const eduDist=cntBy(d,r=>{const v=(r[COL.education]||"").toLowerCase();if(v.includes("phd")||v.includes("mphil"))return"PhD/MPhil";if(v.includes("postgraduate")||v.includes("स्नातकोत्तर"))return"Post Graduate";if(v.includes("graduate")||v.includes("स्नातक"))return"Graduate";return"Other/NS";});
+  const devDist=cntBy(d,r=>{const v=(r[COL.device]||"").toLowerCase();if(v.includes("both")||v.includes("दोनों"))return"Both (Phone+PC)";if(v.includes("computer")||v.includes("laptop"))return"Computer/Laptop";if(v.includes("smart")||v.includes("phone"))return"Smartphone only";return"Other/NS";});
+  const netDist=cntBy(d,r=>{const v=(r[COL.internet]||"").toLowerCase();if(v.includes("reliable")||v.includes("विश्वसनीय"))return"Reliable";if(v.includes("sometimes"))return"Sometimes unreliable";if(v.includes("not available"))return"Not available";return"Other/NS";});
+  const modeDist=cntBy(d,r=>{const v=(r[COL.mode]||"").toLowerCase();if(v.includes("blended")||v.includes("मिश्रित"))return"Blended";if(v.includes("traditional")||v.includes("classroom")||v.includes("पारंपरिक"))return"Traditional classroom";if(v.includes("online")||v.includes("self-paced"))return"Online self-paced";return"Not specified";});
+  const timeDist=cntBy(d,r=>{const v=r[COL.timeAvail]||"";if(v.includes("Less than 5")||v.includes("से कम"))return"<5 hrs/week";if(v.includes("6–8"))return"6–8 hrs/week";if(v.includes("8–10"))return"8–10 hrs/week";if(v.includes("10+"))return"10+ hrs/week";return"NS";});
+  const trainDist=cntBy(d,r=>{const v=r[COL.training]||"";if(v.includes("No formal")||v.includes("केवल कार्य"))return"No formal training";if(v.includes("Short")||v.includes("अल्पकालिक"))return"Short course/workshop";if(v.includes("Certificate")||v.includes("प्रमाणपत्र"))return"Certificate course";if(v.includes("nline")||v.includes("Coursera"))return"Online course";if(v.includes("degree")||v.includes("Formal"))return"Formal degree";return"Other/NS";});
+  const cfDist={};d.forEach(r=>{const val=r[COL.constraints]||"";if(!val.trim())return;val.split(/,\s*(?=[\u0900-\u097F])/).forEach(c=>{const en=c.match(/\(([^()]+)\)/);const label=en?en[1].trim().substring(0,40):c.substring(0,40);if(label)cfDist[label]=(cfDist[label]||0)+1;});});
+  const bliPri=getPriFreq(d,"BLI");const supPri={};["ASO","DSO","AD","DD","DPO","JD"].forEach(p=>Object.entries(getPriFreq(d,p)).forEach(([k,v])=>supPri[k]=(supPri[k]||0)+v));
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 1 — COVER
+  // ───────────────────────────────────────────────────────────────
+  const p1=`<div class="rpt-pg" style="background:#1a356e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:257mm;padding:20mm">
+    <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;font-family:Inter,sans-serif;margin-bottom:16px">Pahlé India Foundation (PIF), New Delhi &nbsp;·&nbsp; GIZ India Funded Initiative</div>
+    <div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;font-family:Inter,sans-serif;margin-bottom:20px">TRAINING NEEDS ASSESSMENT REPORT</div>
+    <h1 style="font-family:'EB Garamond',Georgia,serif;font-size:38px;font-weight:700;line-height:1.25;max-width:560px;margin-bottom:8px">${divLabel}</h1>
+    <div style="width:80px;height:3px;background:#e07b30;margin:20px auto"></div>
+    <p style="font-size:15px;opacity:.8;max-width:460px;line-height:1.6;font-family:Inter,sans-serif">Directorate of Economics &amp; Statistics<br/>Government of Madhya Pradesh</p>
+    <div style="margin-top:40px;font-size:12px;opacity:.55;font-family:Inter,sans-serif;line-height:1.8">
+      Based on STAT Framework (UNSD/GIST) · Indore Pilot Methodology<br/>
+      Survey Respondents: <strong style="opacity:1">${n}</strong> of ${divExp} expected posts (${pct(n,divExp)}%)<br/>
+      Report Generated: ${today}
+    </div>
+  </div>`;
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 2 — TABLE OF CONTENTS
+  // ───────────────────────────────────────────────────────────────
+  const tocItems=[
+    ["1","Executive Summary & Key Statistics","3"],
+    ["2","Survey Context and Background","4"],
+    ["3","Respondent Profile — Demographics and Readiness","5–6"],
+    ["4","Digital and Learning Infrastructure","7"],
+    ["5","Competency Assessment — BLI Field Staff","8–9"],
+    ["6","Competency Assessment — Supervisory Staff","10–11"],
+    ["7","Post-wise Competency Comparison","12"],
+    ["8","Integrated Prioritisation Matrix","13–14"],
+    ["9","Sequencing and Phase Classification","15"],
+    ["10","Training Priority Areas","16–17"],
+    ["11","Software Training Demand","18–19"],
+    ["12","Division-level Context and State Comparison","20"],
+    ["13","Key Findings","21–22"],
+    ["14","Recommendations","23–25"],
+    ["15","Action Plan Template","26–27"],
+    ["16","Methodology Note","28–30"],
+    ["Annex","Competency Framework Reference (STAT/UNSD/GIST)","31–32"],
+  ];
+  const p2=pg(`
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:#8892a4;font-family:Inter,sans-serif;margin-bottom:6px">Training Needs Assessment Report</div>
+      <h2 style="font-family:'EB Garamond',Georgia,serif;font-size:26px;color:#1a356e">${divLabel}</h2>
+    </div>
+    <div style="font-family:'EB Garamond',Georgia,serif;font-size:20px;font-weight:700;color:#1a356e;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #1a356e">Table of Contents</div>
+    ${tocItems.map(([num,title,pg_])=>`
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed #d6d9e0;font-family:Inter,sans-serif">
+        <span style="font-size:12.5px"><strong style="color:#8892a4;margin-right:10px">${num}.</strong>${title}</span>
+        <span style="font-size:11px;color:#8892a4;white-space:nowrap;margin-left:8px">p. ${pg_}</span>
+      </div>`).join("")}
+    <div style="margin-top:28px;padding:14px 16px;background:#f7f8fa;border-radius:5px;font-size:11px;color:#6a6a7a;line-height:1.7;font-family:Inter,sans-serif">
+      <strong>Note:</strong> This report is auto-generated from live survey data collected through the DES MP Statewide TNA Dashboard. All analysis is based on ${n} responses from ${divLabel} as of ${today}. Findings should be read in conjunction with the state-level dashboard for comparative context.
+    </div>`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 3 — EXECUTIVE SUMMARY
+  // ───────────────────────────────────────────────────────────────
+  const p3=pg(`
+    ${sechdr(1,"Executive Summary & Key Statistics",`${divLabel} · ${today}`)}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+      ${kpiCard(n,"Total Responses",`${pct(n,divExp)}% of ${divExp} expected`,"#1a356e")}
+      ${kpiCard(fmt1(avgComp)+" / 4","Avg Competency Score","0=Not Aware, 4=Expert","#e07b30")}
+      ${kpiCard(fmt1(4-avgComp),"Avg Gap from Expert","Intervention headroom","#b91c1c")}
+      ${kpiCard(immThemes.length,"Immediate Themes","Phase 1A (Score ≥50)","#1a7a4a")}
+      ${kpiCard(ph1bThemes.length,"Phase 1B Themes","Score 35–49","#1a56a0")}
+      ${kpiCard(topSw.key,"Top Software Demand","","#6d28d9")}
+    </div>
+    ${insight(`<strong>Overall assessment:</strong> ${divLabel} has submitted ${n} TNA survey responses representing ${pct(n,divExp)}% of the ${divExp} expected filled posts. The average self-assessed competency score of <strong>${fmt1(avgComp)}/4</strong> indicates that staff are broadly at the <em>${avgComp<1.5?"awareness":"basic-to-working"}</em> level across most competencies — meaning most cannot yet perform core tasks independently and require structured training with guided practice.`,
+    avgComp<2?"#b91c1c":"#1a56a0")}
+    ${para(`<strong>Priority classification:</strong> ${immThemes.length>0?`The Integrated Prioritisation Matrix (Section 8) identifies <strong>${immThemes.length} theme${immThemes.length>1?"s":""}</strong> as Immediate (Phase 1A), requiring urgent training design and delivery in the first cycle. These are: <em>${immThemes.map(t=>t.name).join("; ")}</em>.`:"No themes have yet reached the Immediate threshold (Combined Score ≥50). The highest-priority theme is '"+topTheme.name+"' with a combined score of "+topTheme.combined+". As response counts grow, this may shift."} ${ph1bThemes.length>0?`An additional <strong>${ph1bThemes.length} Phase 1B theme${ph1bThemes.length>1?"s":""}</strong> (${ph1bThemes.map(t=>t.name).join("; ")}) should be scheduled in the same training cycle, following the Immediate themes.`:""}`)}
+    ${para(`<strong>Software demand:</strong> The top requested software is <strong>${topSw.key}</strong>. Demand is predominantly at Beginner level across all tools — consistent with the Indore Division Pilot finding (April 2026) that foundational digital literacy is a prerequisite for all statistical software training. The recommended training progression is: Computer basics + MS Office → e-Office + e-HRMS → Statistical software (STATA, R/Python) → AI Tools.`)}
+    ${para(`<strong>Respondent composition:</strong> BLI staff account for ${pct(postcnt.BLI||0,n)}% of responses (${postcnt.BLI||0} of ${n}), making them the primary voice in this assessment. ASO: ${postcnt.ASO||0}, DSO: ${postcnt.DSO||0}, AD: ${postcnt.AD||0}, DD/DPO: ${(postcnt.DD||0)+(postcnt.DPO||0)}, JD: ${postcnt.JD||0}.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 4 — SURVEY CONTEXT & BACKGROUND
+  // ───────────────────────────────────────────────────────────────
+  const p4=pg(`
+    ${sechdr(2,"Survey Context and Background",`Statewide TNA Survey · DES MP`)}
+    ${para(`The Directorate of Economics and Statistics (DES), Government of Madhya Pradesh, in partnership with Pahlé India Foundation (PIF), New Delhi, under the DES–PIF MoU (signed 21 May 2025) and with funding from GIZ India, conducted a statewide Training Needs Assessment (TNA) survey across all 52 districts, 7 divisional offices, and DES Headquarters. This report presents the division-level findings for <strong>${divLabel}</strong>.`)}
+    ${para(`The TNA survey was designed using the STAT Framework (UNSD/GIST) — the internationally recognised Statistical Capacity Development framework — and validated through the Indore Division Pilot Study (April 2026). The pilot established competency baselines, proficiency scales, and the Integrated Prioritisation Matrix methodology that underpins all analysis in this report.`)}
+    ${para(`The survey was administered through Google Forms embedded in the live DES MP Statewide TNA Dashboard. Staff were directed to post-specific competency sections: BLI (Section 2), ASO (Section 3), DSO/Assistant Director (Section 4), Deputy Director/DPO (Section 5), Joint Director (Section 6). The wrapup section captured demographic data, digital access, preferred training modes, software demand, and constraints common to all posts.`)}
+    <div style="background:#f7f8fa;border:1px solid #d6d9e0;border-radius:6px;padding:16px 20px;margin:16px 0">
+      <div style="font-family:'EB Garamond',Georgia,serif;font-size:16px;font-weight:700;color:#1a356e;margin-bottom:12px">Survey Coverage — ${divLabel}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-family:Inter,sans-serif;font-size:12px">
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Survey period:</strong> June 2026 (ongoing)</div>
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Response count:</strong> ${n} of ${divExp} expected (${pct(n,divExp)}%)</div>
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Posts covered:</strong> BLI, ASO, DSO, AD, DD/DPO, JD</div>
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Competency scale:</strong> 0 (Not Aware) to 4 (Expert)</div>
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Methodology:</strong> STAT Framework (UNSD/GIST)</div>
+        <div style="padding:8px 12px;background:#fff;border-radius:4px;border:1px solid #e8eaef"><strong>Pilot reference:</strong> Indore Division, April 2026</div>
+      </div>
+    </div>
+    ${para(`<strong>Statistical note on sample size:</strong> With ${n} responses, ${n<10?"findings should be treated as directional signals only — a larger sample is needed before drawing firm conclusions":n<30?"patterns are emerging and directionally reliable, though division-level sub-group analyses (by post) require caution given small post-group counts":"the sample is sufficient for division-level analysis at the aggregate level, though individual post-group breakdowns with fewer than 5 responses remain indicative only"}. The dashboard updates live as new responses are submitted.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 5 — RESPONDENT PROFILE
+  // ───────────────────────────────────────────────────────────────
+  const p5=pg(`
+    ${sechdr(3,"Respondent Profile — Demographics","Years of Service · Qualification · Prior Training")}
+    ${para(`This section presents the demographic and background characteristics of the ${n} respondents from ${divLabel}. Understanding the profile of the respondent pool is essential for contextualising competency scores and designing appropriate training interventions — an experienced workforce with limited formal training exposure requires a different pedagogical approach than a younger workforce with stronger academic credentials.`)}
+    ${twoCol(
+      card("Years of Service",barsBlock(topN(svcDist,6),null,(v,m)=>{const p=pct(v,m);return p>=50?"#1a356e":p>=25?"#1a56a0":"#4a72a0";})),
+      card("Highest Qualification",barsBlock(topN(eduDist,5),null))
+    )}
+    ${card("Prior Training Exposure",barsBlock(topN(trainDist,6),null,(v,m)=>{const p=pct(v,m);return p>=40?"#b91c1c":p>=20?"#e07b30":"#1a7a4a";}))}
+    ${insight(`<strong>Profile note:</strong> ${(svcDist["< 5 yrs"]||0)>n*0.4?`A substantial proportion (${pct(svcDist["< 5 yrs"]||0,n)}%) of ${divLabel} respondents have less than 5 years of service, indicating a relatively junior workforce that will benefit from structured foundational training.`:`The ${divLabel} workforce is predominantly mid-career, with the majority having ${Object.entries(svcDist).sort((a,b)=>b[1]-a[1])[0]?.[0]||"6–10"} years of service.`} ${(trainDist["No formal training"]||0)>n*0.3?`Notably, ${pct(trainDist["No formal training"]||0,n)}% report no formal training exposure — this underscores the urgency of the first training cycle.`:"Prior training exposure is mixed, suggesting varied starting points across the division."}`,"#1a56a0")}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 6 — PROFILE CONT.
+  // ───────────────────────────────────────────────────────────────
+  const p6=pg(`
+    ${sechdr(3,"Respondent Profile (continued)","Post-wise participation")}
+    ${twoCol(
+      card("Post-wise Participation",barsBlock([["BLI",postcnt.BLI||0],["ASO",postcnt.ASO||0],["DSO",postcnt.DSO||0],["AD",postcnt.AD||0],["DD/DPO",(postcnt.DD||0)+(postcnt.DPO||0)],["JD",postcnt.JD||0]].filter(x=>x[1]>0),Math.max(...Object.values(postcnt),1),"#1a356e")),
+      card("Preferred Training Mode",barsBlock(topN(modeDist,4),null))
+    )}
+    ${twoCol(
+      card("Weekly Learning Time Available",barsBlock(topN(timeDist,5),null,(v,m)=>{const p=pct(v,m);return p>=40?"#1a7a4a":p>=20?"#e07b30":"#b91c1c";})),
+      card("Main Training Constraints",barsBlock(topN(cfDist,5),null,(v,m)=>{const p=pct(v,m);return p>=40?"#b91c1c":p>=20?"#e07b30":"#1a56a0";}))
+    )}
+    ${insight(`<strong>Training design implications:</strong> ${(modeDist["Traditional classroom"]||0)>=(modeDist["Online self-paced"]||0)?`Traditional classroom sessions are the most preferred mode in ${divLabel} — this should anchor the delivery format for Phase 1A training.`:`Online self-paced and blended formats have significant demand in ${divLabel}, suggesting hybrid delivery models are feasible.`} ${(timeDist["<5 hrs/week"]||0)>n*0.4?`Most respondents have fewer than 5 hours per week available for learning — training modules must be short and modular (under 2 hours each) to fit within working schedules.`:""} Key constraints include: ${Object.entries(cfDist).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join("; ")}.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 7 — DIGITAL INFRASTRUCTURE
+  // ───────────────────────────────────────────────────────────────
+  const p7=pg(`
+    ${sechdr(4,"Digital and Learning Infrastructure","Device access · Internet quality · Readiness")}
+    ${twoCol(
+      card("Device Access",barsBlock(topN(devDist,4),null,(v,m)=>{const p=pct(v,m);return p>=40?"#1a7a4a":p>=20?"#e07b30":"#b91c1c";})),
+      card("Internet Quality",barsBlock(topN(netDist,4),null,(v,m)=>{const p=pct(v,m);return p>=50?"#1a7a4a":p>=25?"#e07b30":"#b91c1c";}))
+    )}
+    ${para(`<strong>Digital infrastructure readiness</strong> is a critical enabler for modern training delivery. The data from ${divLabel} reveals important constraints that must inform the choice of training modalities. ${smartN>0?`<strong>${pct(smartN,n)}% of respondents rely on smartphones</strong> as their primary or only device — this requires all training materials to be mobile-optimised, with minimal download requirements.`:""} ${noIntN>0?`<strong>${pct(noIntN,n)}% report unreliable or unavailable internet</strong> — online-only delivery is not feasible for this segment of the workforce. Blended learning with offline-capable content (downloadable PDFs, pre-loaded modules) should be the default.`:""}`)}
+    <div style="background:#fff3cd;border:1px solid #fcd34d;border-radius:5px;padding:14px 16px;margin:14px 0;font-family:Inter,sans-serif">
+      <div style="font-weight:700;color:#b45309;margin-bottom:8px;font-size:13px">⚠ Digital Readiness Assessment — ${divLabel}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;color:#4a3a00">
+        <div>Smartphone-only access: <strong>${pct(smartN,n)}%</strong> (${smartN} of ${n})</div>
+        <div>Limited/no internet: <strong>${pct(noIntN,n)}%</strong> (${noIntN} of ${n})</div>
+        <div>Reliable internet: <strong>${pct(netDist["Reliable"]||0,n)}%</strong></div>
+        <div>Available <5hrs/week: <strong>${pct(timeDist["<5 hrs/week"]||0,n)}%</strong></div>
+      </div>
+    </div>
+    ${para(`<strong>Recommendation on delivery format:</strong> Based on the infrastructure profile, the recommended delivery approach for ${divLabel} is a <em>blended model</em> — core concepts delivered in face-to-face sessions (2–3 hours per module), supplemented by short offline reference materials. For locations with strong internet access, short online micro-modules (15–20 minutes) can reinforce learning between sessions. Full online-only delivery should not be the primary modality until internet access improves across the division.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 8 — BLI COMPETENCY
+  // ───────────────────────────────────────────────────────────────
+  const bliRC=getRoleComps(d,"BLI");
+  const p8=pg(`
+    ${sechdr(5,"Competency Assessment — BLI Field Staff",`Section 2 · n=${postcnt.BLI||0}`)}
+    ${para(`Block Level Investigators (BLI) are the primary data collection workforce of DES MP. They are responsible for conducting field surveys, administering questionnaires, maintaining field records, and uploading data. Their competency profile directly determines the quality of primary statistical data produced by the department. This section presents self-assessed proficiency ratings for BLI staff from ${divLabel} (n=${postcnt.BLI||0}).`)}
+    ${twoCol(
+      card("Functional Competencies",compBlock(bliRC),"#1a56a0"),
+      card("Domain Competencies",compBlock(bliRC),"#1a7a4a")
+    )}
+    <div style="margin-top:4px;display:flex;justify-content:space-between;font-size:9.5px;color:#8892a4;font-family:Inter,sans-serif;padding:0 2px">
+      <span>0—Not Aware</span><span>1—Basic</span><span>2—Working</span><span>3—Proficient</span><span>4—Expert</span>
+    </div>`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 9 — BLI ANALYSIS
+  // ───────────────────────────────────────────────────────────────
+  const p9=pg(`
+    ${sechdr(5,"BLI Competency Analysis (continued)","Gap analysis and training implications")}
+    ${bliSorted.length>0?`
+    <div style="background:#f7f8fa;border:1px solid #d6d9e0;border-radius:6px;padding:14px 18px;margin-bottom:16px">
+      <div style="font-family:'EB Garamond',Georgia,serif;font-size:15px;font-weight:700;color:#1a356e;margin-bottom:12px">BLI Competency Scorecard — ${divLabel}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-family:Inter,sans-serif;font-size:11.5px;margin-bottom:12px">
+        <div style="background:#fee2e2;border-radius:4px;padding:10px 12px;text-align:center">
+          <div style="font-weight:700;color:#b91c1c;font-size:14px">${fmt1(weakest[1])}</div>
+          <div style="color:#7a2a2a;margin-top:3px">Weakest area</div>
+          <div style="color:#7a2a2a;font-size:10px;margin-top:2px">${weakest[0].substring(0,30)}</div>
+        </div>
+        <div style="background:#d4f0e2;border-radius:4px;padding:10px 12px;text-align:center">
+          <div style="font-weight:700;color:#1a7a4a;font-size:14px">${fmt1(strongest[1])}</div>
+          <div style="color:#0a4a2a;margin-top:3px">Strongest area</div>
+          <div style="color:#0a4a2a;font-size:10px;margin-top:2px">${strongest[0].substring(0,30)}</div>
+        </div>
+        <div style="background:#dbe9f8;border-radius:4px;padding:10px 12px;text-align:center">
+          <div style="font-weight:700;color:#1a356e;font-size:14px">${fmt1(avgComp)}</div>
+          <div style="color:#1a356e;margin-top:3px">Division avg</div>
+          <div style="color:#1a356e;font-size:10px;margin-top:2px">across all roles</div>
+        </div>
+      </div>
+    </div>`:""} 
+    ${para(`<strong>Gap analysis:</strong> The competency data reveals that BLI staff in ${divLabel} show the largest gaps in <strong>${weakest[0]}</strong> (score: ${fmt1(weakest[1])}, gap: ${fmt1(4-weakest[1])} from expert level). This is a critical finding because this competency is central to the BLI role in field data collection. An average score below 2.0 (Working Knowledge) means staff cannot perform this task independently and require active supervision.`)}
+    ${para(`The relatively stronger area is <strong>${strongest[0]}</strong> (score: ${fmt1(strongest[1])}). This can serve as a confidence anchor for training design — starting with areas of relative strength before moving to weaker domains helps build learner confidence and motivation.`)}
+    ${insight(`<strong>Training implication:</strong> BLI training should prioritise structured, hands-on sessions in the weakest competency areas first. Given that BLI staff (n=${postcnt.BLI||0}) constitute the largest post group, training capacity planning must account for their volume. Batch sizes of 20–25 are recommended to ensure adequate trainer attention. Sessions should be scheduled around the survey calendar to minimise disruption to fieldwork.`)}
+    ${para(`<strong>Peer learning potential:</strong> BLI staff with scores at 3 or above (Proficient level) can be identified as peer trainers/mentors. This reduces the cost of formal training while building internal capacity. The TNA dashboard can be filtered by post and division to identify high-performing individuals for this purpose.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 10 — SUPERVISORY COMPETENCY
+  // ───────────────────────────────────────────────────────────────
+  const asoC=getRoleComps(d,"ASO");const dsoC={...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")};
+  const p10=pg(`
+    ${sechdr(6,"Competency Assessment — Supervisory Staff","ASO and DSO/Assistant Director")}
+    ${para(`This section presents competency profiles for supervisory and technical staff from ${divLabel}. ASO (n=${postcnt.ASO||0}) staff coordinate district-level data work and supervise BLI operations. DSO and Assistant Director staff (n=${(postcnt.DSO||0)+(postcnt.AD||0)}) lead district/divisional statistical operations. Their competency gaps determine the quality of oversight and technical support available to field staff.`)}
+    ${twoCol(
+      card(`ASO — Competencies (n=${postcnt.ASO||0})`,compBlock(asoC),"#1a56a0"),
+      card(`DSO / Asst. Director (n=${(postcnt.DSO||0)+(postcnt.AD||0)})`,compBlock(dsoC),"#1a356e")
+    )}
+    <div style="margin-top:4px;display:flex;justify-content:space-between;font-size:9.5px;color:#8892a4;font-family:Inter,sans-serif;padding:0 2px">
+      <span>0—Not Aware</span><span>1—Basic</span><span>2—Working</span><span>3—Proficient</span><span>4—Expert</span>
+    </div>
+    ${insight(`<strong>ASO analysis:</strong> ${Object.keys(asoC).length>0?`ASO staff in ${divLabel} show the weakest profile in ${Object.entries(asoC).sort((a,b)=>a[1]-b[1])[0]?.[0]||"—"}. Given that ASOs are expected to provide technical oversight to BLI staff, gaps in analytical and data management competencies cascade down to affect the quality of field data.`:"Insufficient ASO responses for analysis — at least 3 responses recommended for reliable patterns."} DSO/AD staff are expected to have more advanced competencies given their supervisory role; ${Object.keys(dsoC).length>0?`their average profile reflects ${avg(Object.values(dsoC))<2?"below Working level — indicating systemic capacity constraints at the supervisory tier":"working-level proficiency, which is the minimum needed for effective oversight"}.`:"insufficient responses for sub-group analysis."}`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 11 — SENIOR COMPETENCY
+  // ───────────────────────────────────────────────────────────────
+  const ddC=getRoleComps(d,"DD");const jdC=getRoleComps(d,"JD");
+  const p11=pg(`
+    ${sechdr(6,"Competency Assessment (continued)","Deputy Director/DPO and Joint Director")}
+    ${twoCol(
+      card(`Deputy Director / DPO (n=${(postcnt.DD||0)+(postcnt.DPO||0)})`,compBlock(ddC),"#6d28d9"),
+      card(`Joint Director (n=${postcnt.JD||0})`,compBlock(jdC),"#1a7a4a")
+    )}
+    <div style="margin-top:4px;display:flex;justify-content:space-between;font-size:9.5px;color:#8892a4;font-family:Inter,sans-serif;padding:0 2px">
+      <span>0—Not Aware</span><span>1—Basic</span><span>2—Working</span><span>3—Proficient</span><span>4—Expert</span>
+    </div>
+    ${para(`Deputy Directors and District Planning Officers (n=${(postcnt.DD||0)+(postcnt.DPO||0)}) hold senior supervisory responsibility. Their competency profile in coordination, monitoring, and reporting is critical for institutional effectiveness. Joint Directors (n=${postcnt.JD||0}) are the senior-most field-level officers and are expected to function at Proficient (3) to Expert (4) level across most competencies.`)}
+    ${insight(`<strong>Senior staff training note:</strong> For DD/DPO and JD levels, training should focus on high-leverage areas: data analysis and software (for evidence-based decision-making), coordination and monitoring (for programme oversight), and reporting and documentation (for policy communication). Workshop formats (half-day, peer-discussion based) are more appropriate for senior staff than classroom training.`)}
+    ${para(`<strong>Cascade effect:</strong> When senior staff have low competency in a domain, it creates a supervisory vacuum for junior staff working in that domain. The division's training plan should explicitly address this cascade by ensuring that DSO/AD and DD/JD training is sequenced <em>before or simultaneously</em> with BLI/ASO training in shared competency areas.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 12 — POST-WISE COMPARISON TABLE
+  // ───────────────────────────────────────────────────────────────
+  const allComps=new Set([...Object.keys(bliRC),...Object.keys(asoC),...Object.keys(dsoC),...Object.keys(ddC),...Object.keys(jdC)]);
+  const compTable=`<table style="width:100%;border-collapse:collapse;font-size:10.5px;font-family:Inter,sans-serif">
+    <thead><tr style="background:#1a356e;color:#fff">
+      <th style="padding:8px 10px;text-align:left;font-weight:600">Competency Area</th>
+      <th style="padding:8px 6px;text-align:center">BLI</th>
+      <th style="padding:8px 6px;text-align:center">ASO</th>
+      <th style="padding:8px 6px;text-align:center">DSO/AD</th>
+      <th style="padding:8px 6px;text-align:center">DD/DPO</th>
+      <th style="padding:8px 6px;text-align:center">JD</th>
+    </tr></thead>
+    <tbody>${[...allComps].map((comp,i)=>{
+      const bv=bliRC[comp],av=asoC[comp],dv=dsoC[comp],ddv=ddC[comp],jv=jdC[comp];
+      const cell=(v)=>v!==undefined?`<td style="padding:7px 6px;text-align:center;border-bottom:1px solid #eef0f4;font-weight:600;color:${scCol(v)};background:${i%2===0?"#f7f8fa":"#fff"}">${fmt1(v)}</td>`:`<td style="padding:7px 6px;text-align:center;border-bottom:1px solid #eef0f4;color:#c0c0c0;background:${i%2===0?"#f7f8fa":"#fff"}">—</td>`;
+      return`<tr><td style="padding:7px 10px;border-bottom:1px solid #eef0f4;color:#2a2a3a;background:${i%2===0?"#f7f8fa":"#fff"}">${comp.length>40?comp.substring(0,40)+"…":comp}</td>${cell(bv)}${cell(av)}${cell(dv)}${cell(ddv)}${cell(jv)}</tr>`;
+    }).join("")}</tbody>
+  </table>`;
+  const p12=pg(`
+    ${sechdr(7,"Post-wise Competency Comparison","All roles · ${divLabel}")}
+    ${para(`The table below presents competency scores across all post groups in a single view, enabling rapid identification of shared gaps (where all roles score low), post-specific gaps (where only one role scores low), and relative strengths that can be leveraged for peer training.`)}
+    ${compTable}
+    <div style="margin-top:12px;display:flex;gap:14px;font-size:10px;font-family:Inter,sans-serif;color:#6a6a7a">
+      <span style="color:#dc2626">■ &lt;1 Critical</span><span style="color:#f97316">■ 1–2 Below Working</span>
+      <span style="color:#e07b30">■ 2–3 Working</span><span style="color:#22c55e">■ ≥3 Proficient/Expert</span>
+      <span style="color:#c0c0c0">— No responses</span>
+    </div>`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 13 — INTEGRATED MATRIX
+  // ───────────────────────────────────────────────────────────────
+  const matrixTable=`<div style="border:1px solid #d6d9e0;border-radius:6px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:1.3fr 160px 50px 110px 190px;background:#1a356e;color:#fff;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:Inter,sans-serif">
+      <span>Theme</span><span style="text-align:center">Signals</span><span style="text-align:center">Score</span><span style="text-align:center">Phase</span><span>Sequencing Note</span>
+    </div>
+    ${themes.map((t,i)=>{
+      const cls=t.combined>=50?"#1a356e":t.combined>=35?"#1a56a0":"#64748b";
+      const clsLabel=t.combined>=50?"Immediate (Phase 1A)":t.combined>=35?"Phase 1B":"Reinforcement";
+      return`<div style="background:${i%2===0?"#f7f8fa":"#fff"};display:grid;grid-template-columns:1.3fr 160px 50px 110px 190px;padding:9px 10px;border-top:1px solid #e8eaef;align-items:center;gap:6px;break-inside:avoid">
+        <div style="font-size:11px;font-weight:600;color:#1a1f2e;line-height:1.3;font-family:Inter,sans-serif">${t.name}</div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:#6a6a7a;font-family:Inter,sans-serif"><span style="width:42px">Priority</span><div style="flex:1;background:#eef0f4;height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.pri}%;height:100%;background:#1a56a0;border-radius:2px"></div></div><span style="width:22px;text-align:right">${t.pri}%</span></div>
+          <div style="display:flex;align-items:center;gap:3px;font-size:8.5px;color:#6a6a7a;font-family:Inter,sans-serif"><span style="width:42px">Need</span><div style="flex:1;background:#eef0f4;height:4px;border-radius:2px;overflow:hidden"><div style="width:${t.need}%;height:100%;background:#e07b30;border-radius:2px"></div></div><span style="width:22px;text-align:right">${t.need}%</span></div>
+        </div>
+        <div style="font-family:'EB Garamond',Georgia,serif;font-size:22px;font-weight:700;color:${cls};text-align:center">${t.combined}</div>
+        <div style="text-align:center"><span style="background:${cls};color:#fff;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:3px;font-family:Inter,sans-serif">${clsLabel}</span></div>
+        <div style="font-size:10px;color:#4a5268;line-height:1.4;font-family:Inter,sans-serif">${getSeqNote(t,t.combined)}</div>
+      </div>`;
+    }).join("")}
+  </div>`;
+  const p13=pg(`
+    ${sechdr(8,"Integrated Prioritisation Matrix","Combined Score = (Priority Signal + Need Signal) ÷ 2")}
+    <div style="display:flex;gap:10px;font-size:10px;margin-bottom:12px;font-family:Inter,sans-serif">
+      <span style="background:#1a356e;color:#fff;padding:2px 7px;border-radius:3px;font-weight:700">■ Immediate ≥50</span>
+      <span style="background:#dbe9f8;color:#1a56a0;padding:2px 7px;border-radius:3px;font-weight:700;border:1px solid #1a56a0">■ Phase 1B 35–49</span>
+      <span style="background:#eef0f4;color:#64748b;padding:2px 7px;border-radius:3px;font-weight:700">■ Reinforcement &lt;35</span>
+    </div>
+    ${matrixTable}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 14 — MATRIX METHODOLOGY
+  // ───────────────────────────────────────────────────────────────
+  const p14=pg(`
+    ${sechdr(8,"Matrix Methodology and Interpretation","How to read the Integrated Prioritisation Matrix")}
+    ${para(`The Integrated Prioritisation Matrix is the analytical centrepiece of the TNA methodology, developed and validated through the Indore Division Pilot Study (Pahlé India Foundation, April 2026). It combines two independent signals to avoid the biases of either alone.`)}
+    <div style="background:#f7f8fa;border:1px solid #d6d9e0;border-radius:6px;padding:16px 18px;margin:14px 0;font-family:Inter,sans-serif;font-size:12px">
+      <div style="font-weight:700;color:#1a356e;font-size:14px;margin-bottom:12px">Signal Definitions</div>
+      <div style="margin-bottom:10px;padding:10px 12px;background:#fff;border-radius:4px;border-left:3px solid #1a56a0">
+        <strong>Priority Signal (%)</strong> = Percentage of respondents who selected at least one competency in this theme as a top-3 support need. Measures <em>expressed demand</em> — what staff say they need. Subject to awareness bias (staff cannot select needs they are unaware of).
+      </div>
+      <div style="padding:10px 12px;background:#fff;border-radius:4px;border-left:3px solid #e07b30">
+        <strong>Need Signal (%)</strong> = (4 − weighted average competency score) ÷ 4 × 100, weighted by number of respondents per post group. Measures <em>actual capability gap</em> from expert level. Corrects for awareness bias — a staff member who gives a low score on a competency they did not select as a priority is still captured.
+      </div>
+    </div>
+    ${para(`<strong>Combined Score = (Priority Signal % + Need Signal %) ÷ 2.</strong> The 50:50 weighting treats expressed demand and measured gap as equally valid signals. A theme with a high combined score has both strong demand AND a large gap — the strongest possible signal for training intervention.`)}
+    ${insight(`<strong>For ${divLabel}:</strong> ${immThemes.length>0?`<strong>${immThemes.length} Immediate theme${immThemes.length>1?"s":""}</strong> (${immThemes.map(t=>t.name).join("; ")}) require urgent design and delivery. These should anchor the first training cycle.`:"No themes at Immediate level yet. As responses accumulate, thresholds may change."} ${ph1bThemes.length>0?`Phase 1B themes (${ph1bThemes.map(t=>t.name).join("; ")}) should follow in the same cycle.`:""}`)}
+    ${para(`<strong>Thresholds</strong> follow Table 6.2 of the Indore Division Pilot TNA Report: Immediate ≥50, Phase 1B = 35–49, Reinforcement <35. These were set empirically based on the distribution of combined scores in the Indore Pilot and validated against expert review by PIF and DES officers.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 15 — PRIORITY AREAS
+  // ───────────────────────────────────────────────────────────────
+  const p15=pg(`
+    ${sechdr(10,"Training Priority Areas","Most requested competency areas · ${divLabel}")}
+    ${para(`Respondents were asked to select up to 3 competency areas where they need the most training support. These selections form the Priority Signal in the Integrated Matrix and also provide direct, unmediated insight into what staff perceive as their most urgent learning needs.`)}
+    ${twoCol(
+      card("All Posts — Top Priority Areas",barsBlock(topPriorities.slice(0,10),Math.max(...topPriorities.slice(0,10).map(x=>x[1]),1),(v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";})),
+      card("BLI — Priority Areas",barsBlock(topN(bliPri,8),Math.max(...Object.values(bliPri),1)))
+    )}
+    ${insight(`<strong>Priority note:</strong> Self-reported priorities measure <em>awareness-based demand</em> — staff can only select areas they know about. The Need Signal in the matrix corrects for this by measuring score gaps independently. Where a competency has a high Need Signal but low Priority Signal (staff have a gap but didn't select it as a priority), it typically indicates an awareness deficit — staff don't know what they don't know. These areas require sensitisation workshops before formal training can be effective.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 16 — PRIORITY AREAS CONT.
+  // ───────────────────────────────────────────────────────────────
+  const p16=pg(`
+    ${sechdr(10,"Training Priority Areas (continued)","Supervisory staff priorities")}
+    ${card("ASO / DSO / Senior Officer Priority Areas",barsBlock(topN(supPri,10),Math.max(...Object.values(supPri),1),(v,m)=>{const p=pct(v,m);return p>=60?"#1a356e":p>=35?"#1a56a0":"#4a72a0";}))}
+    ${para(`Senior officer priorities (ASO, DSO, AD, DD/DPO, JD) reflect the training needs of the technical and supervisory cadre. These priorities tend to skew towards analytical, coordination, and reporting competencies — reflecting the supervision and communication demands of their roles.`)}
+    ${para(`<strong>Divergence analysis:</strong> Where BLI and senior officer priorities diverge significantly, it signals that <em>different training programmes are needed for different post groups</em>, rather than a single unified curriculum. The TNA dashboard's post-level filter allows PIF and DES training planners to design post-specific training modules.`)}
+    ${insight(`<strong>Design implication:</strong> Training programmes should be post-differentiated. BLI training can use operational, field-based formats. ASO/DSO training should use case-study and analytical formats. Senior officer training (DD/DPO, JD) is best delivered through workshop discussions, exposure visits, and peer-learning networks rather than traditional classroom instruction.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 17 — SOFTWARE DEMAND
+  // ───────────────────────────────────────────────────────────────
+  const p17=pg(`
+    ${sechdr(11,"Software Training Demand","Desired entry-level · ${divLabel}")}
+    ${para(`Respondents indicated the level at which they would like to receive training for each of 7 software categories. Beginner-level demand indicates a need for foundational training from scratch; Intermediate demand indicates existing basic familiarity and readiness for applied skill development; Advanced demand indicates near-expert practitioners who need specialised or advanced applications training.`)}
+    <div style="background:#fff;border:1px solid #d6d9e0;border-radius:6px;padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;gap:14px;margin-bottom:12px;font-size:10px;color:#6a6a7a;font-family:Inter,sans-serif">
+        <span>🟠 Beginner (foundational)</span><span>🔵 Intermediate (applied)</span><span>🟢 Advanced (specialised)</span>
+      </div>
+      ${sw.filter(s=>s.total>0).map(s=>swRow(s)).join("")}
+    </div>
+    ${insight(`<strong>Software sequencing recommendation:</strong> The predominance of Beginner-level demand across all tools — especially for STATA/EViews, R/Python, and AI Tools — confirms that <strong>foundational digital literacy must precede all statistical software training</strong>. Attempting to deliver advanced software training to staff with basic-level computer skills wastes resources and demoralises learners. The recommended progression is: (1) Computer basics + MS Office → (2) e-Office + e-HRMS → (3) STATA/EViews or R/Python → (4) AI Tools for data analysis.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 18 — SOFTWARE BY POST
+  // ───────────────────────────────────────────────────────────────
+  const p18=pg(`
+    ${sechdr(11,"Software Demand by Post (continued)","Post-specific software needs")}
+    ${para(`Different post groups have different software training needs. BLI staff primarily need computer basics, MS Office, and e-Office for daily fieldwork administration. ASO and DSO staff need statistical software for data analysis. Senior officers need AI tools and data visualisation tools for management decision-making.`)}
+    ${["BLI","ASO","DSO","AD","DD","JD"].map(post=>{
+      const pd=d.filter(r=>normPost(r[COL.post]||"")===post);
+      if(!pd.length) return"";
+      const psw=getSwDemand(pd).filter(s=>s.total>0);
+      if(!psw.length) return"";
+      return card(`${post} (n=${pd.length}) — Software Demand`,
+        psw.map(s=>barRow(s.key,s.total,Math.max(...psw.map(x=>x.total),1),s.color)).join("")
+      );
+    }).join("")}
+    ${insight(`<strong>Investment allocation note:</strong> Given that BLI staff constitute the majority of DES staff, software training budgets should reflect their foundational needs (computer literacy, MS Office, e-Office). Statistical software training (STATA, R/Python) is a higher-priority investment for ASO, DSO, and AD staff, where it directly enhances analytical output quality.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 19 — KEY FINDINGS
+  // ───────────────────────────────────────────────────────────────
+  const p19=pg(`
+    ${sechdr(13,"Key Findings","Evidence-based findings from the TNA data · ${divLabel}")}
+    ${[
+      `Overall average competency score for ${divLabel} is <strong>${fmt1(avgComp)}/4</strong> (gap: ${fmt1(4-avgComp)} from expert level). This indicates that staff are broadly operating at <em>${avgComp<1.5?"awareness level — cannot perform tasks":"basic-to-working level — can perform some tasks with guidance"}</em>. A competency gap of this magnitude signals that <strong>structured training is urgently needed</strong> to build functional independence in core statistical operations.`,
+      immThemes.length>0?`The Integrated Prioritisation Matrix identifies <strong>${immThemes.length} Immediate theme${immThemes.length>1?"s":""} (Phase 1A)</strong> requiring urgent training intervention: <em>${immThemes.map(t=>t.name).join("; ")}</em>. These themes have both high expressed demand and large measured skill gaps — the strongest possible signal for training priority.`:`No themes have yet reached the Immediate threshold (Combined Score ≥50). The highest-priority theme is currently <strong>${topTheme.name}</strong> (combined score: ${topTheme.combined}). As additional responses are collected, the threshold may be crossed.`,
+      `BLI staff (n=${postcnt.BLI||0}) are the largest post group and show ${bliSorted.length>0?`the largest gap in <strong>${weakest[0]}</strong> (score: ${fmt1(weakest[1])}, gap: ${fmt1(4-weakest[1])}). Since BLI staff are the primary data collectors, this gap directly compromises the quality of primary statistical data.`:"significant capacity gaps across multiple competency areas, particularly in field operations and data management."}`,
+      `Software demand is predominantly at Beginner level across all tools. <strong>${topSw.key}</strong> is the most requested software. This confirms that foundational digital literacy is a critical prerequisite — attempting advanced software training without first establishing basic computer skills will not yield sustainable capacity gains.`,
+      smartN>0?`<strong>${pct(smartN,n)}% of ${divLabel} respondents rely on smartphones as their primary device</strong> for digital access. This infrastructure constraint means that online training delivery must be mobile-optimised, with low data requirements. Face-to-face or hybrid delivery is recommended as the primary modality.`:`Device access in ${divLabel} is relatively strong, with most respondents reporting access to a computer or laptop. This enables more robust online training delivery compared to divisions with limited device access.`,
+      `The top 3 stated priority areas across all posts are: <strong>${topPriorities.slice(0,3).map(x=>x[0].substring(0,35)).join("; ")}</strong>. These reflect what staff themselves identify as their most urgent needs and should be reflected in the training programme design.`,
+    ].map((f,i)=>finding(`F${i+1}.`,f)).join("")}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 20 — RECOMMENDATIONS
+  // ───────────────────────────────────────────────────────────────
+  const p20=pg(`
+    ${sechdr(14,"Recommendations","Actionable recommendations for ${divLabel}")}
+    ${[
+      `<strong>Design a 3-phase Training Calendar for ${divLabel}.</strong> Phase 1A (immediate): ${immThemes.length>0?immThemes.map(t=>t.name).join("; "):"prioritise highest combined-score themes"}. Phase 1B (important): ${ph1bThemes.length>0?ph1bThemes.map(t=>t.name).join("; "):"schedule after Phase 1A is complete"}. Reinforcement: embed lower-urgency themes in later cycles as electives. Each phase should have a dedicated budget line and timeline in the divisional training plan.`,
+      `<strong>Prioritise BLI training as the highest-volume intervention.</strong> With ${postcnt.BLI||0} BLI staff, this is the single largest training group. Batch size: 20–25 per cohort. Format: face-to-face, field-based, 2–3 hour modules. Schedule: coordinate with the NSSO/state survey calendar to avoid peak field season. Trainer: PIF resource persons + trained DSO staff as co-facilitators.`,
+      `<strong>Establish digital literacy as a formal prerequisite.</strong> No BLI or ASO staff should be enrolled in STATA, R/Python, or AI Tools training until they have completed and passed a computer literacy and MS Office baseline module. This sequencing rule should be enforced in the training management system.`,
+      `<strong>Deploy a Blended Delivery Model.</strong> Core content: face-to-face (2–3 hours). Reinforcement: offline PDF quick-reference cards distributed during training. Follow-up: short WhatsApp/SMS-based quizzes (10 questions) 2 weeks post-training to check retention. This blended model works even in low-internet environments and is cost-effective at scale.`,
+      `<strong>Build Internal Training Capacity.</strong> Identify BLI and ASO staff who score 3+ (Proficient) in key competency areas. Train them as divisional trainers/mentors through a 2-day trainer-the-trainer programme. This creates a self-sustaining training ecosystem at the division level and reduces long-term dependence on external trainers.`,
+      `<strong>Conduct a Post-Training Competency Reassessment.</strong> 6 months after the first training cycle, re-administer the same competency questionnaire to the same post groups. Compare scores to the baseline in this report to measure training impact. Use the TNA Dashboard (filter by ${dv}) to generate an updated report and track score improvements over time.`,
+    ].map((r,i)=>rec(`R${i+1}.`,r)).join("")}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 21 — ACTION PLAN
+  // ───────────────────────────────────────────────────────────────
+  const p21=pg(`
+    ${sechdr(15,"Action Plan Template","${divLabel} · First Training Cycle")}
+    ${para(`The following action plan template provides a structured framework for implementing the training recommendations. It should be adapted by the DES divisional officer and PIF training coordinator based on local scheduling, budget availability, and response count as the survey data grows.`)}
+    <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif">
+      <thead><tr style="background:#1a356e;color:#fff">
+        <th style="padding:8px 10px;text-align:left">Activity</th>
+        <th style="padding:8px 8px;text-align:center">Target Group</th>
+        <th style="padding:8px 8px;text-align:center">Format</th>
+        <th style="padding:8px 8px;text-align:center">Duration</th>
+        <th style="padding:8px 8px;text-align:center">Timeline</th>
+        <th style="padding:8px 8px;text-align:center">Responsibility</th>
+      </tr></thead>
+      <tbody>${[
+        ["Computer literacy baseline module","BLI, ASO","Face-to-face","1 day (2 sessions)","Month 1–2","DES + PIF"],
+        ["MS Office & e-Office fundamentals","BLI, ASO","Face-to-face","1 day","Month 1–2","DES + PIF"],
+        [immThemes[0]?immThemes[0].name.substring(0,35)+"…":"Priority Theme 1 (Phase 1A)","BLI, ASO","Face-to-face","2 days","Month 2–3","PIF Resource Person"],
+        [immThemes[1]?immThemes[1].name.substring(0,35)+"…":"Priority Theme 2 (Phase 1A)","BLI, ASO","Face-to-face","1.5 days","Month 3–4","PIF Resource Person"],
+        ["Data analysis & statistical software","ASO, DSO, AD","Workshop","1.5 days","Month 4–5","PIF + IASRI/ISI Expert"],
+        [ph1bThemes[0]?ph1bThemes[0].name.substring(0,35)+"…":"Priority Theme (Phase 1B)","All posts","Blended","1 day + online","Month 5–6","PIF + Div Office"],
+        ["Trainer-the-trainer programme","Top-scoring BLI/ASO","Face-to-face","2 days","Month 3","PIF"],
+        ["Post-training reassessment","All trained staff","Online survey","30 min","Month 8","DES + PIF"],
+      ].map((row,i)=>`<tr style="background:${i%2===0?"#f7f8fa":"#fff"}">${row.map((cell,j)=>`<td style="padding:7px ${j===0?"10px":"8px"};border-bottom:1px solid #eef0f4;text-align:${j===0?"left":"center"}">${cell}</td>`).join("")}</tr>`).join("")}
+      </tbody>
+    </table>
+    ${para(`This action plan covers approximately 6–8 months and is designed to deliver the full Phase 1A and Phase 1B training agenda. Budget estimates should be developed separately by PIF in consultation with DES, accounting for trainer fees, venue costs, travel (where applicable), and material production.`)}`);
+
+  // ───────────────────────────────────────────────────────────────
+  // PAGE 22 — METHODOLOGY
+  // ───────────────────────────────────────────────────────────────
+  const p22=pg(`
+    ${sechdr(16,"Methodology Note","Survey design · Proficiency scale · Matrix formula")}
+    ${para(`<strong>Survey Design.</strong> The DES MP Statewide TNA Survey was administered through Google Forms, linked to a live dashboard hosted on GitHub Pages. The survey covers all 52 districts, 7 divisional offices, and DES Headquarters (86 locations total). Staff are directed to post-specific competency sections based on their role. The survey was designed collaboratively by PIF and DES, informed by the STAT Framework (UNSD/GIST) and validated in the Indore Division Pilot Study (April 2026).`)}
+    ${para(`<strong>Proficiency Scale.</strong> The 5-point proficiency scale (0–4) follows the STAT Framework standard: 0 = Not aware / cannot perform; 1 = Basic awareness — knows terms, needs guidance for all tasks; 2 = Working knowledge — can perform with support; 3 = Proficient — can perform independently; 4 = Advanced/Expert — can guide others and troubleshoot. All ratings are self-assessed.`)}
+    ${para(`<strong>Integrated Prioritisation Matrix Formula.</strong> Combined Score = (Priority Signal % + Need Signal %) ÷ 2. Priority Signal = % of respondents selecting at least one competency in the theme as a top-3 need. Need Signal = (4 − weighted average score) ÷ 4 × 100, weighted by post-group respondent count. Thresholds: Immediate ≥50, Phase 1B = 35–49, Reinforcement <35. Method reference: Indore Division Pilot TNA Report, Table 6.1–6.2, PIF, April 2026.`)}
+    ${para(`<strong>Competency Themes.</strong> The 7 themes follow Table 6.1 of the Indore Division Pilot Report exactly: (1) Survey operations and field data collection; (2) Data management, scrutiny and quality assurance; (3) Digital tools and office systems; (4) Data analysis, statistics and software; (5) Statistical, economic and planning concepts; (6) Coordination, monitoring and citizen interface; (7) Reporting, documentation and communication.`)}
+    ${para(`<strong>Limitations.</strong> Self-reported ratings carry social desirability bias (tendency to over-report proficiency). Awareness bias affects Priority Signal (staff cannot select areas they are unaware of) — the Need Signal corrects for this. Division-level findings with fewer than 10 responses should be treated as directional indicators. The TNA dashboard is live and scores will update as more responses are submitted.`)}
+    <div style="text-align:center;font-size:10px;color:#8892a4;padding:18px 0 6px;font-family:Inter,sans-serif;border-top:1px solid #d6d9e0;margin-top:20px">
+      <strong style="color:#1a356e">Pahlé India Foundation (PIF), New Delhi</strong> &nbsp;·&nbsp; GIZ India Funded Initiative &nbsp;·&nbsp; DES MP Statewide TNA Survey<br/>
+      Based on STAT Framework (UNSD/GIST) &nbsp;·&nbsp; Indore Division Pilot Methodology (April 2026) &nbsp;·&nbsp; Generated: ${today}
+    </div>`);
+
+  el.innerHTML=p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23;
 }
+
 function downloadReport(){
   const dv=document.getElementById("rpt-division").value;
   if(!dv){alert("Please select a division first.");return;}
