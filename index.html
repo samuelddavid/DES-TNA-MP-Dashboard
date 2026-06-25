@@ -18,19 +18,9 @@
   --accent-purple:#6d28d9;--accent-purple-light:#ede9fe;
   --saffron:#e07b30;--india-navy:#1a356e;--card-bg:#ffffff;
 }
-body.dark{
-  --bg:#0f1117;--surface:#1a1f2e;--surface2:#232836;--border:#2e3448;--border-light:#2a3040;
-  --text:#e2e6f0;--text-mid:#9aa5bc;--text-dim:#5a6478;
-  --accent-blue:#4a90d9;--accent-blue-light:#1a2d47;
-  --accent-green:#2ea86a;--accent-green-light:#0d2a1a;
-  --accent-amber:#e09040;--accent-amber-light:#2a1e0a;
-  --accent-red:#e05050;--accent-red-light:#2a1010;
-  --accent-purple:#9a70f0;--accent-purple-light:#1e1535;
-  --card-bg:#1a1f2e;--india-navy:#2a3f80;
-}
-body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6;transition:background .3s,color .3s}
-.tog-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:3px 9px;border-radius:12px;cursor:pointer;font-size:11px}
-.tog-btn:hover{background:rgba(255,255,255,.22)}
+/* Dark mode removed */
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.6}
+
 /* Heatmap */
 .heatmap-tbl{width:100%;border-collapse:collapse;font-size:11px}
 .heatmap-tbl th{background:var(--india-navy);color:#fff;padding:7px 8px;text-align:center;font-size:10px;font-weight:600;white-space:normal;line-height:1.3}
@@ -242,9 +232,8 @@ footer p{font-size:10.5px;color:var(--text-dim)}
   <span class="gov-strip-text" data-en="Government of Madhya Pradesh" data-hi="मध्य प्रदेश सरकार">Government of Madhya Pradesh</span>
   <span class="gov-strip-sep">|</span>
   <span class="gov-strip-text">Directorate of Economics &amp; Statistics, MP</span>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
-    <button class="tog-btn" id="lang-btn" onclick="toggleLang()">🌐 हिंदी</button>
-    <button class="tog-btn" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+    <span style="font-size:10px;color:rgba(255,255,255,.5);font-style:italic">GIZ India Funded Initiative</span>
   </div>
 </div>
 
@@ -257,7 +246,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
       <p>Madhya Pradesh · All 7 Divisions + HQ · 52 Districts + Divisional Offices · STAT Framework (UNSD/GIST) · GIZ India Funded Initiative</p>
     </div>
     <div class="header-meta" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <img src="data:image/png;base64,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" alt="Pahlé India Foundation" style="height:44px;object-fit:contain"/>
+      <img src="data:image/png;base64,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" alt="Pahlé India Foundation" style="height:60px;object-fit:contain"/>
       <span class="header-badge"><span class="live-dot"></span>LIVE — Auto Refresh</span>
       <span class="header-date" id="header-date">—</span>
       <span class="header-date">Last refreshed: <span id="refresh-time">—</span></span>
@@ -295,7 +284,6 @@ footer p{font-size:10.5px;color:var(--text-dim)}
       <option value="JD">Joint Director</option>
     </select>
   </div>
-  <button class="refresh-btn" style="margin-left:auto" onclick="loadData()">↻ Refresh</button>
 </div>
 
 <div class="tab-bar">
@@ -307,6 +295,9 @@ footer p{font-size:10.5px;color:var(--text-dim)}
   <button class="tab-btn" onclick="switchTab('software',this)" data-en="Software Demand" data-hi="सॉफ्टवेयर मांग">Software Demand</button>
   <button class="tab-btn" onclick="switchTab('comparison',this)" data-en="Division Comparison" data-hi="संभाग तुलना">Division Comparison</button>
   <button class="tab-btn" onclick="switchTab('tna-report',this)" style="color:var(--accent-red);font-weight:600">📄 TNA Report</button>
+  <div style="margin-left:auto;display:flex;align-items:center;padding-right:8px">
+    <button class="refresh-btn" onclick="loadData()" style="font-size:11px;padding:5px 12px">↻ Refresh</button>
+  </div>
 </div>
 
 <div class="main">
@@ -570,23 +561,11 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1fu274JL-ybQJUc0Xgyeu4L0FgNm0SG2dowlOk5U_nbY/export?format=csv&gid=86946345";
 const REFRESH_MS = 10 * 60 * 1000; // 10 minutes
 
-// ── Language & Theme toggles ──
-let LANG = "en";
-function toggleLang(){
-  LANG = LANG==="en" ? "hi" : "en";
-  document.getElementById("lang-btn").textContent = LANG==="en" ? "🌐 हिंदी" : "🌐 English";
-  document.querySelectorAll("[data-en]").forEach(el=>{
-    el.textContent = LANG==="en" ? el.dataset.en : el.dataset.hi;
-  });
-}
-function toggleTheme(){
-  const dark = document.body.classList.toggle("dark");
-  document.getElementById("theme-btn").textContent = dark ? "☀ Light" : "🌙 Dark";
-}
+// Language/Theme toggles removed — UI simplified
 
 // ── Post expected counts per location ──
 // Correct state-wide totals from DES_Technical_Empl_Jan_2026.xlsx
-const STATE_TOTALS={BLI:200,ASO:153,DSO:23,AD:9,DD:3,DPO:3,JD:3};
+const STATE_TOTALS={BLI:192,ASO:136,DSO:23,AD:9,DD:3,DPO:3,JD:4};
 function getExpPost(post, dvF, dlF){
   if(dvF==="all"&&dlF==="all") return STATE_TOTALS[post]||0;
   let t=0;
@@ -602,7 +581,8 @@ function getExpPost(post, dvF, dlF){
 // BLI filled: 200 total (179 districts + 21 HQ)
 // ASO filled: 153; DSO: 23; AD: 9; DD: 3; DPO: 3; JD: 3
 const REG = {
-  "Bhopal":{"div":"Bhopal","DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── BHOPAL DIVISION ──────────────────────────────────────
+  "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Raisen":{"div":"Bhopal","DSO":1,"ASO":2,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Sehore":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Rajgarh":{"div":"Bhopal","DSO":0,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
@@ -610,9 +590,9 @@ const REG = {
   "Vidisha":{"div":"Bhopal","DSO":1,"ASO":3,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Hoshangabad":{"div":"Bhopal","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Harda":{"div":"Bhopal","DSO":0,"ASO":2,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Divisional Office Bhopal":{"div":"Bhopal","is_div_office":true,"DSO":0,"ASO":5,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
   "DES Headquarters":{"div":"Bhopal","is_hq":true,"DSO":0,"ASO":50,"BLI":21,"DPO":0,"DD":3,"AD":9,"JD":3},
-  "Gwalior":{"div":"Gwalior","DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── GWALIOR DIVISION ──────────────────────────────────────
+  "Divisional Office Gwalior":{"div":"Gwalior","is_div_office":true,"DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Datia":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Guna":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Shivpuri":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
@@ -620,48 +600,47 @@ const REG = {
   "Morena":{"div":"Gwalior","DSO":0,"ASO":1,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Sheopur":{"div":"Gwalior","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Ashoknagar":{"div":"Gwalior","DSO":1,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Divisional Office Gwalior":{"div":"Gwalior","is_div_office":true,"DSO":0,"ASO":3,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Indore":{"div":"Indore","DSO":1,"ASO":3,"BLI":8,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── INDORE DIVISION ──────────────────────────────────────
+  "Divisional Office Indore":{"div":"Indore","is_div_office":true,"DSO":1,"ASO":3,"BLI":8,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Dhar":{"div":"Indore","DSO":0,"ASO":2,"BLI":5,"DPO":1,"DD":0,"AD":0,"JD":0},
   "Jhabua":{"div":"Indore","DSO":1,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Alirajpur":{"div":"Indore","DSO":1,"ASO":2,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Alirajpur":{"div":"Indore","DSO":1,"ASO":1,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Khandwa":{"div":"Indore","DSO":0,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Khargone":{"div":"Indore","DSO":1,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Barwani":{"div":"Indore","DSO":1,"ASO":1,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Khargone":{"div":"Indore","DSO":1,"ASO":0,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Barwani":{"div":"Indore","DSO":1,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
   "Burhanpur":{"div":"Indore","DSO":0,"ASO":9,"BLI":11,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Divisional Office Indore":{"div":"Indore","is_div_office":true,"DSO":1,"ASO":3,"BLI":8,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Jabalpur":{"div":"Jabalpur","DSO":1,"ASO":9,"BLI":11,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Balaghat":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":5,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Chhindwara":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Mandla":{"div":"Jabalpur","DSO":1,"ASO":2,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Narsinghpur":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Seoni":{"div":"Jabalpur","DSO":1,"ASO":3,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Katni":{"div":"Jabalpur","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Dindori":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── JABALPUR DIVISION ──────────────────────────────────────
   "Divisional Office Jabalpur":{"div":"Jabalpur","is_div_office":true,"DSO":1,"ASO":2,"BLI":5,"DPO":1,"DD":0,"AD":0,"JD":0},
-  "Rewa":{"div":"Rewa","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Satna":{"div":"Rewa","DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Shahdol":{"div":"Rewa","DSO":1,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Sidhi":{"div":"Rewa","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Singrauli":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Umaria":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Anuppur":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Balaghat":{"div":"Jabalpur","DSO":0,"ASO":1,"BLI":7,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Chhindwara":{"div":"Jabalpur","DSO":1,"ASO":2,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Mandla":{"div":"Jabalpur","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Narsinghpur":{"div":"Jabalpur","DSO":1,"ASO":3,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Seoni":{"div":"Jabalpur","DSO":1,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Katni":{"div":"Jabalpur","DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Dindori":{"div":"Jabalpur","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── REWA DIVISION ──────────────────────────────────────
   "Divisional Office Rewa":{"div":"Rewa","is_div_office":true,"DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Sagar":{"div":"Sagar","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Chhatarpur":{"div":"Sagar","DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Damoh":{"div":"Sagar","DSO":1,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Panna":{"div":"Sagar","DSO":0,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Tikamgarh":{"div":"Sagar","DSO":1,"ASO":4,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Niwari":{"div":"Sagar","DSO":0,"ASO":4,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Satna":{"div":"Rewa","DSO":0,"ASO":0,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Shahdol":{"div":"Rewa","DSO":1,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Sidhi":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Singrauli":{"div":"Rewa","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Umaria":{"div":"Rewa","DSO":0,"ASO":1,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Anuppur":{"div":"Rewa","DSO":0,"ASO":0,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── SAGAR DIVISION ──────────────────────────────────────
   "Divisional Office Sagar":{"div":"Sagar","is_div_office":true,"DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":1},
-  "Ujjain":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Dewas":{"div":"Ujjain","DSO":1,"ASO":4,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Mandsaur":{"div":"Ujjain","DSO":1,"ASO":2,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Ratlam":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Shajapur":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Neemuch":{"div":"Ujjain","DSO":0,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
-  "Agar Malwa":{"div":"Ujjain","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Chhatarpur":{"div":"Sagar","DSO":0,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Damoh":{"div":"Sagar","DSO":1,"ASO":1,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Panna":{"div":"Sagar","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Tikamgarh":{"div":"Sagar","DSO":1,"ASO":4,"BLI":6,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Niwari":{"div":"Sagar","DSO":0,"ASO":4,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  // ── UJJAIN DIVISION ──────────────────────────────────────
   "Divisional Office Ujjain":{"div":"Ujjain","is_div_office":true,"DSO":1,"ASO":2,"BLI":3,"DPO":1,"DD":0,"AD":0,"JD":0},
+  "Dewas":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":4,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Mandsaur":{"div":"Ujjain","DSO":1,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Ratlam":{"div":"Ujjain","DSO":1,"ASO":2,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Shajapur":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":3,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Neemuch":{"div":"Ujjain","DSO":0,"ASO":1,"BLI":1,"DPO":0,"DD":0,"AD":0,"JD":0},
+  "Agar Malwa":{"div":"Ujjain","DSO":0,"ASO":0,"BLI":2,"DPO":0,"DD":0,"AD":0,"JD":0},
 };
 
 function getExpected(info){
@@ -772,6 +751,14 @@ const DMAP = {
   "आगर मालवा":"Agar Malwa","आगरमालवा":"Agar Malwa","agar malwa":"Agar Malwa",
   "des headquarters":"DES Headquarters","मुख्यालय":"DES Headquarters","des hq":"DES Headquarters",
   "des headquarters bhopal":"DES Headquarters","headquarters bhopal":"DES Headquarters","भोपाल मुख्यालय":"DES Headquarters","des headquarter bhopal":"DES Headquarters",
+  // Division city names map to Divisional Office (they ARE the same office)
+  "bhopal":"Divisional Office Bhopal","भोपाल":"Divisional Office Bhopal",
+  "gwalior":"Divisional Office Gwalior","ग्वालियर":"Divisional Office Gwalior",
+  "indore":"Divisional Office Indore","इंदौर":"Divisional Office Indore","इन्दौर":"Divisional Office Indore",
+  "jabalpur":"Divisional Office Jabalpur","जबलपुर":"Divisional Office Jabalpur",
+  "rewa":"Divisional Office Rewa","रीवा":"Divisional Office Rewa",
+  "sagar":"Divisional Office Sagar","सागर":"Divisional Office Sagar",
+  "ujjain":"Divisional Office Ujjain","उज्जैन":"Divisional Office Ujjain",
   "divisional office bhopal":"Divisional Office Bhopal","संभागीय कार्यालय भोपाल":"Divisional Office Bhopal",
   "divisional office gwalior":"Divisional Office Gwalior","संभागीय कार्यालय ग्वालियर":"Divisional Office Gwalior",
   "divisional office indore":"Divisional Office Indore","संभागीय कार्यालय इन्दौर":"Divisional Office Indore",
