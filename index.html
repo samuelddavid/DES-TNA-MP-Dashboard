@@ -52,7 +52,7 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags,.no-print,
-  header,.header-meta,#rpt-division{display:none!important}
+  header,.header-meta,#rpt-division,#rpt-status{display:none!important}
   .tab-panel{display:none!important}
   #tab-tna-report{display:block!important;padding:0!important;margin:0!important}
   body{font-size:12pt;background:#fff!important;color:#000!important;margin:0;padding:0}
@@ -514,20 +514,23 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 
   <!-- TAB 8: TNA REPORT -->
   <div id="tab-tna-report" class="tab-panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div>
-        <h2 style="font-family:'EB Garamond',serif;font-size:20px;color:var(--india-navy)">Division TNA Report Generator</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-top:4px">Select a division to generate a complete 30–35 page Training Needs Assessment report. Click Download PDF to save.</p>
+        <h2 style="font-family:'EB Garamond',serif;font-size:20px;color:var(--india-navy);margin-bottom:4px">Division TNA Report Generator</h2>
+        <p style="font-size:12px;color:var(--text-dim)">Step 1: Select a division below → Step 2: Review the report → Step 3: Click Download PDF</p>
       </div>
-      <div style="display:flex;gap:10px;align-items:center">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <select class="filter-select" id="rpt-division" onchange="renderReport()" style="font-size:14px;padding:8px 14px;min-width:200px">
           <option value="">— Select Division —</option>
           <option>Bhopal</option><option>Gwalior</option><option>Indore</option>
           <option>Jabalpur</option><option>Rewa</option><option>Sagar</option><option>Ujjain</option>
           <option value="HQ">DES Headquarters</option>
         </select>
-        <button class="pdf-btn no-print" onclick="downloadReport()" style="padding:9px 20px;font-size:13px">⬇ Download PDF</button>
+        <button class="pdf-btn no-print" onclick="downloadReport()" id="rpt-download-btn" style="padding:9px 20px;font-size:13px;opacity:.5;cursor:not-allowed" disabled>⬇ Download PDF</button>
       </div>
+    </div>
+    <div id="rpt-status" style="display:none;background:var(--accent-green-light);border:1px solid var(--accent-green);border-radius:5px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:var(--accent-green);font-weight:600">
+      ✅ Report ready — scroll to review, then click Download PDF
     </div>
     <div id="rpt-content">
       <div class="no-data" style="padding:60px"><div class="no-data-icon">📄</div>Select a division above to generate the report</div>
@@ -2424,16 +2427,140 @@ function renderReport(){
       Based on STAT Framework (UNSD/GIST) &nbsp;·&nbsp; Indore Division Pilot Methodology (April 2026) &nbsp;·&nbsp; Generated: ${today}
     </div>`);
 
-  el.innerHTML=p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23;
+  
+  // ── 8 ADDITIONAL NARRATIVE PAGES ──────────────────────────────
+  // Modelled on Indore Pilot Report prose style
+
+  function pgN(content){return`<div class="rpt-pg">${content}</div>`;}
+
+  // PAGE 23: Background continued - the case for evidence-based training
+  const p23=pgN(`
+    ${SH(1,"Background (continued)","The case for evidence-based capacity building")}
+    ${P("A second aspect of the problem is that generic training programmes often do not produce meaningful improvements in specific performance. Statistical work in organisations is differentiated by post, function, and workflow. Field-level personnel, supervisory staff, and district-level officers engage with different combinations of survey operations, data handling, software tools, reporting systems, coordination mechanisms, and administrative processes. As a result, effective capacity building must move away from broad, undifferentiated training agendas and toward role-relevant, evidence-based workshop design.")}
+    ${P("The STAT-based approach adopted in this study directly addresses this challenge. By directing each respondent to a post-specific competency module — different questions for BLIs, ASOs, DSOs, and senior officers — the instrument captures the actual training needs of each role rather than a generic average. This design choice has a direct consequence for interpretation: findings from this report should not be read as a single undifferentiated picture of DES capacity in "+divLabel+", but as a structured profile of role-specific strengths and gaps that can guide role-differentiated workshop design.")}
+    ${H3("1.1 The Statewide Context")}
+    ${P("The present exercise forms part of a broader statewide roll-out across all seven divisions and DES Headquarters. The Indore Division Pilot (April 2026) established and validated the methodology, questionnaire design, proficiency scale, and prioritisation logic. "+divLabel+" is one of the subsequent divisions in this roll-out. The findings presented here are therefore both a standalone planning tool for "+divLabel+" and a contribution to the comparative divisional evidence base that DES and PIF are building across Madhya Pradesh.")}
+    ${P("As the statewide data accumulates, it will become possible to identify patterns of need that are genuinely common across all divisions — candidates for standardised, state-level training programmes — versus patterns that are division-specific, requiring locally tailored workshops. The current report uses only "+divLabel+" data and is intended primarily for division-level planning. Comparative analysis will be presented in the statewide TNA report when all divisions have completed the survey.")}
+    ${H3("1.2 What This Report Is and Is Not")}
+    ${P("This report is an analytical planning tool for the first training cycle. It presents structured evidence on the training needs of DES staff in "+divLabel+" and translates that evidence into an implementable workshop package. It is not a performance appraisal of individual staff, a HR assessment, or an accountability document. Respondent data has been aggregated and is non-identifying throughout. The report's value lies in informing decisions about what workshops to design, for whom, in what sequence, and through what delivery format.")}
+    ${WB("<strong>Important note on self-assessed data:</strong> All competency ratings in this report are self-reported by survey respondents. They measure perceived proficiency — the respondent's own assessment of their capability — not independently verified performance. Self-reported ratings typically carry social desirability bias, meaning respondents may over-report their proficiency. The integrated analysis partially corrects for this by cross-referencing stated priorities with proficiency scores. Nevertheless, findings should be read as an evidence-based orientation for workshop planning rather than as a definitive audit of performance.")}`);
+
+  // PAGE 24: Competency patterns - the Indore Pilot benchmark comparison
+  const p24=pgN(`
+    ${SH(5,"Competency Assessment — Overall Patterns","Comparison with Indore Pilot benchmark")}
+    ${H3("5.1 How to Read Competency Scores")}
+    ${P("Before examining the specific competency data for "+divLabel+", it is important to interpret the proficiency scale correctly. The scale runs from 0 to 4, and the most important interpretive threshold is the distinction between scores of 2 and 3. A score of 2 means <em>working knowledge with support</em> — the respondent believes they can perform the task but need checking or guidance. A score of 3 means <em>proficient</em> — the respondent believes they can perform the task independently. For operational statistical work, the target level is 3: independent execution without supervision.")}
+    ${P("Average scores clustered around 2.0 — as seen in most DES divisions — suggest that the workforce is not starting from zero, but it has not yet achieved the level of independent operational mastery that statistical quality requires. This is an important distinction. It means the immediate training need is not remedial education but practical consolidation and reinforcement of skills that are partially present. The gap from 2 to 3 is narrower than the gap from 0 to 3, and it can be closed more quickly through well-designed, applied workshop experiences.")}
+    ${H3("5.2 Indore Pilot Benchmark")}
+    ${P("The Indore Division Pilot (April 2026) established a benchmark for comparison. The overall BLI average proficiency score in Indore was 2.02 out of 4. Among ASO respondents, the average was 2.33, and among DSO respondents, 2.45. These values correspond to the boundary between basic awareness and working knowledge — a pattern consistent with a workforce that has practical field experience but has received limited structured training in formal competency development.")}
+    ${P("The "+divLabel+" average of "+fmt1(avgComp)+" out of 4 "+(avgComp>2.3?"places this division above the Indore benchmark, suggesting a relatively stronger starting base for capacity building. This is a positive signal — it implies that the first training cycle can move more quickly to applied and intermediate content rather than beginning purely from foundational orientation.":avgComp<1.8?"places this division somewhat below the Indore benchmark. This reinforces the urgency of early intervention and suggests that the first training cycle should allow additional time for foundational orientation before moving to applied practice.":"is broadly consistent with the Indore benchmark, confirming a similar pattern of partial operational capability that requires practical consolidation across core competencies.")+"")}
+    ${IB("<strong>Key finding on overall competency:</strong> The "+divLabel+" competency profile is best described as one of <em>moderate existing capability with uneven distribution</em>. Staff are not uniformly weak, but most competencies remain at or near the working-knowledge threshold rather than at the independent-proficiency level that operational quality requires. The immediate training priority is consolidation and practical strengthening, not remediation.")}
+    ${H3("5.3 The Pattern of Uneven Capability")}
+    ${P("A broad pattern is visible across responding cadres in "+divLabel+": the respondent group does not appear to be uniformly under-skilled, but it also does not report strong, consistent confidence across most competency areas. Instead, the dominant pattern is one of partial capability — staff generally appear to possess some functional familiarity with their work, but many competencies remain at the level of basic awareness to working knowledge rather than full independent proficiency. The strongest competency in "+divLabel+" — <strong>"+strongest[0]+"</strong> (score: "+fmt1(strongest[1])+") — and the weakest — <strong>"+weakest[0]+"</strong> (score: "+fmt1(weakest[1])+") — together illustrate the range of this uneven profile.")}`);
+
+  // PAGE 25: Priority areas - detailed narrative
+  const p25=pgN(`
+    ${SH(8,"Priority Areas — Interpretation","Reading the demand signals for "+divLabel)}
+    ${H3("8.3 What the Priority Data Tells Us")}
+    ${P("Three broad messages emerge from the stated priority data for "+divLabel+". First, the strongest expressed demand is operational: respondents most often ask for support in the parts of the workflow that shape field execution, data quality, data handling, and day-to-day administrative functioning. This is consistent with the Indore Pilot finding and reflects a structural reality of DES operations: the statistical chain begins with field execution, and weaknesses at that stage propagate forward.")}
+    ${P("Second, digital tools appear as a recurring enabling need rather than a marginal add-on. In the Indore Pilot, digital fluency and data collection/interview methods jointly topped the BLI priority list, each selected by 50% of BLI respondents. This pattern is significant because it places digital competence not in a separate \"IT training\" category but squarely within the operational core of how field staff execute their daily work. e-Office, MS Office, and file/DAK systems are now embedded in routine administrative workflows, and weakness in these tools creates process delays and documentation failures that have direct statistical quality implications.")}
+    ${P("Third, the analytical strand of demand — data analysis, statistical methods, and software — becomes more visible and more concentrated as the analysis moves beyond the BLI frontline. Among ASO and DSO staff, the demand for analytical upskilling is strong and consistent. This creates a layered architecture for the workshop programme: a common operational core for all staff, followed by a more targeted analytical track for the supervisory and technical cadres.")}
+    ${H3("8.4 Interpreting Absence of Priority Selection")}
+    ${P("An important methodological point: when a competency area shows low priority selection but a significant Need Signal gap, this does not mean the area is unimportant. It often indicates an awareness deficit — staff have not selected this area as a priority because they are not yet sufficiently aware of the gap. This is the primary reason the integrated methodology uses both signals rather than relying on expressed demand alone.")}
+    ${P("For "+divLabel+", any theme where the Need Signal substantially exceeds the Priority Signal should be treated as an area requiring sensitisation — a brief introductory session or workshop module that helps staff understand the importance of the competency area before formal training begins. Without this sensitisation step, even well-designed training may face engagement challenges because participants do not yet understand why the content matters for their work.")}
+    ${IB("<strong>Practical implication:</strong> The workshop design for "+divLabel+" should include a brief opening orientation in each session that explicitly connects the workshop content to the specific work tasks respondents encounter daily. This is especially important for competency areas where Need Signal exceeds Priority Signal, signalling that participants may not arrive with a strong pre-existing motivation to learn the content.")}`);
+
+  // PAGE 26: Matrix deep dive - the Indore comparison
+  const p26=pgN(`
+    ${SH(9,"Integrated Matrix — Comparison with Indore Pilot","How "+divLabel+" compares to the statewide benchmark")}
+    ${H3("9.2 The Indore Pilot Baseline")}
+    ${P("The Indore Division Pilot (April 2026) established the first set of combined scores for the seven competency themes. The results were as follows: Survey operations and field data collection: 58.1 (Immediate); Data management, scrutiny and quality assurance: 55.9 (Immediate); Digital tools and office systems: 54.6 (Immediate); Statistical, economic and planning concepts: 37.6 (Phase 1B); Data analysis, statistics and software: 34.8 (Phase 1B); Coordination, monitoring and citizen interface: 30.0 (Reinforcement); Reporting, documentation and communication: 22.2 (Reinforcement).")}
+    ${P("These Indore scores establish a meaningful benchmark for the statewide roll-out. The three Immediate themes in Indore — survey operations, data management, and digital tools — represent the core operational training needs that are most likely to be broadly shared across DES divisions. Where "+divLabel+" shows similar or higher combined scores for these themes, it confirms a common statewide need. Where scores diverge, it signals division-specific emphasis that should shape the local workshop design.")}
+    ${H3("9.3 What Determines the Combined Score in "+divLabel)}
+    ${P("The combined score for "+divLabel+" is influenced by several factors: the distribution of respondents by post (a BLI-heavy sample will produce different priority signals than an ASO-heavy sample); the overall proficiency level (lower average scores produce higher Need Signals); and the specific operational context of the division (different survey workloads, administrative systems, and fieldwork conditions may shift the relative importance of different competency themes).")}
+    ${P("With "+n+" responses, "+( n>=20?"the "+divLabel+" data provides a solid foundation for the matrix calculation, and the combined scores are reasonably stable.":n>=10?"the matrix scores are meaningful but should be treated as early indicators that may shift as more responses are added.":"the matrix scores are early-stage indicators only. The scores will be more reliable and stable once at least 15–20 responses are available from "+divLabel+".")+"")}
+    ${IB("<strong>How to use the matrix for "+divLabel+":</strong> The themes with the highest combined scores in this division are the most defensible first-cycle workshop priorities. If "+( immThemes.length>0?immThemes.length+" themes are at Immediate level ("+immThemes.map(t=>t.name).join(", ")+"), these should anchor the workshop calendar. Phase 1B themes should follow in the same cycle.":"no themes have yet crossed the Immediate threshold (≥50), the top-scoring themes should anchor the workshop calendar with the expectation that scores will be recalibrated as more responses are added.")+" Reinforcement themes should be embedded as modules in later cycles rather than treated as standalone first-cycle workshops.")}`);
+
+  // PAGE 27: Key findings - extended narrative
+  const p27=pgN(`
+    ${SH(13,"Key Findings — Extended Interpretation","Evidence synthesis for "+divLabel)}
+    ${H3("13.4 Evidence Points to a Real and Actionable Demand")}
+    ${P("The pilot does not indicate a weak or diffuse demand for learning. Instead, it presents a clear set of recurring needs associated with day-to-day statistical work. Respondents repeatedly identified support needs in survey operations, digital tools, data handling, reporting systems, and — for the smaller technical group — analytical software and statistical interpretation. This validates the basic premise of the exercise: training in DES must be approached as an operational requirement tied to data quality, workflow efficiency, and documentation rather than as a peripheral professional development activity.")}
+    ${P("The blue (Priority Signal) and orange (Need Signal) values in the matrix reflect two independent channels of evidence pointing toward the same set of workshop priorities. When both channels point to the same themes simultaneously, the evidence for those themes is considerably stronger than when only one channel signals urgency. For "+divLabel+", "+( immThemes.length>0?"the three channels converge clearly on: "+immThemes.map(t=>t.name).join("; ")+". This convergence makes the case for these themes as first-cycle priorities particularly robust.":"the matrix shows the highest convergence for "+topTheme.name+" (combined score: "+topTheme.combined+"). Monitoring the score as more responses arrive will clarify the full first-cycle prioritisation.")+"")}
+    ${H3("13.5 The Distinction Between Operational and Analytical Needs")}
+    ${P("A central interpretive finding of the STAT-based assessment — confirmed in the Indore Pilot and likely to recur in "+divLabel+" as data accumulates — is the distinction between operational needs (which are broad, shared, and urgent) and analytical needs (which are concentrated, post-specific, and important but less immediately universal). Operational needs relate to the execution and quality control of statistical fieldwork, the use of digital systems, and the documentation and reporting of statistical outputs. Analytical needs relate to interpreting data, applying statistical methods, using software tools for analysis, and connecting statistical outputs with economic and planning frameworks.")}
+    ${P("This distinction has a direct implication for workshop architecture. The first training cycle should be designed around the operational needs first, because these are the most widely shared and most immediately connected to the quality of primary statistical data. The analytical layer should then be added as a targeted track, designed specifically for ASO and DSO staff, and sequenced after the operational foundation is in place. Attempting to deliver analytical training before the operational core is strengthened typically produces poor uptake and limited transfer to work practice.")}
+    ${IB("<strong>The core design principle for "+divLabel+":</strong> Begin with a common operational core for BLI and ASO staff covering survey operations, data management, digital tools, and reporting. Add a targeted analytical track for ASO/DSO staff in Phase 1B. This structure produces the highest expected return on training investment because it addresses the most broadly shared needs first, then deepens the analytical capacity of the staff who need it most.")}`);
+
+  // PAGE 28: Recommendations narrative
+  const p28=pgN(`
+    ${SH(14,"Recommendations — Rationale and Logic","Why these workshops, in this sequence")}
+    ${H3("14.3 Recommendation Logic")}
+    ${P("The recommended workshop package is not a simple list of the most frequently selected topics. Instead, it is the outcome of a structured translation from evidence themes to workshop-ready interventions. The process involves three steps: first, identifying which themes have the highest combined scores in the integrated matrix; second, checking whether those themes can be delivered feasibly given the time, device, and connectivity constraints reported by respondents; and third, designing a sequenced package that builds skills progressively rather than jumping between unrelated topics.")}
+    ${P("The first three workshops in the recommended package — survey operations and field data quality, data management and scrutiny, and digital tools and e-Office workflow — are directly anchored in the highest-ranked themes from the integrated analysis and form the immediate operational core. Workshop 4 on reporting, file/DAK, and documentation is included because operational strengthening cannot be sustained without better documentation, record discipline, and statistical communication — these are the practices through which improved field and data skills are preserved and communicated upward. Workshop 5 on applied data analysis and statistical software is retained as a targeted technical stream because the analytical need is concentrated in the ASO layer — critical for a smaller but strategically important group that determines the quality of district-level statistical outputs.")}
+    ${H3("14.4 The Role of Sequencing")}
+    ${P("Sequencing matters as much as content selection. In the Indore Pilot, the recommended implementation pathway placed survey operations and data quality first (Phase 1A), followed by digital tools and workflow management, and then the analytical track for ASO staff. This sequence reflects a pedagogical logic: each workshop builds on capabilities developed in the previous one. Survey operations training creates awareness of data quality issues at source. Data management training addresses how to handle and scrutinise the data collected. Digital tools training provides the technical infrastructure for better documentation and reporting. The analytical track then builds on this operational foundation to introduce more sophisticated interpretive and analytical capabilities.")}
+    ${P("For "+divLabel+", the recommended sequence should follow the same logic, adapted where necessary to the specific competency profile of the division. If the "+( immThemes.length>0?"Immediate themes in this division include "+immThemes[0].name+", this should be the first workshop delivered.":"matrix does not yet show Immediate themes, the workshop sequence should follow the statewide benchmark from the Indore Pilot: survey operations and data quality first, then data management, then digital tools.")+"")}
+    ${IB("<strong>Sequencing principle:</strong> Do not attempt to deliver all workshops simultaneously or in a single intensive week. The research base on adult learning in professional settings consistently shows that spaced learning — with time for participants to apply new skills between sessions — produces significantly better retention and transfer to practice than massed delivery. A 6–8 month delivery timeline for the five-workshop package allows for application between sessions and creates a natural review cycle.")}`);
+
+  // PAGE 29: Wider roll-out narrative
+  const p29=pgN(`
+    ${SH(16,"Implications for Wider Roll-out","From "+divLabel+" to the state-level learning strategy")}
+    ${H3("16.3 The Value of This Exercise Beyond "+divLabel)}
+    ${P("The present exercise is not only a planning tool for "+divLabel+". Like the Indore Division Pilot that preceded it, it demonstrates that a structured STAT-based assessment can generate actionable evidence for workshop design at the division level. The findings from "+divLabel+" therefore have two levels of significance: immediate value for identifying priority workshops for current staff, and strategic value as part of the broader DES capacity-building process across Madhya Pradesh.")}
+    ${P("From a state-level perspective, the accumulating divisional data will allow DES and PIF to build a comparative picture of training needs across all seven divisions and DES Headquarters. Where needs are consistent across divisions — as the Indore Pilot suggested for survey operations, data management, and digital tools — this creates the case for statewide common workshops that can be delivered efficiently through a centralised training programme. Where needs diverge, it creates the case for division-specific supplementary workshops that address local capacity gaps.")}
+    ${H3("16.4 Building Institutional Capacity for Training Management")}
+    ${P("A longer-term implication of the statewide TNA exercise is the need to build DES's own institutional capacity for managing training. Currently, the training needs assessment and workshop design are led by PIF with DES as the implementing partner. As the process matures, DES should progressively take on more of the coordination, facilitation, and monitoring functions. This is consistent with the GIZ project's objective of strengthening statistical capacity in a sustainable way — not creating a permanent dependency on external technical assistance, but rather building the institutional systems and human resources that allow DES to manage its own capacity development.")}
+    ${P("The TNA dashboard developed as part of this project provides a practical foundation for institutionalising training management. By maintaining a live, division-level view of competency profiles and training priorities, it enables DES to monitor capacity trends over time, identify emerging gaps as the statistical work programme evolves, and evaluate the impact of training interventions through pre/post score comparisons. This is a significant institutional asset that DES should invest in maintaining and expanding after the GIZ project concludes.")}
+    ${H3("16.5 Conclusion")}
+    ${P("This report set out to identify the immediate workshop needs emerging from the TNA survey for "+divLabel+". The analysis shows that the first training cycle should be practical, selective, and tightly connected to work processes. The strongest immediate needs lie in the operational core of statistical work: survey and field data quality, data management and scrutiny, digital and e-office workflows, and reporting and file systems. At the same time, the evidence supports a smaller but important analytical track, especially for ASO and similarly placed personnel.")}
+    ${P("The broader significance of the exercise is equally important. It demonstrates that DES, Madhya Pradesh, can use a structured STAT-based assessment process to prioritise workshops based on evidence rather than assumption. This is the principal value of the exercise for the wider state system. The central lesson is clear: targeted, evidence-based, role-relevant training is more likely to strengthen the statistical system than broad, generic, and weakly prioritised training efforts.")}`);
+
+  // PAGE 30: Final methodology and closing
+  const p30=pgN(`
+    ${SH(17,"Methodology Note and Limitations","Complete reference documentation")}
+    ${H3("17.1 Survey Design")}
+    ${P("The DES MP Statewide TNA Survey was administered through Google Forms connected to a live dashboard hosted on GitHub Pages. The survey covers all 52 districts, 7 divisional offices, and DES Headquarters — 61 locations in total. Staff were directed to post-specific competency sections based on their role. The questionnaire was designed collaboratively by PIF and DES, informed by the STAT Framework (UNSD/GIST) and validated in the Indore Division Pilot Study (April 2026). All data flows automatically from Google Forms into the dashboard without manual data entry, enabling real-time analysis.")}
+    ${H3("17.2 Proficiency Scale")}
+    ${P("The 5-point proficiency scale follows the STAT Framework standard: 0 = Not aware / cannot perform; 1 = Basic awareness — knows key terms, needs guidance for all tasks; 2 = Working knowledge — can perform with support or checking; 3 = Proficient — can perform independently without guidance; 4 = Advanced/Expert — can guide others and troubleshoot. The most important operational threshold is between 2 and 3: the transition from guided to independent performance. All ratings are self-assessed.")}
+    ${H3("17.3 Integrated Prioritisation Formula")}
+    ${P("Combined Score = (Priority Signal % + Need Signal %) ÷ 2. Priority Signal = percentage of respondents who selected at least one competency in the theme as a top-3 support need. Need Signal = (4 − weighted average competency score) ÷ 4 × 100, where the weighted average is calculated by weighting each post group's average score by the number of respondents in that group. Classification thresholds: Immediate ≥50, Phase 1B = 35–49, Reinforcement <35. These thresholds follow Table 6.2 of the Indore Division Pilot TNA Report, Pahlé India Foundation (PIF), New Delhi, April 2026.")}
+    ${H3("17.4 Competency Themes")}
+    ${P("The seven themes follow exactly Table 6.1 of the Indore Division Pilot TNA Report: (1) Survey operations and field data collection; (2) Data management, scrutiny and quality assurance; (3) Digital tools and office systems; (4) Data analysis, statistics and software; (5) Statistical, economic and planning concepts; (6) Coordination, monitoring and citizen interface; (7) Reporting, documentation and communication.")}
+    ${H3("17.5 Limitations")}
+    ${P("First, self-reported ratings carry social desirability bias — staff may over-report proficiency. Second, awareness bias means staff cannot select priority areas they are unaware of — the Need Signal corrects for this but does not fully eliminate the issue. Third, district-level patterns within the division should be treated as indicative where response counts are small (fewer than 5). Fourth, the assessment relied on only the individual learning needs questionnaire — the institutional manager questionnaire and other STAT components were outside the scope of this exercise. Fifth, findings reflect perceptions at a single point in time; as training cycles are completed, the competency profile should be reassessed to track improvement.")}
+    <div style="text-align:center;font-size:10px;color:#888;padding:18px 0 6px;font-family:Inter,sans-serif;border-top:1px solid ${CV.border};margin-top:20px"><strong style="color:${CV.navy}">Pahlé India Foundation (PIF), New Delhi</strong>  ·  GIZ India Funded Initiative  ·  DES MP Statewide TNA Survey<br/>Based on STAT Framework (UNSD/GIST)  ·  Indore Division Pilot Methodology (April 2026)  ·  Generated: ${today}</div>`);
+
+  el.innerHTML=p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23+p24+p25+p26+p27+p28+p29+p30;
+  // Enable download button and show status
+  const btn=document.getElementById("rpt-download-btn");
+  if(btn){btn.disabled=false;btn.style.opacity="1";btn.style.cursor="pointer";}
+  const status=document.getElementById("rpt-status");
+  if(status){status.style.display="block";status.textContent=`✅ Report ready for ${divLabel} (22 pages) — scroll to review, then click Download PDF`;}
 }
 
 function downloadReport(){
   const dv=document.getElementById("rpt-division").value;
-  if(!dv){alert("Please select a division first.");return;}
+  if(!dv){
+    alert("Please select a division first, then click Download PDF.");
+    return;
+  }
+  // Check if the report content has been generated
+  const el=document.getElementById("rpt-content");
+  const isGenerated=el&&el.querySelector(".rpt-pg");
+  if(!isGenerated){
+    // Generate it first, then print
+    renderReport();
+  }
+  // Switch to the TNA Report tab so print captures the right content
+  switchTab("tna-report",null);
   const divLabel=dv==="HQ"?"DES-Headquarters":dv+"-Division";
   document.title=`TNA Report — ${divLabel} — DES MP`;
-  window.print();
-  setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},3000);
+  // Wait for DOM to fully render, then print
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},3000);
+  },400);
 }
 
 // ── UI ──
