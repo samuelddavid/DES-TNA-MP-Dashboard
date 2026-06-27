@@ -1968,7 +1968,8 @@ function renderReport(){
   function barsBlock(items,maxV,colorFn){
     if(!items||!items.length) return`<p style="color:#8892a4;font-size:11px;padding:8px 0;font-family:Inter,sans-serif">No data available for this unit.</p>`;
     const mv=maxV||Math.max(...items.map(x=>x[1]),1);
-    return items.map(([l,v])=>barRow(l,v,mv,colorFn?colorFn(v,mv):"#1a356e")).join("");
+    const cf=typeof colorFn==="function"?colorFn:(typeof colorFn==="string"?()=>colorFn:null);
+    return items.map(([l,v])=>barRow(l,v,mv,cf?cf(v,mv):"#1a356e")).join("");
   }
   function compBlock(comps){
     const items=Object.entries(comps).sort((a,b)=>a[1]-b[1]);
@@ -2158,7 +2159,6 @@ function renderReport(){
   // ───────────────────────────────────────────────────────────────
   // PAGE 8 — BLI COMPETENCY
   // ───────────────────────────────────────────────────────────────
-  const bliRC=getRoleComps(d,"BLI");
   const p8=pg(`
     ${sechdr(5,"Competency Assessment — BLI Field Staff",`Section 2 · n=${postcnt.BLI||0}`)}
     ${para(`Block Level Investigators (BLI) are the primary data collection workforce of DES MP. They are responsible for conducting field surveys, administering questionnaires, maintaining field records, and uploading data. Their competency profile directly determines the quality of primary statistical data produced by the department. This section presents self-assessed proficiency ratings for BLI staff from ${divLabel} (n=${postcnt.BLI||0}).`)}
@@ -2204,7 +2204,6 @@ function renderReport(){
   // ───────────────────────────────────────────────────────────────
   // PAGE 10 — SUPERVISORY COMPETENCY
   // ───────────────────────────────────────────────────────────────
-  const asoC=getRoleComps(d,"ASO");const dsoC={...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")};
   const p10=pg(`
     ${sechdr(6,"Competency Assessment — Supervisory Staff","ASO and DSO/Assistant Director")}
     ${para(`This section presents competency profiles for supervisory and technical staff from ${divLabel}. ASO (n=${postcnt.ASO||0}) staff coordinate district-level data work and supervise BLI operations. DSO and Assistant Director staff (n=${(postcnt.DSO||0)+(postcnt.AD||0)}) lead district/divisional statistical operations. Their competency gaps determine the quality of oversight and technical support available to field staff.`)}
@@ -2220,7 +2219,6 @@ function renderReport(){
   // ───────────────────────────────────────────────────────────────
   // PAGE 11 — SENIOR COMPETENCY
   // ───────────────────────────────────────────────────────────────
-  const ddC=getRoleComps(d,"DD");const jdC=getRoleComps(d,"JD");
   const p11=pg(`
     ${sechdr(6,"Competency Assessment (continued)","Deputy Director/DPO and Joint Director")}
     ${twoCol(
