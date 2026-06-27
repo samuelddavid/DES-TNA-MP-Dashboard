@@ -1879,6 +1879,11 @@ function getSeqNote(t,score){
 function renderReport(){
   const dv=document.getElementById("rpt-division").value;
   const el=document.getElementById("rpt-content");
+  // Reset status and content immediately when division changes
+  const statusEl=document.getElementById("rpt-status");
+  if(statusEl){statusEl.style.display="none";}
+  const btnEl=document.getElementById("rpt-download-btn");
+  if(btnEl){btnEl.disabled=true;btnEl.style.opacity=".5";btnEl.style.cursor="not-allowed";}
   if(!dv){el.innerHTML='<div class="no-data" style="padding:60px"><div class="no-data-icon">📄</div>Select a division above to generate the report</div>';return;}
   const d=getDivData(dv);
   const divLabel=dv==="HQ"?"DES Headquarters, Bhopal":dv+" Division";
@@ -1909,6 +1914,12 @@ function renderReport(){
   const bliSorted=Object.entries(bliComps).sort((a,b)=>a[1]-b[1]);
   const weakest=bliSorted[0]||["—",0];
   const strongest=bliSorted[bliSorted.length-1]||["—",0];
+  // Supervisory competency vars used across multiple pages
+  const asoC=getRoleComps(d,"ASO");
+  const dsoC={...getRoleComps(d,"DSO"),...getRoleComps(d,"AD")};
+  const ddC={...getRoleComps(d,"DD"),...getRoleComps(d,"DPO")};
+  const jdC=getRoleComps(d,"JD");
+  const bliRC=bliComps;
   const smartN=d.filter(r=>(r[COL.device]||"").toLowerCase().includes("smart")).length;
   const noIntN=d.filter(r=>{const v=(r[COL.internet]||"").toLowerCase();return v.includes("not available")||v.includes("sometimes");}).length;
   const bliBeLow=d.filter(r=>normPost(r[COL.post]||"")==="BLI"&&COL.allCompCols&&COL.allCompCols.some(col=>{const v=parseFloat(r[col]);return!isNaN(v)&&v<2;})).length;
