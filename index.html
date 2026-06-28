@@ -96,8 +96,8 @@ select.filter-select:focus{border-color:var(--accent-blue)}
 .tab-btn{font-family:"Inter",sans-serif;font-size:12px;font-weight:500;color:var(--text-mid);background:none;border:none;border-bottom:2px solid transparent;padding:12px 18px;cursor:pointer;white-space:nowrap;transition:all .15s}
 .tab-btn:hover{color:var(--india-navy)}
 .tab-btn.active{color:var(--india-navy);border-bottom-color:var(--saffron);font-weight:600}
-.main{padding:28px 40px 60px;max-width:1400px;margin:0 auto}
-.tab-panel{display:none}.tab-panel.active{display:block}
+.main{padding:20px 40px 20px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block;min-height:0}
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 .loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--india-navy);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -239,13 +239,11 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 </div>
 <div id="tooltip"></div>
 
-<div class="gov-strip">
-  <span class="gov-strip-text" data-en="Government of Madhya Pradesh" data-hi="मध्य प्रदेश सरकार">Government of Madhya Pradesh</span>
-  <span class="gov-strip-sep">|</span>
-  <span class="gov-strip-text">Directorate of Economics &amp; Statistics, MP</span>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-    <span style="font-size:10px;color:rgba(255,255,255,.5);font-style:italic">GIZ India Funded Initiative</span>
-  </div>
+<div class="gov-strip" style="padding:6px 40px;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0f1b3d 0%,#1a356e 100%)">
+  <span style="font-size:11px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.92);font-family:Inter,sans-serif">GOVERNMENT OF MADHYA PRADESH</span>
+  <span style="color:rgba(255,255,255,.3);font-size:10px">|</span>
+  <span style="font-size:11px;font-weight:500;letter-spacing:.03em;color:rgba(255,255,255,.75);font-family:Inter,sans-serif">DIRECTORATE OF ECONOMICS &amp; STATISTICS, MP</span>
+  <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:.02em">GIZ India Funded Initiative</span>
 </div>
 
 <header>
@@ -567,7 +565,7 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 </div>
 
 <footer>
-  <p>Based on <strong>STAT Framework (UNSD/GIST)</strong> · GIZ India Funded Initiative · Indore Division Pilot: April 2026</p>
+  <p>Based on <strong>STAT Framework (UNSD/GIST)</strong> · GIZ India Funded Initiative</p>
   <p><strong>Pahlé India Foundation (PIF), New Delhi</strong> · Developed by Samuel D. David · Data: Google Forms → Sheets · Live · Auto-refreshes every 10 min</p>
 </footer>
 
@@ -2024,7 +2022,7 @@ function renderReport(){
     <div style="width:80px;height:3px;background:#e07b30;margin:20px auto"></div>
     <p style="font-size:15px;opacity:.8;max-width:460px;line-height:1.6;font-family:Inter,sans-serif">Directorate of Economics &amp; Statistics<br/>Government of Madhya Pradesh</p>
     <div style="margin-top:40px;font-size:12px;opacity:.55;font-family:Inter,sans-serif;line-height:1.8">
-      Based on STAT Framework (UNSD/GIST) · Indore Pilot Methodology<br/>
+      Based on STAT Framework (UNSD/GIST)<br/>
       Survey Respondents: <strong style="opacity:1">${n}</strong> of ${divExp} expected posts (${pct(n,divExp)}%)<br/>
       Report Generated: ${today}
     </div>
@@ -2433,7 +2431,7 @@ function renderReport(){
     ${para(`<strong>Limitations.</strong> Self-reported ratings carry social desirability bias (tendency to over-report proficiency). Awareness bias affects Priority Signal (staff cannot select areas they are unaware of) — the Need Signal corrects for this. Division-level findings with fewer than 10 responses should be treated as directional indicators. The TNA dashboard is live and scores will update as more responses are submitted.`)}
     <div style="text-align:center;font-size:10px;color:#8892a4;padding:18px 0 6px;font-family:Inter,sans-serif;border-top:1px solid #d6d9e0;margin-top:20px">
       <strong style="color:#1a356e">Pahlé India Foundation (PIF), New Delhi</strong> &nbsp;·&nbsp; GIZ India Funded Initiative &nbsp;·&nbsp; DES MP Statewide TNA Survey<br/>
-      Based on STAT Framework (UNSD/GIST) &nbsp;·&nbsp; Indore Division Pilot Methodology (April 2026) &nbsp;·&nbsp; Generated: ${today}
+      Based on STAT Framework (UNSD/GIST) &nbsp;·&nbsp; Generated: ${today}
     </div>`);
 
   
@@ -2533,7 +2531,7 @@ function renderReport(){
     ${para("Combined Score = (Priority Signal % + Need Signal %) ÷ 2. Priority Signal = % selecting at least one theme competency as a top-3 need. Need Signal = (4 − weighted average score) ÷ 4 × 100, weighted by post-group respondent count. Phases: Immediate ≥50, Phase 1B = 35–49, Reinforcement <35. Method follows Table 6.1–6.2 of the Indore Division Pilot TNA Report, Pahlé India Foundation (PIF), New Delhi, April 2026.")}
     <h3 style="font-family:'EB Garamond',Georgia,serif;font-size:16px;font-weight:700;color:#1a356e;margin:15px 0 8px">17.4 Limitations</h3>
     ${para("Self-reported ratings carry social desirability bias and measure perceived rather than verified proficiency. Awareness bias means staff cannot select areas they are unaware of — the Need Signal corrects for this. District-level patterns with fewer than 5 responses should be treated as indicative only. This assessment used only the individual learning needs questionnaire — the institutional manager questionnaire and other STAT components were outside its scope. Findings reflect perceptions at a single point in time; the competency profile should be reassessed after each training cycle to track improvement.")}
-    <div style="text-align:center;font-size:10px;color:#888;padding:18px 0 6px;font-family:Inter,sans-serif;border-top:1px solid #d6d9e0;margin-top:20px"><strong style="color:#1a356e">Pahlé India Foundation (PIF), New Delhi</strong>  ·  GIZ India Funded Initiative  ·  DES MP Statewide TNA Survey<br/>Based on STAT Framework (UNSD/GIST)  ·  Indore Division Pilot Methodology (April 2026)  ·  Generated: ${today}</div>`);
+    <div style="text-align:center;font-size:10px;color:#888;padding:18px 0 6px;font-family:Inter,sans-serif;border-top:1px solid #d6d9e0;margin-top:20px"><strong style="color:#1a356e">Pahlé India Foundation (PIF), New Delhi</strong>  ·  GIZ India Funded Initiative  ·  DES MP Statewide TNA Survey<br/>Based on STAT Framework (UNSD/GIST)  ·  Generated: ${today}</div>`);
 
   el.innerHTML=p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23+p24+p25+p26+p27+p28+p29+p30;
   // Enable download button and show status
@@ -2547,22 +2545,24 @@ function downloadReport(){
     alert("Please select a division first, then click Download PDF.");
     return;
   }
-  // Check if the report content has been generated
   const el=document.getElementById("rpt-content");
   const isGenerated=el&&el.querySelector(".rpt-pg");
   if(!isGenerated){
-    // Generate it first, then print
     renderReport();
   }
-  // Switch to the TNA Report tab so print captures the right content
-  switchTab("tna-report",null);
+  // Ensure TNA Report tab is active
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-tna-report").classList.add("active");
   const divLabel=dv==="HQ"?"DES-Headquarters":dv+"-Division";
-  document.title=`TNA Report — ${divLabel} — DES MP`;
-  // Wait for DOM to fully render, then print
-  setTimeout(()=>{
-    window.print();
-    setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},3000);
-  },400);
+  document.title="TNA Report - "+divLabel+" - DES MP";
+  // Longer delay to ensure full render, then print
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      window.print();
+      setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},3000);
+    });
+  });
 }
 
 // ── UI ──
