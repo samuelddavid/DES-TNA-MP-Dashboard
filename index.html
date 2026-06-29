@@ -255,8 +255,8 @@ footer p{font-size:10.5px;color:var(--text-dim)}
 /* ============================================================
    FIX 2: REPORT PAGE STYLES — each .rpt-pg = one A4 page
    ============================================================ */
-.rpt-pg{min-height:297mm;box-sizing:border-box;background:#fff;padding:12mm 18mm 22mm;position:relative;page-break-before:always;break-before:page}
-.rpt-pg:first-child{page-break-before:avoid;break-before:auto}
+.rpt-pg{min-height:297mm;box-sizing:border-box;background:#fff;padding:12mm 18mm 22mm;position:relative}
+
 .rpt-cover-pg{padding:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important}
 .rpt-page-footer{position:absolute;bottom:8mm;left:18mm;right:18mm;display:flex;justify-content:space-between;align-items:center;padding-top:3mm;border-top:1px solid #d1d5db;font-size:8pt;color:#9ca3af;font-family:Arial,sans-serif}
 .rpt-cover-pg .rpt-page-footer{display:none!important}
@@ -2620,11 +2620,12 @@ async function downloadReport(){
   const dv=document.getElementById("rpt-division").value;
   if(!dv){alert("Please select a division first, then click Download PDF.");return;}
 
+  // Render report if not yet generated
   const el=document.getElementById("tna-report-container");
   const isGenerated=el&&el.querySelector(".rpt-pg");
-  if(!isGenerated){renderReport();await new Promise(r=>setTimeout(r,400));}
+  if(!isGenerated){renderReport();await new Promise(r=>setTimeout(r,500));}
 
-  // Ensure TNA Report tab is active
+  // Ensure TNA Report tab is active (content must be in DOM and visible)
   document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-tna-report").classList.add("active");
@@ -2636,28 +2637,48 @@ async function downloadReport(){
   const originalText=btn?btn.innerHTML:"";
   if(btn){btn.innerHTML="⏳ Generating PDF...";btn.disabled=true;}
 
-  // FIX 5: Isolate report before generating
-  document.body.classList.add("generating-pdf");
-  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(r,120))));
+  // Wait for paint — html2pdf captures ONLY #tna-report-container
+  // No need to hide surrounding UI; html2pdf renders only the specified element
+  await new Promise(r=>setTimeout(r,300));
 
   const reportEl=document.getElementById("tna-report-container");
+
+  // Set explicit pixel width so mm-based CSS renders correctly (794px ≈ A4 width at 96dpi)
+  const prevWidth=reportEl.style.width;
+  reportEl.style.width="794px";
+
   const opts={
     margin:0,
     filename:`TNA_Report_${divLabel}_DES-MP.pdf`,
     image:{type:"jpeg",quality:0.98},
-    html2canvas:{scale:2,useCORS:true,logging:false,windowWidth:794,letterRendering:true},
+    html2canvas:{
+      scale:2,
+      useCORS:true,
+      logging:false,
+      windowWidth:794,
+      letterRendering:true,
+      allowTaint:true
+    },
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait",compress:true},
-    pagebreak:{mode:["css","legacy"],before:[".rpt-pg"],avoid:[".rpt-card",".rpt-insight"]}
+    pagebreak:{
+      // "legacy" mode: adds page-break-before:always to each .rpt-pg
+      // Do NOT also add page-break in CSS — that causes double breaks = blank pages
+      mode:["legacy"],
+      before:[".rpt-pg"],
+      avoid:[".rpt-card",".rpt-insight"]
+    }
   };
 
   try{
     await html2pdf().set(opts).from(reportEl).save();
-    document.body.classList.remove("generating-pdf");
+    reportEl.style.width=prevWidth;
     if(btn){btn.innerHTML="✅ Downloaded!";setTimeout(()=>{btn.innerHTML=originalText;btn.disabled=false;},2500);}
   }catch(err){
     console.error("html2pdf error:",err);
-    document.body.classList.remove("generating-pdf");
+    reportEl.style.width=prevWidth;
     // Fallback to window.print()
+    alert("PDF library error. Using browser print as fallback.
+Tip: In print settings, uncheck 'Headers and footers'.");
     const originalTitle=document.title;
     document.title="TNA Report - "+divLabel+" - DES MP";
     window.print();
