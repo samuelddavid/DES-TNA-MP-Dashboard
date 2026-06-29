@@ -2621,38 +2621,34 @@ async function downloadReport(){
   if(!dv){alert("Please select a division first, then click Download PDF.");return;}
 
   // Render report if not yet generated
-  const el=document.getElementById("tna-report-container");
-  const isGenerated=el&&el.querySelector(".rpt-pg");
-  if(!isGenerated){renderReport();await new Promise(r=>setTimeout(r,600));}
+  const container=document.getElementById("tna-report-container");
+  if(!container||!container.querySelector(".rpt-pg")){
+    renderReport();
+    await new Promise(r=>setTimeout(r,800));
+  }
 
   const divLabel=dv==="HQ"?"DES-Headquarters":dv+"-Division";
   const btn=document.getElementById("rpt-download-btn");
   const originalText=btn?btn.innerHTML:"";
-  if(btn){btn.innerHTML="⏳ Generating PDF (this may take 20–40 seconds)...";btn.disabled=true;}
+  if(btn){btn.innerHTML="⏳ Generating PDF...";btn.disabled=true;}
 
-  // ── Clone container directly into <body> off-screen ──────
-  // html2canvas needs the element to be a direct child of body
-  // to bypass tab panel display:none constraints
-  const source=document.getElementById("tna-report-container");
-  const clone=source.cloneNode(true);
-  clone.id="tna-pdf-clone";
-  clone.style.cssText=[
-    "position:fixed",
-    "left:-9999px",
-    "top:0",
-    "width:794px",
-    "min-width:794px",
-    "max-width:794px",
-    "background:#fff",
-    "z-index:-9999",
-    "overflow:visible",
-    "box-sizing:border-box"
-  ].join(";");
-  document.body.appendChild(clone);
+  // ── Step 1: Make TNA Report tab active (element must be in visible DOM) ──
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-tna-report").classList.add("active");
+  const tnaBtn=Array.from(document.querySelectorAll(".tab-btn")).find(b=>b.textContent.includes("TNA Report"));
+  if(tnaBtn) tnaBtn.classList.add("active");
 
-  // Wait for browser to layout the clone
-  await new Promise(r=>setTimeout(r,400));
+  // ── Step 2: Set width and scroll to top ──
+  container.style.width="794px";
+  container.style.background="#fff";
+  window.scrollTo(0,0);
+  await new Promise(r=>setTimeout(r,500));
 
+  // ── Step 3: Configure html2pdf with onclone callback ──
+  // onclone lets us ensure the cloned DOM used by html2canvas
+  // is fully visible and properly dimensioned, regardless of
+  // what CSS hides it in the live page
   const opts={
     margin:0,
     filename:`TNA_Report_${divLabel}_DES-MP.pdf`,
@@ -2665,7 +2661,25 @@ async function downloadReport(){
       backgroundColor:"#ffffff",
       scrollX:0,
       scrollY:0,
-      windowWidth:794
+      onclone:function(clonedDoc){
+        // Force the report container visible in html2canvas's internal clone
+        const c=clonedDoc.getElementById("tna-report-container");
+        if(c){
+          c.style.cssText="display:block!important;width:794px!important;background:#fff!important;visibility:visible!important;opacity:1!important;";
+        }
+        // Force the tab panel visible
+        const tab=clonedDoc.getElementById("tab-tna-report");
+        if(tab){
+          tab.style.cssText="display:block!important;visibility:visible!important;";
+        }
+        // Remove no-print elements from the clone (dashboard UI)
+        clonedDoc.querySelectorAll(".no-print").forEach(function(el){el.remove();});
+        // Remove any dashboard chrome that might interfere
+        ["global-flags","loading-overlay","tooltip"].forEach(function(id){
+          const el=clonedDoc.getElementById(id);
+          if(el) el.remove();
+        });
+      }
     },
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait",compress:true},
     pagebreak:{
@@ -2676,19 +2690,20 @@ async function downloadReport(){
   };
 
   try{
-    await html2pdf().set(opts).from(clone).save();
-    document.body.removeChild(clone);
-    if(btn){btn.innerHTML="✅ Downloaded!";setTimeout(()=>{btn.innerHTML=originalText;btn.disabled=false;},3000);}
+    await html2pdf().set(opts).from(container).save();
+    // Restore container styles
+    container.style.width="";
+    container.style.background="";
+    if(btn){
+      btn.innerHTML="✅ Downloaded!";
+      setTimeout(()=>{btn.innerHTML=originalText;btn.disabled=false;},2500);
+    }
   }catch(err){
     console.error("html2pdf error:",err);
-    if(document.body.contains(clone))document.body.removeChild(clone);
+    container.style.width="";
+    container.style.background="";
     // Fallback to window.print()
-    alert("PDF library error. Falling back to browser print.\n\nIn the print dialog:\n• Uncheck 'Headers and footers'\n• Set margins to None or Minimum");
-    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-    document.getElementById("tab-tna-report").classList.add("active");
-    const tnaBtn=Array.from(document.querySelectorAll(".tab-btn")).find(b=>b.textContent.includes("TNA Report"));
-    if(tnaBtn)tnaBtn.classList.add("active");
+    alert("PDF library failed. Using browser print as fallback.\n\nIn Chrome print dialog:\n  ✓ Uncheck 'Headers and footers'\n  ✓ Set Margins to None\n  ✓ Enable 'Background graphics'");
     const originalTitle=document.title;
     document.title="TNA Report - "+divLabel+" - DES MP";
     window.print();
