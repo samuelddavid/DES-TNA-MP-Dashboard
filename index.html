@@ -51,42 +51,207 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
 .pdf-btn{background:var(--accent-red);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
 @media print {
 
-  /* ✅ FIX 1: Remove double page-break — never use both after AND before on consecutive elements */
-  .report-section {
-    page-break-after: auto;       /* Remove any page-break-after: always */
-    page-break-before: always;    /* Keep only page-break-before on sections */
+  /* ============================================
+     1. HIDE ALL DASHBOARD UI — PRINT REPORT ONLY
+     ============================================ */
+  
+  /* Top nav bar (Govt of MP / DES / GIZ header) */
+  header,
+  .site-header,
+  .top-bar,
+  .gov-header {
+    display: none !important;
   }
 
-  /* ✅ FIX 2: Cover/hero section — special case, only needs break AFTER */
+  /* Main dashboard title section (Statewide TNA Dashboard, PIF logo, LIVE badge) */
+  .dashboard-header,
+  .dashboard-hero,
+  .dashboard-title-section,
+  .main-header {
+    display: none !important;
+  }
+
+  /* Filter bar (Division / District / Post dropdowns) */
+  .filter-bar,
+  .filter-section,
+  .filters,
+  select,
+  .dropdown-row {
+    display: none !important;
+  }
+
+  /* Navigation tabs (Overview / Response Coverage / etc.) */
+  .tab-nav,
+  .tabs,
+  .nav-tabs,
+  [role="tablist"] {
+    display: none !important;
+  }
+
+  /* Alert/warning banner (32 locations have not responded...) */
+  .alert,
+  .alert-banner,
+  .warning-banner,
+  [class*="alert"],
+  [class*="warning"] {
+    display: none !important;
+  }
+
+  /* Report Generator widget (division dropdown + Download PDF button + green status bar) */
+  .report-generator,
+  .report-gen-section,
+  .download-section,
+  [class*="report-generator"],
+  [class*="download-btn"],
+  .report-status-bar {
+    display: none !important;
+  }
+
+  /* Any button */
+  button,
+  .btn {
+    display: none !important;
+  }
+
+  /* ============================================
+     2. PAGE SETUP
+     ============================================ */
+
+  @page {
+    size: A4;
+    margin: 15mm 18mm 15mm 18mm;
+  }
+
+  /* Suppress browser's own URL/date headers and footers */
+  @page { margin-top: 10mm; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 11pt;
+    color: #1a1a1a;
+    background: white !important;
+  }
+
+  /* ============================================
+     3. COVER PAGE — EXACTLY ONE PAGE
+     ============================================ */
+
   .report-cover,
-  .cover-section,
-  .hero-section {
-    page-break-after: always;
+  .cover-page,
+  [class*="cover"] {
     page-break-before: avoid;
+    page-break-after: always;
+    page-break-inside: avoid;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    break-inside: avoid;
   }
 
-  /* ✅ FIX 3: Callout/note boxes — do NOT force breaks around them */
+  /* ============================================
+     4. TABLE OF CONTENTS — ONE PAGE
+     ============================================ */
+
+  .toc,
+  .table-of-contents,
+  [class*="toc"] {
+    page-break-before: always;
+    page-break-after: always;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ============================================
+     5. SECTION HEADERS (BLUE BOXES) — NEW PAGE EACH
+     ============================================ */
+
+  /* Every numbered section block starts on a new page */
+  .report-section,
+  .section-block,
+  [class*="section-header"],
+  [class*="report-page"] {
+    page-break-before: always;
+    break-before: always;
+  }
+
+  /* But never break INSIDE a section header box itself */
+  .section-header-box,
+  .section-title-block,
+  [class*="section-heading"] {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+  }
+
+  /* ============================================
+     6. KEEP CONTENT BLOCKS TOGETHER
+     ============================================ */
+
+  /* Callout / note boxes */
   .callout,
   .note-box,
   .highlight-box,
   .profile-note,
-  .training-note {
+  [class*="callout"],
+  [class*="note-box"] {
     page-break-inside: avoid;
-    page-break-after: auto;       /* was likely 'always' — this is the culprit */
+    page-break-after: auto;   /* NOT always — this was causing blank pages */
+    break-inside: avoid;
   }
 
-  /* ✅ FIX 4: Chart and table containers */
+  /* Charts and score cards */
   .chart-container,
-  .competency-table,
-  .matrix-table {
+  .scorecard,
+  .competency-bars,
+  .matrix-table,
+  [class*="chart"],
+  [class*="scorecard"] {
     page-break-inside: avoid;
-    page-break-after: auto;
+    break-inside: avoid;
   }
 
-  /* ✅ FIX 5: Avoid orphaned headers */
-  h2, h3 {
-    page-break-after: avoid;
+  /* Two-column grids / side-by-side panels */
+  .two-col,
+  .grid-2,
+  [class*="two-col"],
+  [class*="grid"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
+
+  /* Tables */
+  table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    width: 100%;
+  }
+
+  th, td {
+    page-break-inside: avoid;
+  }
+
+  /* Headings — never orphan a heading at the bottom of a page */
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* ============================================
+     7. SUPPRESS DOUBLE PAGE BREAKS
+     ============================================ */
+
+  /* The classic empty-page bug: don't combine after+before=always */
+  .report-section + .report-section {
+    page-break-before: always;
+  }
+
+  .callout + .report-section,
+  .note-box + .report-section {
+    page-break-before: always;
+  }
+
 }
 @media(max-width:900px){.kpi-grid-posts{grid-template-columns:repeat(3,1fr)}.cmp-grid{grid-template-columns:1fr}}
 .gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
