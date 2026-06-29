@@ -49,27 +49,44 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
 .cmp-outcome-item::before{content:"→";position:absolute;left:0;color:var(--accent-blue)}
 .cmp-donut{display:flex;justify-content:center;margin:10px 0}
 .pdf-btn{background:var(--accent-red);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
-@media print{
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .gov-strip,.filter-bar,.tab-bar,.refresh-btn,.pdf-btn,footer,#global-flags,.no-print,
-  header,.header-meta,#rpt-division,#rpt-status,
-  .filter-group,.filter-sep,.filter-label,.filter-select{display:none!important}
-  .tab-panel{display:none!important}
-  #tab-tna-report{display:block!important;padding:0!important;margin:0!important}
-  body{font-size:12pt;background:#fff!important;color:#000!important;margin:0;padding:0}
-  .main{padding:0!important;max-width:100%!important}
-  /* Each .rpt-pg class = new A4 page */
-  .rpt-pg{page-break-after:always;min-height:257mm;padding:18mm 20mm 14mm;box-sizing:border-box;background:#fff}
-  .rpt-pg:last-child{page-break-after:auto}
-  /* Force section headers to not break */
-  .rpt-sec-hdr,.rpt-sechdr{page-break-after:avoid;page-break-inside:avoid}
-  /* Prevent cards/charts from breaking across pages */
-  .rpt-card,.rpt-2col>div{page-break-inside:avoid;break-inside:avoid}
-  .rpt-2col{page-break-inside:avoid}
-  /* Typography for print */
-  p,div{orphans:3;widows:3}
-  /* Hide screen-only elements */
-  .screen-only{display:none!important}
+@media print {
+
+  /* ✅ FIX 1: Remove double page-break — never use both after AND before on consecutive elements */
+  .report-section {
+    page-break-after: auto;       /* Remove any page-break-after: always */
+    page-break-before: always;    /* Keep only page-break-before on sections */
+  }
+
+  /* ✅ FIX 2: Cover/hero section — special case, only needs break AFTER */
+  .report-cover,
+  .cover-section,
+  .hero-section {
+    page-break-after: always;
+    page-break-before: avoid;
+  }
+
+  /* ✅ FIX 3: Callout/note boxes — do NOT force breaks around them */
+  .callout,
+  .note-box,
+  .highlight-box,
+  .profile-note,
+  .training-note {
+    page-break-inside: avoid;
+    page-break-after: auto;       /* was likely 'always' — this is the culprit */
+  }
+
+  /* ✅ FIX 4: Chart and table containers */
+  .chart-container,
+  .competency-table,
+  .matrix-table {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* ✅ FIX 5: Avoid orphaned headers */
+  h2, h3 {
+    page-break-after: avoid;
+  }
 }
 @media(max-width:900px){.kpi-grid-posts{grid-template-columns:repeat(3,1fr)}.cmp-grid{grid-template-columns:1fr}}
 .gov-strip{background:var(--india-navy);padding:5px 40px;display:flex;align-items:center;gap:16px}
