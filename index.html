@@ -1141,15 +1141,37 @@ function getSwDemand(data){
     {key:"e-HRMS",      col:COL.sw_hrms,    color:"#4a5268"},
     {key:"Computer",    col:COL.sw_computer,color:"#0891b2"},
   ];
+  // Track any value that doesn't match a known category — surfaced via
+  // window.__SW_UNMATCHED for debugging if new answer phrasing appears
+  if(!window.__SW_UNMATCHED) window.__SW_UNMATCHED=new Set();
+
   return sw.map(s=>{
     let beg=0,mid=0,adv=0;
     data.forEach(r=>{
       const v=(r[s.col]||"").toLowerCase().trim();
-      if(!v||v==="no"||v==="नहीं"||v==="not required"||v==="none"||v==="कोई नहीं") return;
+      if(!v) return;
+      // FIX: use .includes() not strict equality — real answers are bilingual
+      // strings like "नहीं चाहिए (Not Required)" which never equal "no" exactly.
+      // The old `v==="no"` check never matched, so every "Not Required" answer
+      // fell through to the `else beg++` catch-all, inflating every software's
+      // Beginner count to equal the full respondent count (n).
+      const isNotRequired =
+        v.includes("not required") || v.includes("not needed") ||
+        v.includes("no training") || v.includes("nothing required") ||
+        v.includes("कोई नहीं") || v.includes("आवश्यकता नहीं") ||
+        v.includes("नहीं चाहिए") || v.includes("जरूरत नहीं") ||
+        v==="no" || v==="none" || v==="नहीं" || v==="n/a" || v==="na";
+      if(isNotRequired) return;
+
       if(v.includes("beginner")||v.includes("प्रारंभिक")) beg++;
       else if(v.includes("intermediate")||v.includes("मध्यवर्ती")) mid++;
       else if(v.includes("advanced")||v.includes("उन्नत")) adv++;
-      else beg++;
+      else{
+        // Unrecognised non-empty value — log once for review instead of
+        // silently assuming Beginner. Visible in browser console.
+        window.__SW_UNMATCHED.add(s.key+" :: "+v);
+        beg++; // best-effort fallback; check console.log(window.__SW_UNMATCHED) if counts look off
+      }
     });
     return {...s,beg,mid,adv,total:beg+mid+adv};
   }).sort((a,b)=>b.total-a.total);
@@ -1687,6 +1709,19 @@ function renderPriorities(d){
 }
 
 // ── SOFTWARE ──
+// Diagnostic helper — run window.checkSwUnmatched() in browser console
+// to see any software-demand answer text that didn't match a known
+// category (Beginner/Intermediate/Advanced/Not Required). Use this if
+// post-wise software counts ever look inflated again.
+window.checkSwUnmatched=function(){
+  if(!window.__SW_UNMATCHED||!window.__SW_UNMATCHED.size){
+    console.log("No unmatched software-demand values found.");
+    return;
+  }
+  console.log("Unmatched software-demand values (review these):");
+  window.__SW_UNMATCHED.forEach(v=>console.log("  "+v));
+};
+
 function renderSoftware(d){
   const n=d.length,sw=getSwDemand(d);
   document.getElementById("sw-top").textContent=sw[0]?sw[0].key:"—";
