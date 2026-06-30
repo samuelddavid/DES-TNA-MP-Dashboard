@@ -1766,9 +1766,18 @@ function renderSoftware(d){
     }
   }
 
-  // By post
+  // By post — segmented bars showing Beginner/Intermediate/Advanced composition.
+  // NOTE: Totals are often equal across software within a post group because
+  // the survey form requires a level selection for every software (no blank/
+  // "Not Required" skip option) — so total demand = n is expected, not a bug.
+  // The useful signal is WHICH LEVEL is needed, shown here via colour segments.
   const postEl=document.getElementById("sw-post-chart");
   if(postEl){
+    const legend=`<div style="display:flex;gap:12px;margin-bottom:12px;font-size:10px;color:var(--text-dim)">
+      <span><span style="display:inline-block;width:9px;height:9px;background:#f97316;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Beginner</span>
+      <span><span style="display:inline-block;width:9px;height:9px;background:#1a56a0;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Intermediate</span>
+      <span><span style="display:inline-block;width:9px;height:9px;background:#15803d;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Advanced</span>
+    </div>`;
     const postLines=["BLI","ASO","DSO","AD","DPO","DD","JD"].map(post=>{
       const pd=d.filter(r=>normPost(r[COL.post]||"")===post);
       if(!pd.length) return "";
@@ -1776,13 +1785,25 @@ function renderSoftware(d){
       if(!psw.length) return "";
       const pm=Math.max(...psw.map(s=>s.total),1);
       return `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;color:var(--india-navy);margin-bottom:6px">${post} (n=${pd.length})</div>`+
-        psw.map(s=>`<div class="prog-row">
+        psw.map(s=>{
+          const barPct=Math.round(s.total/pm*100);
+          const bSeg=s.total>0?Math.round(s.beg/s.total*100):0;
+          const mSeg=s.total>0?Math.round(s.mid/s.total*100):0;
+          const aSeg=Math.max(0,100-bSeg-mSeg);
+          return `<div class="prog-row" data-tip="${s.key}: Total ${s.total} | Beginner: ${s.beg} | Intermediate: ${s.mid} | Advanced: ${s.adv}">
           <div class="prog-label" style="min-width:90px">${s.key}</div>
-          <div class="prog-track"><div class="prog-fill" style="width:${Math.round(s.total/pm*100)}%;background:${s.color}"></div></div>
+          <div class="prog-track">
+            <div style="display:flex;width:${barPct}%;height:100%">
+              <div style="width:${bSeg}%;background:#f97316"></div>
+              <div style="width:${mSeg}%;background:#1a56a0"></div>
+              <div style="width:${aSeg}%;background:#15803d"></div>
+            </div>
+          </div>
           <div class="prog-val">${s.total}</div>
-        </div>`).join("")+"</div>";
+        </div>`;
+        }).join("")+"</div>";
     }).join("");
-    postEl.innerHTML=postLines||'<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';
+    postEl.innerHTML=postLines?legend+postLines:'<div class="no-data"><div class="no-data-icon">📊</div>No data yet</div>';
   }
 
   // Division top
