@@ -81,6 +81,11 @@ body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);font-
   #tab-tna-report>.no-print { display:none!important; }
   #tna-report-container { display:block!important; width:100%!important; margin:0!important; }
 
+  /* Comparison print mode — override default (which shows TNA report) */
+  body[data-print-mode="comparison"] #tab-tna-report { display:none!important; }
+  body[data-print-mode="comparison"] #tab-comparison { display:block!important; }
+  body[data-print-mode="comparison"] .cmp-selectors { display:none!important; }
+
   /* Report page breaks */
   .rpt-pg { page-break-before:always; break-before:page; }
   .rpt-pg:first-child { page-break-before:avoid; break-before:auto; }
@@ -549,11 +554,17 @@ body.generating-pdf #tna-report-container{display:block!important;width:794px!im
 
   <!-- TAB 6: SOFTWARE -->
   <div id="tab-software" class="tab-panel">
+    <!-- Heatmap first — shows division-level urgency at a glance -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title" data-en="Division × Competency Theme — Training Need Heatmap" data-hi="संभाग × दक्षता विषय हीटमैप">Division × Competency Theme — Training Need Heatmap</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">Combined Score per division per theme (0–100). <span style="background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:2px;font-weight:600">Red ≥50</span> Immediate &nbsp;<span style="background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:2px;font-weight:600">Amber 35–49</span> Important &nbsp;<span style="background:#d4f0e2;color:#1a7a4a;padding:1px 6px;border-radius:2px;font-weight:600">Green &lt;35</span> Lower priority</p>
+      <div style="overflow-x:auto"><div id="heatmap-container"></div></div>
+    </div>
     <div class="kpi-grid">
       <div class="kpi-card blue"><div class="kpi-label">Top Demand</div><div class="kpi-value" style="font-size:16px;line-height:1.4" id="sw-top">—</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">AI Tools Demand</div><div class="kpi-value" id="sw-ai-pct">—</div></div>
-      <div class="kpi-card green"><div class="kpi-label">R/Python Demand</div><div class="kpi-value" id="sw-rpy-pct">—</div></div>
-      <div class="kpi-card purple"><div class="kpi-label">STATA/EViews Demand</div><div class="kpi-value" id="sw-stata-pct">—</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">AI Tools — Beginner %</div><div class="kpi-value" id="sw-ai-pct">—</div><div class="kpi-sub">% needing foundational training</div></div>
+      <div class="kpi-card green"><div class="kpi-label">R/Python — Beginner %</div><div class="kpi-value" id="sw-rpy-pct">—</div><div class="kpi-sub">% needing foundational training</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">STATA/EViews — Beginner %</div><div class="kpi-value" id="sw-stata-pct">—</div><div class="kpi-sub">% needing foundational training</div></div>
     </div>
     <div class="card" style="margin-bottom:20px">
       <div class="section-title">Software Demand by Training Level — Beginner / Intermediate / Advanced</div>
@@ -571,12 +582,6 @@ body.generating-pdf #tna-report-container{display:block!important;width:794px!im
     <div class="two-col">
       <div class="card"><div class="section-title">Software Demand by Post</div><div id="sw-post-chart"></div></div>
       <div class="card"><div class="section-title">Division-wise Top Software Needs</div><div id="sw-div-chart"></div></div>
-    </div>
-    <!-- Heatmap: Division × Competency Theme -->
-    <div class="card">
-      <div class="section-title" data-en="Division × Competency Theme — Training Need Heatmap" data-hi="संभाग × दक्षता विषय हीटमैप">Division × Competency Theme — Training Need Heatmap</div>
-      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">Combined Score per division per theme (0–100). <span style="background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:2px;font-weight:600">Red ≥50</span> Immediate &nbsp;<span style="background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:2px;font-weight:600">Amber 35–49</span> Important &nbsp;<span style="background:#d4f0e2;color:#1a7a4a;padding:1px 6px;border-radius:2px;font-weight:600">Green &lt;35</span> Lower priority</p>
-      <div style="overflow-x:auto"><div id="heatmap-container"></div></div>
     </div>
   </div>
 
@@ -1340,15 +1345,27 @@ function renderOverview(d){
   const n=d.length;
   const dvF=document.getElementById("filter-division").value;
   const dlF=document.getElementById("filter-district").value;
+  const poF=document.getElementById("filter-post").value;
+  // Returns expected count for a registry location respecting the post filter
+  function expForLoc(info){
+    if(poF==="all") return getExpected(info);
+    if(poF==="DD") return (info["DD"]||0)+(info["DPO"]||0); // DD filter = DD+DPO combined
+    return info[poF]||0;
+  }
   let exp=0;
-  if(dvF==="all"&&dlF==="all"){
-    // Use verified Excel totals — REG has minor counting errors
+  if(dvF==="all"&&dlF==="all"&&poF==="all"){
     exp=Object.values(STATE_TOTALS).reduce((a,b)=>a+b,0);
+  } else if(dvF==="all"&&dlF==="all"&&poF!=="all"){
+    // Post-only filter: use STATE_TOTALS for accuracy
+    if(poF==="DD") exp=(STATE_TOTALS["DD"]||0)+(STATE_TOTALS["DPO"]||0);
+    else exp=STATE_TOTALS[poF]||0;
   } else {
     Object.entries(REG).forEach(([loc,info])=>{
-      if(dvF!=="all"&&info.div!==dvF) return;
+      const isHQ=info.is_hq||false;
+      if(dvF==="HQ"&&!isHQ) return;
+      if(dvF!=="all"&&dvF!=="HQ"&&(info.div!==dvF||isHQ)) return;
       if(dlF!=="all"&&loc!==dlF) return;
-      exp+=getExpected(info);
+      exp+=expForLoc(info);
     });
   }
   document.getElementById("kpi-total").textContent=n;
@@ -1431,15 +1448,22 @@ function renderOverview(d){
 function renderCoverage(d,audit){
   const dvF=document.getElementById("filter-division").value;
   const dlF=document.getElementById("filter-district").value;
+  const covPoF=document.getElementById("filter-post").value;
+  function expForLocCov(info){
+    if(covPoF==="all") return getExpected(info);
+    if(covPoF==="DD") return (info["DD"]||0)+(info["DPO"]||0);
+    return info[covPoF]||0;
+  }
   let totExp=0,zeros=0;
   const rows=[];
   Object.entries(REG).forEach(([loc,info])=>{
     if(dvF!=="all"&&info.div!==dvF) return;
     if(dlF!=="all"&&loc!==dlF) return;
-    const exp=getExpected(info);
+    const exp=expForLocCov(info);
+    if(exp===0&&covPoF!=="all") return; // skip locations with 0 of selected post
     const rec=d.filter(r=>normDist(r[COL.district]||"")===loc).length;
     totExp+=exp;
-    if(rec===0) zeros++;
+    if(rec===0&&exp>0) zeros++;
     rows.push({loc,div:info.div,exp,rec,pend:Math.max(exp-rec,0),covPct:pct(rec,exp),
       is_hq:info.is_hq,is_div:info.is_div_office});
   });
@@ -1726,9 +1750,12 @@ function renderSoftware(d){
   const n=d.length,sw=getSwDemand(d);
   document.getElementById("sw-top").textContent=sw[0]?sw[0].key:"—";
   const ai=sw.find(s=>s.key==="AI Tools"),rpy=sw.find(s=>s.key==="R/Python"),stata=sw.find(s=>s.key==="STATA/EViews");
-  document.getElementById("sw-ai-pct").textContent=n&&ai?pct(ai.total,n)+"%":"—";
-  document.getElementById("sw-rpy-pct").textContent=n&&rpy?pct(rpy.total,n)+"%":"—";
-  document.getElementById("sw-stata-pct").textContent=n&&stata?pct(stata.total,n)+"%":"—";
+  // Show % Beginner for analytical tools — form is mandatory (total=n always),
+  // so % of total is always 100% and meaningless. % Beginner tells trainers
+  // how many staff need foundational training from scratch for each tool.
+  document.getElementById("sw-ai-pct").textContent=ai&&ai.total>0?pct(ai.beg,ai.total)+"%":"—";
+  document.getElementById("sw-rpy-pct").textContent=rpy&&rpy.total>0?pct(rpy.beg,rpy.total)+"%":"—";
+  document.getElementById("sw-stata-pct").textContent=stata&&stata.total>0?pct(stata.beg,stata.total)+"%":"—";
 
   // Level breakdown chart
   const lvlEl=document.getElementById("sw-level-chart");
@@ -1952,9 +1979,19 @@ function printComparison(){
   const a=document.getElementById("cmp-div-a")?.value;
   const b=document.getElementById("cmp-div-b")?.value;
   if(!a||!b){alert("Please select both divisions before downloading.");return;}
+  // Switch to comparison tab so @media print captures the right content
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-comparison").classList.add("active");
+  document.body.setAttribute("data-print-mode","comparison");
   document.title=`TNA Comparison — ${a} vs ${b} — DES MP`;
-  window.print();
-  setTimeout(()=>{document.title="DES MP — Statewide TNA Dashboard";},2000);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.title="DES MP — Statewide TNA Dashboard";
+      document.body.removeAttribute("data-print-mode");
+    },2000);
+  }));
 }
 
 // ── TNA REPORT ──────────────────────────────────────────────
